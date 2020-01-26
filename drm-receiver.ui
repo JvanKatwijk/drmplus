@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>445</width>
+    <height>251</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>drm+ radio</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QwtPlot" name="hfSpectrum">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>30</y>
+      <width>381</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Main Spectrum Window. This window shows the spectrum of the signal arriving from the selected input device, decimated to the selected inputrate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="hfScopeSlider">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>24</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="frequencyDisplay">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>40</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="lineWidth">
+     <number>4</number>
+    </property>
+    <property name="digitCount">
+     <number>11</number>
+    </property>
+    <property name="segmentStyle">
+     <enum>QLCDNumber::Flat</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="freqButton">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>0</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Touching this button will cause a widget to appear with a keypad on which a frequency - in kHz or mHz - can be specified. Use the kHz or mHz button on this pad to acknowledge the choice.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>select freq</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="streamOutSelector">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>190</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;select an audio output device. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="freqSave">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>0</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The selected frequency can be saved. Touching this button will show a small widget where you&lt;/p&gt;&lt;p&gt;can give the frequency a name as label.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>frequency save</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timeDisplay">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>400</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>0</y>
+      <width>21</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SWRadio copyright:&lt;/p&gt;&lt;p&gt;Copyright of the Qt toolkit used: the Qt Company&lt;/p&gt;&lt;p&gt;Copyright of the libraries used for SDRplay, portaudio, libsndfile and libsamplerate to their developers&lt;/p&gt;&lt;p&gt;Copyright of the Reed Solomon Decoder software: Phil Karns&lt;/p&gt;&lt;p&gt;All copyrights gratefully acknowledged&lt;/p&gt;&lt;p&gt;CopyRight: 2018, Jan van Katwijk, Lazy Chair Computing.&lt;/p&gt;&lt;p&gt;sdr-j swradio (an SDR-J program) is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>©</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="deviceSelector">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>190</y>
+      <width>126</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="decoderSelect">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>190</y>
+      <width>126</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>drm+</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>FM</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="frequencyBackwards">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>0</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icons/prev.png</normaloff>:/icons/prev.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="frequencyForwards">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>0</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icons/next.png</normaloff>:/icons/next.png</iconset>
+    </property>
+   </widget>
+   <zorder>hfSpectrum</zorder>
+   <zorder>hfScopeSlider</zorder>
+   <zorder>freqButton</zorder>
+   <zorder>streamOutSelector</zorder>
+   <zorder>freqSave</zorder>
+   <zorder>timeDisplay</zorder>
+   <zorder>label_2</zorder>
+   <zorder>frequencyDisplay</zorder>
+   <zorder>deviceSelector</zorder>
+   <zorder>decoderSelect</zorder>
+   <zorder>frequencyBackwards</zorder>
+   <zorder>frequencyForwards</zorder>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

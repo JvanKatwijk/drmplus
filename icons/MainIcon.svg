@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="64"
+   height="64"
+   id="svg2985"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="MainIcon.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1855"
+     inkscape:window-height="1176"
+     id="namedview3057"
+     showgrid="false"
+     inkscape:snap-bbox="true"
+     inkscape:zoom="2.2584258"
+     inkscape:cx="-67.074253"
+     inkscape:cy="11.140834"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2985" />
+  <title
+     id="title2987">Dream Icon</title>
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Dream Receiver Icon</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>David Flamand</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by/3.0/" />
+        <dc:date>2013-01-09</dc:date>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs2987" />
+  <g
+     id="layer1"
+     style="display:inline">
+    <path
+       d="m 59.636364,34.18182 a 21.363636,22.90909 0 1 1 -42.727272,0 21.363636,22.90909 0 1 1 42.727272,0 z"
+       transform="matrix(1.2217815,0,0,1.1393597,-14.76091,-6.9453891)"
+       id="path5207"
+       style="opacity:0.98000004;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#45528e;stroke-width:4.02593184;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <g
+       transform="matrix(0.96426357,0,0,1.0370609,1.0516663e-6,-2.8950616e-6)"
+       id="text5241"
+       style="fill:#45528e;fill-opacity:1;stroke:none">
+      <path
+         d="m 28.698168,21.442433 0,18.828005 2.852102,0 c 3.251653,6e-6 5.731739,-0.806022 7.440265,-2.418086 1.72226,-1.612048 2.583401,-3.954351 2.583425,-7.026917 -2.4e-5,-3.058758 -0.854276,-5.387283 -2.562758,-6.985583 -1.708526,-1.598255 -4.195501,-2.397394 -7.460932,-2.397419 l -2.852102,0 m -7.956951,-6.014214 8.390966,0 c 4.684595,3e-5 8.170493,0.337598 10.457707,1.012702 2.300946,0.661387 4.271236,1.791203 5.910877,3.389455 1.446688,1.39163 2.521392,2.996797 3.224115,4.815505 0.702659,1.818751 1.054005,3.8786 1.054038,6.179554 -3.3e-5,2.32854 -0.351379,4.409057 -1.054038,6.241556 -0.702723,1.818738 -1.777427,3.423905 -3.224115,4.815505 -1.653419,1.598282 -3.637488,2.734988 -5.952212,3.410121 -2.31477,0.661358 -5.78689,0.992036 -10.416372,0.992036 l -8.390966,0 0,-30.856434"
+         id="path5293"
+         style="fill:#45528e;fill-opacity:1" />
+    </g>
+  </g>
+  <rect
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:none"
+     id="rect3059"
+     width="11.474757"
+     height="4.2233467"
+     x="28.062962"
+     y="29.604877" />
+  <rect
+     style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:none"
+     id="rect3061"
+     width="4.2170048"
+     height="11.465956"
+     x="31.693512"
+     y="26.233631" />
+</svg>

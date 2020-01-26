@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+	<file>icons/drmplus.ico
+        <file>icons/prev.png</file>
+        <file>icons/next.png</file>
+    </qresource>
+</RCC>
