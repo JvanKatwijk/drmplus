@@ -1,6 +1,6 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.4 EXPERIMENTAL
+DRMPLUS-0.4 EXPERIMENTAL  "Work in progress"
 ------------------------------------------------------------------
 
 DRMPLUS-0.4 is experimental software for the decoding of

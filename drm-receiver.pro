@@ -4,7 +4,7 @@
 TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
-TARGET	= drm_plus
+TARGET	= drmplus_receiver-0.4
 #QMAKE_CFLAGS	+= -ffast-math -flto
 #QMAKE_CXXFLAGS	+= -ffast-math -flto
 QMAKE_LFLAGS	+= -g
