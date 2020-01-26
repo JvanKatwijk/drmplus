@@ -1,23 +1,23 @@
 #
 /*
- *    Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the drm radio
+ *    This file is part of the DRM+ Decoder
  *
- *    drm radio is free software; you can redistribute it and/or modify
+ *    DRM+ Decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm radio is distributed in the hope that it will be useful,
+ *    DRM+ Decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm radio; if not, write to the Free Software
+ *    along with DRM+ Decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"iqdisplay.h"
@@ -32,9 +32,9 @@ SpectrogramData	*IQData	= nullptr;
 QwtLinearColorMap *colorMap  = new QwtLinearColorMap (Qt::black, Qt::white);
 
 	setRenderThreadCount	(1);
-	Radius		= 100;
 	plotgrid	= plot;
 	x_amount	= x;
+	Radius		= x_amount;
 	CycleCount	= 0;
 	Points. resize (x_amount);
 	memset (Points. data(), 0, x_amount * sizeof (std::complex<float>));

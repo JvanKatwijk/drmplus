@@ -41,7 +41,6 @@
 #include	"msc-processor.h"
 
 class		drmDecoder;
-class		EQDisplay;
 
 class	frameHandler: public QThread {
 Q_OBJECT
@@ -68,7 +67,6 @@ private:
 	mscProcessor	*my_mscProcessor;
 	facProcessor    my_facProcessor;
 	sdcProcessor    my_sdcProcessor;
-	EQDisplay	*my_eqDisplay;
 	void		run		();
 	int		nSymbols;
 	std::atomic<bool>	running;

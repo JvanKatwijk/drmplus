@@ -73,7 +73,8 @@
 	delete	myFrame;
 	delete	techFrame;
 	delete	audioFrame;
-	delete	my_iqDisplay;
+	my_iqDisplay	-> hide ();
+//	delete	my_iqDisplay;
 	delete	my_eqDisplay;
 }
 
@@ -314,11 +315,12 @@ std::complex<float> line [xx];
 
 void	drmDecoder::show_iq		() {
 std::complex<float> Values [128];
+std::complex<float> pixels [5 * 128];
 int16_t i;
 int16_t t;
 double  avg     = 0;
 int     scopeWidth      = techData. scopeSlider -> value();
-
+float	pixS	= 1.0 / 128;
 	while (iqBuffer -> GetRingBufferReadAvailable () >= 128) {
            t = iqBuffer -> getDataFromBuffer (Values, 128);
            for (i = 0; i < t; i ++) {
@@ -326,8 +328,21 @@ int     scopeWidth      = techData. scopeSlider -> value();
               if (!std::isnan (x) && !std::isinf (x))
               avg += abs (Values [i]);
            }
+
+	   for (i = 0; i < t; i ++) {
+	      pixels [5 * i] = std::complex<float> (real (Values [i]) - pixS,
+	                                            imag (Values [i]));
+	      pixels [5 * i + 1] = std::complex<float> (real (Values [i]) - pixS,
+	                                                imag (Values [i]) - pixS);
+	      pixels [5 * i + 2] = std::complex<float> (real (Values [i]),
+	                                                imag (Values [i]));
+	      pixels [5 * i + 3] = std::complex<float> (real (Values [i]) + pixS,
+	                                                imag (Values [i]));
+	      pixels [5 * i + 4] = std::complex<float> (real (Values [i]) + pixS,
+	                                                imag (Values [i]) + pixS);
+	   }
            avg     /= t;
-           my_iqDisplay -> DisplayIQ (Values, scopeWidth / avg);
+           my_iqDisplay -> DisplayIQ (pixels, scopeWidth / avg);
 	}
 }
 
