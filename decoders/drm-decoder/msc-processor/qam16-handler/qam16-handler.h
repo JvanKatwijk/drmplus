@@ -6,19 +6,19 @@
 #include	"msc-handler.h"
 #include	"qam16-metrics.h"
 
-class	dataProcessor;
+class	postProcessor;
 class	Mapper;
 class	MSC_streamer;
 class	prbs;
 
 class qam16_handler: public mscHandler {
 public:
-		qam16_handler	(drmParameters *, dataProcessor *, int, int);
+		qam16_handler	(drmParameters *, postProcessor *, int, int);
 		~qam16_handler	();
 	void	process		(theSignal *, bool);
 private:
 	drmParameters	*params;
-	dataProcessor	*postProcessor;
+	postProcessor	*the_postProcessor;
 	prbs		*thePRBS;
 	int		muxLength;
 	int		streamIndex;

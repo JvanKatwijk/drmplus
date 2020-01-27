@@ -29,7 +29,7 @@
 #include	"basics.h"
 #include	<mutex>
 #include	<deinterleaver.h>
-#include	"data-processor.h"
+#include	"post-processor.h"
 
 class	drmDecoder;
 class	mscHandler;
@@ -50,7 +50,7 @@ private:
 	RingBuffer<std::complex<float>> *iqBuffer;
 	bool			show_Constellation;
 	deInterleaver_long	*my_deInterleaver;
-	dataProcessor		my_dataProcessor;
+	postProcessor		*the_postProcessor;
 	int			start_frame_2;
 	int			start_frame_3;
 	int			start_frame_4;

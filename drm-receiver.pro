@@ -186,9 +186,17 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.h \
+	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.h \
+	   ./decoders/drm-decoder/msc-processor/data-handling/audio-processor.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/drm-aacdecoder.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.h \
+	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
 	   ./decoders/drm-decoder/utilities/checkcrc.h \
 	   ./decoders/drm-decoder/utilities/mapper.h \
 	   ./decoders/drm-decoder/utilities/prbs.h \
@@ -224,9 +232,17 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-metrics.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/data-handling/audio-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/drm-aacdecoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
 	   ./decoders/drm-decoder/utilities/checkcrc.cpp \
 	   ./decoders/drm-decoder/utilities/mapper.cpp \
 	   ./decoders/drm-decoder/utilities/prbs.cpp \

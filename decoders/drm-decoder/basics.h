@@ -84,6 +84,8 @@ typedef struct {
 	int16_t		packetId;
 	int16_t		packetLength;
 	int		applicationId;
+	bool		FEC;
+	int		R, C;
 } streamParameters;
 
 typedef struct	{

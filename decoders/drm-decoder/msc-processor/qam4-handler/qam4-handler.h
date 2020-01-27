@@ -33,17 +33,18 @@
 
 class	viterbi_drm;
 class	prbs;
-class	dataProcessor;
+class	postProcessor;
 
 class qam4_handler: public mscHandler {
 public:
-		qam4_handler	(drmParameters *, dataProcessor *, int, int);
+		qam4_handler	(drmParameters *,
+	                         postProcessor *, int, int);
 		~qam4_handler	();
 	void	process		(theSignal *, bool);
 private:
 	qam4_metrics	myDecoder;
 	punctureTables	myTables;
-	dataProcessor	*postProcessor;
+	postProcessor	*the_postProcessor;
 	drmParameters	*params;
 	int		muxLength;
 	int		muxCounter;

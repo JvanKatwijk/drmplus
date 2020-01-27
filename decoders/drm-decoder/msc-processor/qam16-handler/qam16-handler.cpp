@@ -27,7 +27,7 @@
 #include        "basics.h"
 #include        "prbs.h"
 
-#include	"data-processor.h"
+#include	"post-processor.h"
 
 //
 //	Implements table 31 (page 111);
@@ -92,7 +92,7 @@ int16_t	getRYlcm_16	(int16_t protLevel) {
 }
 
 	qam16_handler::qam16_handler	(drmParameters *params,
-	                                 dataProcessor *postProcessor,
+	                                 postProcessor *the_postProcessor,
 	                                 int muxLength,
 	                                 int streamIndex):
 	                                     mscHandler (params,
@@ -105,7 +105,7 @@ float denom;
 //      in the lower protected part (the B part) follows
 
         this    -> params		= params;
-	this	-> postProcessor	= postProcessor;
+	this	-> the_postProcessor	= the_postProcessor;
 	this	-> muxLength		= muxLength;
 	this	-> streamIndex		= streamIndex;
         lengthA         = 0;
@@ -215,6 +215,6 @@ uint8_t level_1 [muxLength];
 	if (toggler)
 	   memcpy (firstBuffer, bitsOut, lengthA + lengthB);
 	else
-	   postProcessor -> process (firstBuffer, bitsOut, streamIndex);
+	   the_postProcessor -> process (firstBuffer, bitsOut, streamIndex);
 }
 

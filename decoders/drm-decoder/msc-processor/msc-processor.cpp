@@ -27,18 +27,19 @@
 #include	"qam4-handler.h"
 #include	"qam16-handler.h"
 #include	"referenceframe.h"
+#include	"audio-processor.h"
+#include	"data-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
 	                            drmParameters	*params,
-	                            RingBuffer<std::complex<float>> *iqBuffer):
-	                                my_dataProcessor (parent, params) {
+	                            RingBuffer<std::complex<float>> *iqBuffer) {
 	int nrCells	= 0;
 	int symbol, carrier;
 	this	-> theParent	= parent;
 	this	-> params	= params;
 	this	-> iqBuffer	= iqBuffer;
 	show_Constellation	= false;
-
+	this	-> the_postProcessor	= nullptr;
 	for (symbol = 0; symbol < symbolsperFrame; symbol ++) {
 	   for (carrier = K_min; carrier <= K_max; carrier ++) {
 	      if (isFACcell (symbol, carrier)) {
@@ -200,13 +201,24 @@ void	mscProcessor::selectService	(int stream) {
 	if (my_mscHandler != nullptr)
 	   delete my_mscHandler;
 
+	if (the_postProcessor != nullptr)
+	   delete the_postProcessor;
+	if (params  -> theStreams [stream]. is_audio) {
+	   fprintf (stderr, "we selected an audio stream\n");
+	   the_postProcessor = new audioProcessor (theParent, params);
+	}
+	else {
+	   fprintf (stderr, "we selected a data stream\n");
+	   the_postProcessor = new dataProcessor (theParent, params, stream);
+	}
+
 	if (params -> theChannel. MSC_Mode == 0)
 	   my_mscHandler	= new qam16_handler (params,
-	                                             &my_dataProcessor, 
+	                                             the_postProcessor, 
 	                                             muxLength, stream);
 	else
 	   my_mscHandler	= new qam4_handler (params,
-	                                            &my_dataProcessor,
+	                                            the_postProcessor,
 	                                            muxLength, stream);
 	locker. unlock ();
 }

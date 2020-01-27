@@ -25,10 +25,10 @@
 #include	"puncture-tables.h"
 #include	"viterbi-drm.h"
 #include	"prbs.h"
-#include	"data-processor.h"
+#include	"post-processor.h"
 
 	qam4_handler::qam4_handler	(drmParameters *params,
-	                                 dataProcessor	*postProcessor,
+	                                 postProcessor	*the_postProcessor,
 	                                 int muxLength,
 	                                 int stream):
 	                                    mscHandler (params, muxLength,
@@ -36,7 +36,7 @@
 	                                    myDecoder (),
 	                                    myTables () {
 	this	-> params	= params;
-	this	-> postProcessor = postProcessor;
+	this	-> the_postProcessor = the_postProcessor;
 	this	-> muxLength	= muxLength;
 	this	-> stream	= stream;
 	this	-> lengthA	= 0;
@@ -139,8 +139,8 @@ int	Teller	= 0;
 	if (toggleFlag)
 	   memcpy (firstBuffer, mscDecoded, lengthA + lengthB);
 	else
-	   postProcessor -> process (firstBuffer,
-	                             mscDecoded, stream);
+	   the_postProcessor -> process (firstBuffer,
+	                                 mscDecoded, stream);
 }
 
 void	qam4_handler::map_protLevel (int protLevel, int* Rx, int* Ry) {

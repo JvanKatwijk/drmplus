@@ -125,11 +125,11 @@ QString	temp;
 	while (inputRate < Khz (1000))
 	   inputRate += outputRate;
 	libraryLoaded	= false;
-	workerHandle	= NULL;
-	d_filter	= NULL;
-	workerHandle	= NULL;
+	workerHandle	= nullptr;
+	d_filter	= nullptr;
+	workerHandle	= nullptr;
 	open		= false;
-	gains		= NULL;
+	gains		= nullptr;
 
 	statusLabel	-> setText ("setting up");
 #ifdef	__MINGW32__
@@ -137,7 +137,7 @@ QString	temp;
 #else
 	Handle		= dlopen ("librtlsdr.so", RTLD_NOW);
 #endif
-	if (Handle == NULL) {
+	if (Handle == nullptr) {
 	   fprintf (stderr, "Failed to open rtlsdr.dll\n");
 	   statusLabel	-> setText ("no rtlsdr lib");
 	   delete myFrame;

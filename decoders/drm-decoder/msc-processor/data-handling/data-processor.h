@@ -4,71 +4,68 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the DRM+ decoder
+ *    This file is part of the DRM+ Decoder
  *
- *    DRM+ decoder is free software; you can redistribute it and/or modify
+ *    DRM+ Decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    DRM+ decoder is distributed in the hope that it will be useful,
+ *    DRM+ Decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with DRM+ decoder; if not, write to the Free Software
+ *    along with DRM+ Decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
+#
 #ifndef	__DATA_PROCESSOR__
 #define	__DATA_PROCESSOR__
 
-
+#include	<QObject>
+#include	<cstring>
 #include	"basics.h"
-#include        <QObject>
-#include        <cstring>
-#include	"fir-filters.h"
-#include        "drm-aacdecoder.h"
-#include	"message-processor.h"
-
-typedef struct frame {
-	int16_t length, startPos;
-	uint8_t aac_crc;
-	uint8_t audio [512];
-} audioFrame;
+#include	"post-processor.h"
 
 class	drmDecoder;
+class	packetAssembler;
+class	fecHandler;
 
-class	dataProcessor: public QObject {
+class	dataProcessor: public postProcessor {
 Q_OBJECT
 public:
-
-			dataProcessor	(drmDecoder *, drmParameters *);
-			~dataProcessor	();
-	void		process		(uint8_t *, uint8_t *, int);
+		dataProcessor	(drmDecoder *,
+	                         drmParameters *, int stream);
+		~dataProcessor	(void);
+	void	process		(uint8_t *, uint8_t *, int);
 private:
-	drmDecoder	*parent;
 	drmParameters	*params;
-	messageProcessor my_messageProcessor;
-	DRM_aacDecoder	my_aacDecoder;
-	LowPassFIR      upFilter_24000;
-	int		numFrames;
-	void		processAudio	(uint8_t *, int16_t,
-	                                 int16_t, int16_t, int16_t, int16_t);
-	void		process_aac     (uint8_t *, int16_t, int16_t,
-	                                 int16_t, int16_t, int16_t);
-	void		handle_uep_audio (uint8_t *, int16_t,
-	                                 int16_t, int16_t, int16_t, int16_t);
-	void		handle_eep_audio (uint8_t *, int16_t,
-	                                          int16_t, int16_t);
-	void		writeOut	(int16_t *, int16_t, int32_t);
-	void		toOutput	(float *, int16_t);
-	void		playOut		(int16_t);
-signals:
-	void            show_audioMode  (QString);
-	void            putSample       (float, float);
-	void            faadSuccess     (bool);
+	drmDecoder	*drmMaster;
+	int16_t		numFrames;
+	fecHandler	*my_fecHandler;
+	packetAssembler	*my_packetAssembler;
+	int16_t		old_CI;
+	void	process_packets	(uint8_t *, int16_t,
+	                         int16_t, int16_t, int16_t, int16_t);
+	void	handle_uep_packets	(uint8_t *, int16_t,
+	                         int16_t, int16_t, int16_t, int16_t);
+	void	handle_eep_packets	(uint8_t *, int16_t, int16_t, int16_t);
+	void	handle_packets_with_FEC	(uint8_t *, int16_t, uint8_t);
+	void	handle_packets	(uint8_t *, int16_t, uint8_t);
+
+	void	process_syncStream (uint8_t *v, int16_t mscIndex,
+                                    int16_t startHigh,
+                                    int16_t lengthHigh,
+                                    int16_t startLow,
+                                    int16_t lengthLow);
+	void	handle_uep_syncStream (uint8_t *v, int16_t mscIndex,
+                                   int16_t startHigh, int16_t lengthHigh,
+                                   int16_t startLow, int16_t lengthLow);
+	void	handle_eep_syncStream (uint8_t *v, int16_t mscIndex,
+                                   int16_t startLow, int16_t lengthLow);
+	void	handle_syncStream	(uint8_t *v, int16_t, int16_t);
 };
 
 #endif

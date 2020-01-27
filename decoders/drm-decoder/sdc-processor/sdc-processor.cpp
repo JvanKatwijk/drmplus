@@ -154,10 +154,10 @@ QString	s;
 	      params	-> protLevelA	= get_SDCBits (data, base, 2);
 	      params	-> protLevelB	= get_SDCBits (data, base + 2, 2);
 	      for (int i = 0; i < bodySize / 3; i ++) {
-	         int index = base + 4 + i / 3 * 24;
-	         params -> theStreams [i / 3]. lengthHigh =
+	         int index = base + 4 + i * 24;
+	         params -> theStreams [i]. lengthHigh =
 	                        get_SDCBits (data, index, 12);
-	         params -> theStreams [i / 3]. lengthLow =
+	         params -> theStreams [i]. lengthLow =
 	                       get_SDCBits (data, index + 12, 12);
 
 //	         fprintf (stderr, "subchId %d (%d %d) lengths %d %d\n",
@@ -209,10 +209,11 @@ QString	s;
 	   case 1:	// label entity
 	      shortId = get_SDCBits (data, base, 2);
 //	      params -> theStreams [shortId]. inUse = true;
-	      for (int i = 0; i < bodySize; i ++)
-	         s. append (get_SDCBits (data, base + 4 + 8 * i, 8));
-	      if (params -> theStreams [shortId]. serviceName. isEmpty ())
+	      if (params -> theStreams [shortId]. serviceName. isEmpty ()) {
+	         for (int i = 0; i < bodySize; i ++)
+	            s. append (get_SDCBits (data, base + 4 + 8 * i, 8));
 	         params -> theStreams [shortId]. serviceName = s;
+	      }
 	      return index + 16 + 8 * bodySize;
 
 	   case 12:	// language and country data 
@@ -277,6 +278,19 @@ QString	s;
 	                               get_SDCBits (data, base + 13, 1);
 	      params -> theStreams [shortId]. coderField =
 	                               get_SDCBits (data, base + 14, 5);
+	      return index + 16 + 8 * bodySize;
+
+	   case 10:	//packet stream FEC parameters
+	      shortId	= get_SDCBits (data, base, 2);
+	      params	-> theStreams [shortId]. streamId =
+	                                get_SDCBits (data, base + 2, 2);
+	      params	-> theStreams [shortId]. R =
+	                                get_SDCBits (data, base + 4, 8);
+	      params	-> theStreams [shortId]. C =
+	                                get_SDCBits (data, base + 12, 8);
+	      params	-> theStreams [shortId]. packetLength =
+	                                get_SDCBits (data, base + 20, 8);
+	      params	-> theStreams [shortId]. FEC	= true;
 	      return index + 16 + 8 * bodySize;
 	}
 	return index + 12;
