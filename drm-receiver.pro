@@ -4,7 +4,7 @@
 TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
-TARGET	= drmplus_receiver-0.4
+TARGET	= drm-plus-0.5
 #QMAKE_CFLAGS	+= -ffast-math -flto
 #QMAKE_CXXFLAGS	+= -ffast-math -flto
 QMAKE_LFLAGS	+= -g
@@ -54,11 +54,9 @@ HEADERS += ./radio.h \
            ./output/audiosink.h \
 	   ./scopes-qwt6/virtual-scope.h \
 	   ./scopes-qwt6/spectrogramdata.h \
-	   ./scopes-qwt6/waterfall-scope.h \
 	   ./scopes-qwt6/spectrum-scope.h \
            ./scopes-qwt6/scope.h \
            ./scopes-qwt6/fft-scope.h \
-	   ./scopes-qwt6/audio-scope.h \
 	   ./devices/device-handler.h \
 	   ./devices/wavfiles/wavfiles.h \
 	   ./devices/wavfiles/wav-reader.h \
@@ -86,7 +84,6 @@ SOURCES += ./main.cpp \
 	   ./output/upconverter.cpp \
            ./output/audiosink.cpp \
 	   ./scopes-qwt6/virtual-scope.cpp \
-	   ./scopes-qwt6/waterfall-scope.cpp \
 	   ./scopes-qwt6/spectrum-scope.cpp \
            ./scopes-qwt6/scope.cpp \
            ./scopes-qwt6/fft-scope.cpp \

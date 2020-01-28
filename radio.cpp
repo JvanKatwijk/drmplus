@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of drm+-receiver
+ *    This file is part of DRM+-receiver
  *
- *    drm+ receiver is free software; you can redistribute it and/or modify
+ *    DRM+ receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm+ receiver is distributed in the hope that it will be useful,
+ *    DRM+ receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm+ receiver; if not, write to the Free Software
+ *    along with DRM+ receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	<unistd.h>
@@ -188,9 +188,6 @@ theDevice	= setDevice (s, inputData);
                  SIGNAL (clickedwithLeft (int)),
                  this,
                  SLOT (adjustFrequency_khz (int)));
-	connect (hfScope,
-	         SIGNAL (clickedwithRight (int)),
-	         this, SLOT (switch_hfViewMode (int)));
         connect (hfScopeSlider, SIGNAL (valueChanged (int)),
                  this, SLOT (set_hfscopeLevel (int)));
 //	else we start the handle
@@ -305,11 +302,6 @@ void    RadioInterface::set_hfscopeLevel (int level) {
         hfScope -> setLevel (level);
 }
 
-
-void	RadioInterface::switch_hfViewMode	(int d) {
-	(void)d;
-	hfScope	-> switch_viewMode ();
-}
 
 void	RadioInterface::updateTime		(void) {
 QDateTime currentTime = QDateTime::currentDateTime ();
@@ -459,6 +451,8 @@ deviceHandler	*inputDevice	= nullptr;
 	if (s == "wav files") {
 	   try {
 	      inputDevice	= new wavFiles (this, inputRate,  b);
+	      freqButton	-> hide ();
+	      mykeyPad		-> hide ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -470,6 +464,8 @@ deviceHandler	*inputDevice	= nullptr;
 	if (s == "raw files 16")  {
 	   try {
 	      inputDevice	= new rawFiles_16 (this, inputRate, b);
+	      freqButton	-> hide ();
+	      mykeyPad		-> hide ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -481,6 +477,8 @@ deviceHandler	*inputDevice	= nullptr;
 	if (s == "raw files") {
 	   try {
 	      inputDevice	= new rawFiles_8 (this, inputRate, b);
+	      freqButton	-> hide ();
+	      mykeyPad		-> hide ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -492,6 +490,8 @@ deviceHandler	*inputDevice	= nullptr;
 	if (s == "raw files 32") {
 	   try {
 	      inputDevice	= new rawFiles_32 (this, inputRate, b);
+	      freqButton	-> hide ();
+	      mykeyPad		-> hide ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),

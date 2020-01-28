@@ -1,27 +1,26 @@
 #
 /*
- *    Copyright (C)  2017, 2018
+ *    Copyright (C)  2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
+ *    This file is part of the DRM+ Decoder
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    DRM+ Decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DRM+ Decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DRM+ Decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"spectrum-scope.h"
-#include	"waterfall-scope.h"
 #include	"fft-scope.h"
 
 //
@@ -175,28 +174,6 @@ void	fftScope::setScope (quint64 centerFreq, int32_t offset) {
 	vfo	= centerFreq;
 	needle	= offset;
 	needleBin	= (needle * displaySize) / sampleRate + displaySize / 2;
-}
-
-void	fftScope::switch_viewMode	(void) {
-	delete scope;
-	if (viewMode == SPECTRUMVIEW) {
-	   viewMode = WATERFALLVIEW;
-	   scope = new waterfallScope (plotgrid, displaySize, 50);
-	}
-	else {
-	   viewMode = SPECTRUMVIEW;
-	   scope = new spectrumScope (plotgrid, displaySize);
-	}
-
-	scope	-> set_bitDepth (bitDepth);
-	sampleCounter	= 0;
-	fillPointer	= 0;
-	averageCounter	= 0;
-	memset (averageBuffer, 0, displaySize * sizeof (double));
-	connect (scope, SIGNAL (clickedwithLeft (int)),
-	         this,  SIGNAL (clickedwithLeft (int)));
-	connect (scope, SIGNAL (clickedwithRight (int)),
-	         this,  SIGNAL (clickedwithRight (int)));
 }
 
 void	fftScope::set_bitDepth		(int16_t bd) {

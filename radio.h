@@ -102,7 +102,6 @@ private slots:
         void            handle_freqButton       (void);
 	void		set_freqSave		(void);
 	void		handle_quitButton	(void);
-	void		switch_hfViewMode	(int);
 	void		updateTime		(void);
 	void		closeEvent		(QCloseEvent *event);
 	void		handle_decoderSelect	(const QString &);
