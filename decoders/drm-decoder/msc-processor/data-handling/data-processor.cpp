@@ -281,7 +281,6 @@ int16_t	i;
 //	first a crc check
 	   if (crc16_bytewise (packetBuffer, packetLength) != 0)
 	      continue;
-	   fprintf (stderr, "d");
 	   my_packetAssembler -> assemble (packetBuffer,
 	                                   packetLength, mscIndex);
 	}

@@ -36,10 +36,6 @@ enum    {
 };
 
 enum    {
-        SM, HM, HMI, HMIQ
-};
-
-enum    {
         AUDIO_STREAM, DATA_STREAM
 };
 

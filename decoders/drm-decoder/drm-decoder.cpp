@@ -370,6 +370,9 @@ void	drmDecoder::cleanup_db		() {
 	channel_3	-> setText ("not available");
 }
 
+QString monthTable [] = {"jan", "feb", "mar", "apr", "may", "jun",
+	                 "jul", "aug", "sep", "oct", "nov", "dec"};
+
 void	drmDecoder::update_GUI		() {
 	if (params. theStreams [0]. inUse) {
 	   if (channel_0 -> text () == "not available") {
@@ -400,9 +403,14 @@ void	drmDecoder::update_GUI		() {
 	   }
 	}
 
-	if (params. hours >= 0)
-	   timeLabel -> setText (QString (params. hours) + ":"
-	                             + QString (params. minutes));
+	if (params. hours >= 0) {
+	   QString dd = QString::number (params.Year) + ":" +
+	                monthTable [params. Month - 1] + ":" +
+	                QString::number (params. Day) + " " +
+	                QString::number (params. hours) + ":" +
+	                QString::number (params. minutes);
+	   timeLabel -> setText (dd);
+	}
 	else
 	   timeLabel	-> setText (" ");
 }
