@@ -137,13 +137,13 @@ void	drmDecoder::show_stationLabel (const QString &s) {
 	stationLabel -> setText (s);
 }
 
-void	drmDecoder::show_channels	(int audio, int data) {
-}
-
 void	drmDecoder::show_audioMode	(QString s) {
 	audioModeLabel	-> setText (s);
 }
 
+void	drmDecoder::show_mer		(float mer) {
+	mer_display	-> display (mer);
+}
 
 static std::complex<float> lbuf [4800];
 static int fillP        = 0;
@@ -289,7 +289,7 @@ void	drmDecoder::showMOT		(QByteArray data, int subtype) {
 
 void    drmDecoder::set_phaseOffset (int f) {
         phaseOffset += f;
-	phaseOffsetDisplay	-> display (phaseOffset);
+//	phaseOffsetDisplay	-> display (phaseOffset);
 }
 
 

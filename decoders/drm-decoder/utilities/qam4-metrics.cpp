@@ -35,6 +35,24 @@ const double rTableQAM4[2][2] = {
 	qam4_metrics::~qam4_metrics	(void) {
 }
 
+float	qam4_metrics::compute_Mer	(theSignal *signalVector,
+	                                 int32_t amount) {
+float	nominator	= 0;
+float denominator	= 0;
+	for (int i = 0; i < amount; i ++) {
+	   float I_comp = real (signalVector [i]. signalValue);
+	   float Q_comp = imag (signalVector [i]. signalValue);
+	   if (I_comp < 0) I_comp = - I_comp;
+	   if (Q_comp < 0) Q_comp = - Q_comp;
+	   nominator += I_comp * I_comp + Q_comp * Q_comp;
+	   float delta_I = rTableQAM4 [0][0] - I_comp;
+	   float delta_Q = rTableQAM4 [0][0] - Q_comp;
+	   denominator += delta_I * delta_I + delta_Q * delta_Q;
+	}
+	return 10 * log10 (nominator / (denominator + 0.0001));;
+}
+
+	     
 void	qam4_metrics::computemetrics	(theSignal *signalVector,
 	                                 int32_t amount,
 	                                 metrics *outputMetrics) {
@@ -75,3 +93,4 @@ int32_t	i;
 	}
 }
 
+	

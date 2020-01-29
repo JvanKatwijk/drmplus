@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of drm+-receiver
+ *    This file is part of DRM+-receiver
  *
- *    drm+ receiver is free software; you can redistribute it and/or modify
+ *    DRM+ receiver is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    drm+ receiver is distributed in the hope that it will be useful,
+ *    DRM+ receiver is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with drm+ receiver; if not, write to the Free Software
+ *    along with DRM+ receiver; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"sdc-processor.h"
@@ -58,6 +58,8 @@ int	symbol, carrier;
 
 	connect (this, SIGNAL (show_iq ()),
 	         theParent, SLOT (show_iq ()));
+	connect (this, SIGNAL (show_mer (float)),
+	         theParent, SLOT (show_mer (float)));
 	nr_sdcSamples		= init_sdcTable ();
 
 	Y21Mapper	= new Mapper (2 * nr_sdcSamples, 21);
@@ -79,6 +81,7 @@ int	symbol, carrier;
 	delete	handler_12;
 	delete	handler_14;
 }
+static int teller	= 0;
 
 bool	sdcProcessor::processSDC	(theSignal **theData) {
 metrics	rawBits 	[2 * nr_sdcSamples];
@@ -98,6 +101,11 @@ int	i;
 	if (show_Constellation) {
 	   iqBuffer -> putDataIntoBuffer (buffer, nr_sdcSamples);
 	   show_iq ();
+	}
+
+	if (++teller > 5) {
+	   show_mer (my_qam4_metrics. compute_Mer (sdcCells, nr_sdcSamples));
+	   teller = 0;
 	}
 
 //	second: map them to soft bits

@@ -452,7 +452,7 @@ deviceHandler	*inputDevice	= nullptr;
 	   try {
 	      inputDevice	= new wavFiles (this, inputRate,  b);
 	      freqButton	-> hide ();
-	      mykeyPad		-> hide ();
+	      mykeyPad		-> hidePad ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -465,7 +465,7 @@ deviceHandler	*inputDevice	= nullptr;
 	   try {
 	      inputDevice	= new rawFiles_16 (this, inputRate, b);
 	      freqButton	-> hide ();
-	      mykeyPad		-> hide ();
+	      mykeyPad		-> hidePad ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -478,7 +478,7 @@ deviceHandler	*inputDevice	= nullptr;
 	   try {
 	      inputDevice	= new rawFiles_8 (this, inputRate, b);
 	      freqButton	-> hide ();
-	      mykeyPad		-> hide ();
+	      mykeyPad		-> hidePad ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),
@@ -491,7 +491,7 @@ deviceHandler	*inputDevice	= nullptr;
 	   try {
 	      inputDevice	= new rawFiles_32 (this, inputRate, b);
 	      freqButton	-> hide ();
-	      mykeyPad		-> hide ();
+	      mykeyPad		-> hidePad ();
 	   }
 	   catch (int e) {
 	      QMessageBox::warning (this, tr ("Warning"),

@@ -97,7 +97,7 @@
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLCDNumber" name="phaseOffsetDisplay">
+        <widget class="QLCDNumber" name="mer_display">
          <property name="font">
           <font>
            <family>DejaVu Sans</family>
@@ -105,7 +105,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PhaseOffsetDisplay shows the local offset of the frequency as caused by the mousewheeel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>MER display, indicates the quality of the signal, high is better.</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>

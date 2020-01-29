@@ -67,6 +67,7 @@ typedef struct {
 
 signals:
 	void		show_iq		();
+	void		show_mer	(float);
 };
 #endif
 

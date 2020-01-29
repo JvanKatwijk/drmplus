@@ -70,13 +70,13 @@ public slots:
 	void		show_stationLabel	(const QString &);
 	void		show_eqsymbol		(int);
 	void		show_iq			();
+	void		show_mer		(float);
 	void		show_audioMode		(QString);
 	void		show_coarseOffset	(float);
 	void		show_fineOffset		(float);
 	void		show_timeDelay		(float);
 	void		show_timeOffset		(float);
 	void		show_clockOffset	(float);
-	void		show_channels		(int, int);
 	void		show_angle		(float);
 	void		sampleOut		(float, float);
 	void		faadSuccess		(bool);

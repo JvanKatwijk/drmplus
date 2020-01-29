@@ -32,6 +32,8 @@ public:
 		qam4_metrics		(void);
 		~qam4_metrics		(void);
 	void	computemetrics		(theSignal *, int32_t, metrics *);
+	float	compute_Mer		(theSignal *signalVector,
+                                         int32_t amount);
 private:
 };
 
