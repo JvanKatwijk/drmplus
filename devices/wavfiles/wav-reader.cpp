@@ -64,7 +64,7 @@ SF_INFO	*sf_info;
 	numofChannels	= sf_info	-> channels;
 	readerOK	= true;
 	resetRequest	= false;
-	
+
 	currPos		= 0;
 }
 
@@ -98,23 +98,7 @@ int32_t	wavReader::Samples	(void) {
 	return _I_Buffer -> GetRingBufferReadAvailable () / 2;
 }
 
-int32_t	wavReader::getSamples	(std::complex<float> *V,
-	                                int32_t n, uint8_t Mode) {
-int32_t	i;
-
-	while (running. load () &&
-	       (_I_Buffer -> GetRingBufferReadAvailable () < (uint32_t)(2 * n))) {
-	   usleep (100);
-	}
-
-	if (!running. load ())
-	   return 0;
-
-	 _I_Buffer	-> getDataFromBuffer (V, n);
-	return n;
-}
-
-/*	length is number of floats that we read.
+/*	length is number of FLOATS (not full samples) that we read.
  *	In case of mono, we add zeros to the right channel
  *	and therefore only read length / 2 floats
  *	Notice that sf_readf_xxx reads frames (samples * numofchannels)
@@ -204,23 +188,22 @@ int64_t	nextStop;
 	         t = bufferSize;
 	      }
 	       _I_Buffer -> putDataIntoBuffer ((std::complex<float> *)bi, t / 2);
-	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
+	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10) {
 	         emit dataAvailable (theRate / 10);
-
-	      if (nextStop - getMyTime () > 0)
-	         usleep (nextStop - getMyTime ());
+	         usleep (100000);
+	      }
 	   }
 	}
 	else {		// conversion needed
-	   int32_t	outputLimit	= 4 * theRate / 10;
+	   int32_t	outputLimit	= theRate / 10;
 	   double	ratio	= (double)theRate / sampleRate;
 //
 //	inputbuffer size:
-	   bufferSize		= ceil (outputLimit / ratio);
-	   bi			= new float [bufferSize];
+	   int inputSize	= ceil (outputLimit / ratio);
+	   bi			= new float [2 * inputSize];
 	   int		error;
 //	outputbuffer size
-	   float	bo [outputLimit];
+	   float	bo [2 * outputLimit];
 	   SRC_STATE	*converter	= src_new (SRC_LINEAR, 2, &error);
 	   SRC_DATA	*src_data	= new SRC_DATA;
 	   if (converter == 0) {
@@ -242,24 +225,27 @@ int64_t	nextStop;
 	         sf_seek (filePointer, 0, SEEK_SET);
 	         resetRequest = false;
 	      }
-	      while (_I_Buffer -> WriteSpace () < outputLimit + 10) {
+
+	      while (_I_Buffer -> WriteSpace () < 2 * outputLimit + 10) {
 	         if (!running. load ())
 	            break;
 	         usleep (100);
 	      }
 
 	      nextStop	+= period;
-	      t = readBuffer (bi, bufferSize);
+	      t = sf_readf_float (filePointer, bi, inputSize);
+//	      t = readBuffer (bi, 2 * inputSize);
 	      if (t <= 0) {
-	         for (i = 0; i < bufferSize; i ++)
+	         for (i = 0; i < 2 * inputSize; i ++)
 	            bi [i] = 0;
-	         t = bufferSize;
+	         t = inputSize;
+	         sf_seek (filePointer, 0, SEEK_SET);
 	      }
 
-	      src_data -> input_frames	= t / 2;
-	      src_data -> output_frames	= outputLimit / 2;
-// we are reading continously, after eof we just start all over again,
-// therefore end_of_input flag is not altered
+	      src_data -> input_frames	= t;
+	      src_data -> output_frames	= outputLimit;
+//	we are reading continously, after eof we just start all over again,
+//	therefore end_of_input flag is not altered
 	      res	= src_process	(converter, src_data);
 	      if (res != 0) {
 	         fprintf (stderr, "error %s\n", src_strerror (t));
@@ -270,7 +256,7 @@ int64_t	nextStop;
                                                  numofOutputs);
 	      }
 
-	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
+	      while (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
 	         emit dataAvailable (theRate / 10);
 	                                      
 	      if (nextStop - getMyTime () > 0)

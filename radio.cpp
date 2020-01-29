@@ -164,6 +164,7 @@ QString	FrequencytoString (int32_t freq) {
 	connect (deviceSelector, SIGNAL (activated (const QString &)),
                     this,  SLOT (doStart (const QString &)));
 	theDevice	= nullptr;
+	dumpfilePointer	= nullptr;
 }
 
 //      The end of all
@@ -204,6 +205,8 @@ theDevice	= setDevice (s, inputData);
 	         this, SLOT (handle_frequencyBackwards ()));
 	connect (frequencyForwards, SIGNAL (clicked ()),
 	         this, SLOT (handle_frequencyForwards ()));
+	connect (dumpButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_dumpButton ()));
 	theDevice	-> restartReader ();
 
 	if (decoderSelect -> currentText () == "drm+") 
@@ -285,15 +288,24 @@ QString programName     = myLine -> text ();
 
 //////////////////////////////////////////////////////////////////
 //
+#define	SEGMENT_SIZE	1024
 void	RadioInterface::sampleHandler (int amount) {
-std::complex<float>   buffer [512];
+std::complex<float>   buffer [SEGMENT_SIZE];
+float	dumpBuffer [2 * SEGMENT_SIZE];
 int	i, j;
 
 	(void)amount;
-	while (inputData -> GetRingBufferReadAvailable () > 512) {
-	   inputData	-> getDataFromBuffer (buffer, 512);
-	   hfScope	-> addElements (buffer, 512);
-	   bufferData -> putDataIntoBuffer (buffer, 512);
+	while (inputData -> GetRingBufferReadAvailable () > SEGMENT_SIZE) {
+	   inputData	-> getDataFromBuffer (buffer, SEGMENT_SIZE);
+	   hfScope	-> addElements (buffer, SEGMENT_SIZE);
+	   bufferData	-> putDataIntoBuffer (buffer, SEGMENT_SIZE);
+	   if (dumpfilePointer != NULL) {
+              for (i = 0; i < SEGMENT_SIZE; i ++) {
+                 dumpBuffer [2 * i]     = real (buffer [i]);
+                 dumpBuffer [2 * i + 1] = imag (buffer [i]);
+              }
+              sf_writef_float (dumpfilePointer, dumpBuffer, SEGMENT_SIZE);
+           }
 	}
 }
 //
@@ -528,3 +540,35 @@ void	RadioInterface::handle_frequencyForwards () {
 	adjustFrequency_khz (50);
 }
 
+void	RadioInterface::handle_dumpButton (void) {
+SF_INFO	*sf_info	= (SF_INFO *)alloca (sizeof (SF_INFO));
+
+	if (dumpfilePointer != NULL) {
+	   sf_close (dumpfilePointer);
+	   dumpfilePointer	= NULL;
+	   dumpButton	-> setText ("dump");
+	   return;
+	}
+
+	QString file = QFileDialog::getSaveFileName (this,
+	                                        tr ("Save file ..."),
+	                                        QDir::homePath (),
+	                                        tr ("PCM wave file (*.wav)"));
+	if (file == QString (""))
+	   return;
+	file		= QDir::toNativeSeparators (file);
+	if (!file.endsWith (".wav", Qt::CaseInsensitive))
+	   file.append (".wav");
+	sf_info		-> samplerate	= inputRate;
+	sf_info		-> channels	= 2;
+	sf_info		-> format	= SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+
+	dumpfilePointer	= sf_open (file. toUtf8 (). data (),
+	                                   SFM_WRITE, sf_info);
+	if (dumpfilePointer == NULL) {
+	   qDebug () << "Cannot open " << file. toUtf8 (). data ();
+	   return;
+	}
+
+	dumpButton		-> setText ("WRITING");
+}

@@ -386,6 +386,7 @@ void	drmDecoder::update_GUI		() {
 	      channel_1 -> setText (params. theStreams [1]. serviceName);
 	      connect (channel_1, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_1 ()));
+	      fprintf (stderr, "%s \n", params. theStreams [1]. serviceName. toUtf8 (). data ());
 	   }
 	}
 	if (params. theStreams [2]. inUse) {

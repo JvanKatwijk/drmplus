@@ -27,7 +27,7 @@
 //	A simple interface class to the ringBuffer
 //	The methods are called from the drmdecoder
 
-#define	OFFSET	600
+#define	OFFSET	00
 
 	theReader::theReader (RingBuffer<std::complex<float>> *r,
 	                                              int32_t size) {

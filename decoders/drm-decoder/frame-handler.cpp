@@ -181,6 +181,7 @@ L1:
 	   if (!running. load ())
 	      return;
 
+	static int facError = 0;
 	   bool fac_synced	= false;
 	   fprintf (stderr, "lc = %d\n", lc);
 	   if (my_facProcessor. processFAC (outbank, 
@@ -188,6 +189,7 @@ L1:
 		                            my_equalizer. getChannels   ())) {
 	      setFACSync (true);
 	      fac_synced	= true;
+	      facError		= 0;
 	   }
 	   else {
 	      setFACSync (false);
@@ -225,8 +227,12 @@ L1:
 	      if (!my_facProcessor. processFAC (outbank,
 	                                        my_equalizer. getMeanEnergy (),
 	                                        my_equalizer. getChannels ())) {
-	         setFACSync (false);
-	         break;
+	         if (facError >= 1) {
+	            setFACSync (false);
+	            break;
+	         }
+	         else
+	           facError ++;
 	      }
 
 	      if ((params -> theChannel. Identity == 0) || 	

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>445</width>
-    <height>251</height>
+    <width>529</width>
+    <height>257</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <rect>
       <x>40</x>
       <y>30</y>
-      <width>381</width>
+      <width>411</width>
       <height>151</height>
      </rect>
     </property>
@@ -70,7 +70,7 @@
    <widget class="QPushButton" name="freqButton">
     <property name="geometry">
      <rect>
-      <x>70</x>
+      <x>40</x>
       <y>0</y>
       <width>121</width>
       <height>31</height>
@@ -86,7 +86,7 @@
    <widget class="QComboBox" name="streamOutSelector">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>170</x>
       <y>190</y>
       <width>151</width>
       <height>31</height>
@@ -99,7 +99,7 @@
    <widget class="QPushButton" name="freqSave">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>260</x>
       <y>0</y>
       <width>121</width>
       <height>31</height>
@@ -128,7 +128,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>10</x>
       <y>0</y>
       <width>21</width>
       <height>21</height>
@@ -162,7 +162,7 @@
    <widget class="QComboBox" name="decoderSelect">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>330</x>
       <y>190</y>
       <width>126</width>
       <height>31</height>
@@ -182,7 +182,7 @@
    <widget class="QPushButton" name="frequencyBackwards">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>160</x>
       <y>0</y>
       <width>51</width>
       <height>31</height>
@@ -199,7 +199,7 @@
    <widget class="QPushButton" name="frequencyForwards">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>210</x>
       <y>0</y>
       <width>51</width>
       <height>31</height>
@@ -211,6 +211,19 @@
     <property name="icon">
      <iconset resource="resources.qrc">
       <normaloff>:/icons/next.png</normaloff>:/icons/next.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="dumpButton">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>0</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>dump</string>
     </property>
    </widget>
    <zorder>hfSpectrum</zorder>
@@ -225,6 +238,7 @@
    <zorder>decoderSelect</zorder>
    <zorder>frequencyBackwards</zorder>
    <zorder>frequencyForwards</zorder>
+   <zorder>dumpButton</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

@@ -79,6 +79,7 @@ private:
         fftScope        *hfScope;
 	int16_t		delayCount;
 
+	SNDFILE		*dumpfilePointer;
 	QTimer		secondsTimer;
 	void		setupSoundOut   (QComboBox        *streamOutSelector,
                                          audioSink        *our_audioSink,
@@ -107,6 +108,7 @@ private slots:
 	void		handle_decoderSelect	(const QString &);
 	void		handle_frequencyBackwards	();
 	void		handle_frequencyForwards	();
+	void		handle_dumpButton	();
 public slots:
 	void		sampleHandler		(int amount);
 };
