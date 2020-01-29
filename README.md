@@ -1,6 +1,6 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.4
+DRMPLUS-0.5
 ------------------------------------------------------------------
 
 DRMPLUS-0.5 is experimental software for the decoding of
@@ -68,7 +68,7 @@ of the signal (just a technical term, skip if you are not familiar with it),
 i.e, the protection of the high and low protected parts as well as the
 offsets in the mux where to find the data.
 Furthermore, this widget will tell whether the signal was encoded as
-a 4QAM or a 16QAM signal.
+a 4QAM or a 16QAM signal (both supported).
 
 The (really) technical widget will show two "scopes". The scope on the
 left will show the equalization signal (note that DRM decoding requires
@@ -96,6 +96,8 @@ and some software filtering is applied - in the decimation process -
 to narrow the reception band to 192000 (Note that the SDRplay already
 has support for a bandwidth of 200 Khz)
 
+The *dump* button will write out the input data as a PCM (.wav)
+file with a samplerate of 192000
 Next to these devices, there is support for
 
  - PCM based files, i.e. ".wav" files;
