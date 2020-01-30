@@ -46,11 +46,10 @@ private:
         std::complex<float> *wordVector;
         fftwf_plan      plan;
         std::complex<float> *freqVector;
-	int		offsetIndex;
 	float		theAngle;
-	float		sampleclockOffset;
-	float		timedelay;
-	float		averageTimeDelay;
+	int		offsetIndex;
+	float		sampleOffset;
+	float		avgRateOffset;
 };
 
 #endif

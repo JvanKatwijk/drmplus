@@ -42,9 +42,9 @@
                                        sin (2 * M_PI * i / SAMPLE_RATE));
 	offsetIndex	= 0;
         theAngle        = 0;
-	sampleclockOffset	= 0;
+	sampleOffset	= 0;
+	avgRateOffset	= 0;
 }
-
 
 	wordCollector::~wordCollector	() {
         fftwf_destroy_plan      (plan);
@@ -57,31 +57,29 @@ void	wordCollector::reset	() {
 }
 
 float	wordCollector::getWord (std::complex<float> *out,
-	                               drmParameters *p, int offset) {
+	                        drmParameters *p, int offset) {
 std::complex<float> temp [Ts_t];
 int	i;
 std::complex<float> angle	= std::complex<float> (0, 0);
-int     base    = myReader -> currentIndex;
-int	bufMask	= myReader -> bufMask;
-int16_t	d;
+int     base			= myReader -> currentIndex;
+int	bufMask			= myReader -> bufMask;
+int16_t	d = 0;
 float	timeOffsetFractional;
-float	timeDelay;
 
-	myReader	-> waitfor (Ts_t + Ts_t / 2);
+	myReader	-> waitfor (Ts_t + 10);
 
 //	correction of the time offset by interpolation
-
-	timeDelay	= p -> timeOffset_fractional;
-	if (timedelay < 0)
+	float timeDelay	= p -> timeOffset_fractional;
+	if (timeDelay < 0)
 	   timeDelay = 0;
 	d	= floor (timeDelay + 0.5);
-	timeOffsetFractional	= timedelay - d;
+	timeOffsetFractional	= timeDelay - d;
 
 //      keep it simple, just linear interpolation
-        int f = (myReader -> currentIndex) & bufMask;
+        int f = (myReader -> currentIndex + d) & bufMask;
 
-        if (timeOffsetFractional < 0) {
-           timeOffsetFractional = 1 + timeOffsetFractional;
+        if (sampleOffset < 0) {
+           sampleOffset = 1 + sampleOffset;
            f -= 1;
         }
 
@@ -93,7 +91,7 @@ float	timeDelay;
                                     cmul (two, timeOffsetFractional);
         }
 
-	myReader -> currentIndex = (myReader -> currentIndex + Ts_t) & bufMask;
+	myReader -> currentIndex = (f + Ts_t) & bufMask;
 
 	for (i = 0; i < Tg_t; i ++)
 	   angle += conj (temp [Tu_t + i]) * temp [i];
@@ -101,7 +99,7 @@ float	timeDelay;
 	if (std::isinf (arg (angle)) || std::isnan (arg (angle)))
 	   fprintf (stderr, "XX");
 	else
-	theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
+	   theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
 
 	int offset_in_Hz = theAngle / (2 * M_PI) * SAMPLE_RATE / Tu_t;
 	offset_in_Hz -= p -> freqOffset_integer * SAMPLE_RATE / Tu_t;

@@ -28,6 +28,8 @@
 #include	"eqdisplay.h"
 #include	"drm-decoder.h"
 
+static	int goodFrames	= 0;
+
 	frameHandler::frameHandler (drmDecoder 		*theRadio,
 	                            RingBuffer<std::complex<float>> *b,
 	                            drmParameters	*params,
@@ -104,6 +106,7 @@ int	updateTimer	= 10;
 L1:
 	   if (!running. load ())
 	      return;
+	   goodFrames	= 0;
 //	at first we need to find the first sample of a symbol
 	   my_wordCollector. reset ();
 	   setTimeSync	(false);
@@ -140,8 +143,8 @@ L1:
                 symbol < symbolsperFrame; symbol ++) {
 	      my_wordCollector. getWord (inbank [symbol], params);
 	      my_timeCorrelator. getCorr (symbol, inbank [symbol]);
-	      params -> timeOffset_fractional +=
-	                           Ts_t * params -> sampleRate_offset;
+//	      params -> timeOffset_fractional +=
+//	                           Ts_t * params -> sampleRate_offset;
 	   }
 //
 //	continue reading until we find a "first" symbol
@@ -149,8 +152,8 @@ L1:
 	   while (running. load ()) {
 	      my_wordCollector. getWord (inbank [lc], params);
 	      my_timeCorrelator. getCorr (lc, inbank [lc]);
-	      params -> timeOffset_fractional +=
-	                           Ts_t * params -> sampleRate_offset;
+//	      params -> timeOffset_fractional +=
+//	                           Ts_t * params -> sampleRate_offset;
 	      lc = (lc + 1) % symbolsperFrame;
 	      if (my_timeCorrelator. is_bestIndex (lc))  
                  break;
@@ -169,8 +172,8 @@ L1:
 	   while (!frameReady && running. load ()) {
 	      my_wordCollector.
                       getWord (inbank [lc], params);
-	      params -> timeOffset_fractional +=
-	                           Ts_t * params -> sampleRate_offset;
+//	      params -> timeOffset_fractional +=
+//	                           Ts_t * params -> sampleRate_offset;
 	      frameReady = my_equalizer. equalize (inbank [lc],
                                                    symbol_no,
                                                    outbank);
@@ -181,7 +184,6 @@ L1:
 	   if (!running. load ())
 	      return;
 
-	static int facError = 0;
 	   bool fac_synced	= false;
 	   fprintf (stderr, "lc = %d\n", lc);
 	   if (my_facProcessor. processFAC (outbank, 
@@ -189,12 +191,12 @@ L1:
 		                            my_equalizer. getChannels   ())) {
 	      setFACSync (true);
 	      fac_synced	= true;
-	      facError		= 0;
 	   }
 	   else {
 	      setFACSync (false);
 	      goto L1;
 	   }
+
 	   bool firstTime = true;
 	   while (running. load ()) {
 	      float	offsetFractional	= 0;    //
@@ -204,6 +206,7 @@ L1:
 	      float	angle			= 0;
 	      frameReady	= false;
 	      for (i = 0; !frameReady && (i < symbolsperFrame); i ++) {
+	         float v;
 	         angle = my_wordCollector.
 	              getWord (inbank [(lc + i) % symbolsperFrame], params);
 	         frameReady = my_equalizer.
@@ -227,14 +230,13 @@ L1:
 	      if (!my_facProcessor. processFAC (outbank,
 	                                        my_equalizer. getMeanEnergy (),
 	                                        my_equalizer. getChannels ())) {
-	         if (facError >= 1) {
-	            setFACSync (false);
-	            break;
-	         }
-	         else
-	           facError ++;
+	         setFACSync (false);
+	         fprintf (stderr, "%d good frames before error\n",
+	                                                       goodFrames);
+	         break;
 	      }
 
+	      goodFrames ++;
 	      if ((params -> theChannel. Identity == 0) || 	
 	          (params -> theChannel. Identity == 3)) {
 	         bool sdcFlag = my_sdcProcessor. processSDC (outbank);

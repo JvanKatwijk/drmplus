@@ -34,6 +34,7 @@
 	theRate		= rate;
 	this	-> myFrame	= new QFrame;
 	setupUi		(myFrame);
+	myFrame	-> show ();
 	myReader	= NULL;
 	QString	replayFile
 	              = QFileDialog::
