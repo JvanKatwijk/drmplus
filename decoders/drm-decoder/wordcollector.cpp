@@ -43,6 +43,8 @@
 	phasePointer	= 0;
         theAngle        = 0;
 	actualBase	= 0;
+	totalOffset	= 0;
+	nrSymbols	= 0;
 }
 
 	wordCollector::~wordCollector	() {
@@ -55,6 +57,8 @@ void	wordCollector::reset	() {
 	theAngle	= 0;
 	phasePointer	= 0;
 	actualBase	= 0;
+	totalOffset	= 0;
+	nrSymbols	= 0;
 }
 
 int	wordCollector::fine_timeSync (drmParameters *p,
@@ -95,6 +99,12 @@ std::complex<float> gamma	= std::complex<float> (0, 0);
 	return actualBase;
 }
 
+int	wordCollector::samplerateError	() {
+	if ((nrSymbols == 0) || (totalOffset == 0))
+	   return 0;
+	return nrSymbols / totalOffset;
+}
+
 float	wordCollector::getWord (drmParameters *p,
 	                        std::complex<float> *buffer,
 	                        std::complex<float> *out) {
@@ -104,6 +114,7 @@ std::complex<float> angle	= std::complex<float> (0, 0);
 int16_t	d = 0;
 float	timeOffsetFractional;
 
+	nrSymbols	++;
 	float timeDelay	= - p -> timeOffset_fractional;
 //	correction of the time offset by interpolation
 	if (timeDelay < -0.5) {
@@ -150,12 +161,21 @@ float	timeOffsetFractional;
 	       - K_min * sizeof (std::complex<float>));
 	memcpy (&out [nrCarriers - K_max - 1], &fftVector [0],
 	             (K_max + 1) * sizeof (std::complex<float>));
+//
+//	as an experiment we "shift" the position in the
+//	samplestream, based on the computed "actualBase".
+//	always nice for statistics
+//	
+	int shiftBase	= Ts_t + actualBase;
+	int amount	= FINE_TIME_BLOCKS * Ts_t - actualBase;
+	int toRead	= Ts_t + actualBase;
+	memmove (buffer, &buffer [shiftBase],
+	                 amount * sizeof (std::complex<float>));
+	myReader -> waitfor (toRead);
+	myReader -> read (&buffer [amount], toRead, p -> freqOffset_integer);
+	totalOffset	+= actualBase;
+	actualBase = 0;
 
-	memmove (buffer, &buffer [Ts_t],
-	             FINE_TIME_BLOCKS * Ts_t * sizeof (std::complex<float>));
-	myReader -> waitfor (Ts_t);
-	myReader -> read (&buffer [FINE_TIME_BLOCKS * Ts_t],
-	                  Ts_t, p -> freqOffset_integer);
 	return theAngle;
 }
 

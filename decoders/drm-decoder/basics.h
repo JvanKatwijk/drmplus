@@ -39,7 +39,7 @@
 //        AUDIO_STREAM, DATA_STREAM
 //};
 
-#define	FINE_TIME_BLOCKS	6
+#define	FINE_TIME_BLOCKS	2
 typedef struct {
 	uint8_t		Identity;		// FAC
 	uint8_t		RMFlag;

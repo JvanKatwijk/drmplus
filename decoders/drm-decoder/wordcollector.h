@@ -43,6 +43,7 @@ float	getWord			(drmParameters * params,
 int	fine_timeSync (drmParameters *p, std::complex<float> *buffer);
 
 void	reset			();
+int	samplerateError		();
 private:
         theReader       *myReader;
         fftwf_plan      plan;
@@ -51,6 +52,8 @@ private:
 	int32_t		phasePointer;
 	float		theAngle;
 	int32_t		actualBase;
+	int		nrSymbols;
+	int		totalOffset;
 };
 
 #endif

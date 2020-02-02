@@ -255,7 +255,8 @@ L1:
 	         show_coarseOffset	(params -> freqOffset_integer);
 	         show_timeDelay		(params -> timeOffset_fractional);
 	         show_clockOffset	(params -> sampleRate_offset);
-	         show_fineOffset	(v * temp);
+	         show_fineOffset	(my_wordCollector.
+	                                      samplerateError ());
 	        
 	         displayDelay = 0;
 	      }
