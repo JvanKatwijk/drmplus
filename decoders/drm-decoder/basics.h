@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013 .. 2017
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -227,5 +227,6 @@ std::complex<float> valueFor (float amp, int16_t phase) {
 #define		K_max		+106
 #define		nrCarriers	(K_max - K_min + 1)
 float		sinc		(float);
+#define		carrierDifference	(192000 / Tu_t)
 #endif
 

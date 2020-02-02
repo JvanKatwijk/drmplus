@@ -88,7 +88,6 @@ static	int goodFrames	= 0;
 void	frameHandler::run () {
 std::complex<float> *inbank  [symbolsperFrame];
 theSignal	    *outbank [symbolsperFrame];
-//int	bufMask	= myReader. bufMask;
 int	symbol_no;
 int	i;
 int	updateTimer	= 10;
@@ -98,21 +97,24 @@ std::complex<float> fine_timeBlocks [(FINE_TIME_BLOCKS + 1) * Ts_t];
 	   inbank [i]	= new std::complex<float> [nrCarriers];
 	   outbank [i]	= new theSignal [nrCarriers];
 	}
+
 	cleanup_db ();
 	running. store (true);
 	myReader. shiftBuffer (Ts_t / 2);
+
 	try {
 	   bool the_sdcFlag = false;
 L1:
+	   bool	frameReady	= false;
 	   if (!running. load ())
 	      return;
 	   goodFrames	= 0;
+
 //	at first we need to find the first sample of a symbol
 	   my_wordCollector. reset ();
 	   setTimeSync	(false);
            setFACSync	(false);
 	   int lc	= 0;
-	   bool	frameReady	= false;
 //
 //	first step: find the start of a symbol, use lots of symbols
 	   bool timeSynced	= my_timeSyncer. dosync (params);
@@ -224,8 +226,9 @@ L1:
 	      setFACSync (false);	// sorry ....
 	      goto L1;
 	   }
-
-	   bool firstTime = true;
+//
+//	The main loop, we assume everything is allright, and
+//	
 	   while (running. load ()) {
 	      float	angle			= 0;
 	      float v;
@@ -281,6 +284,7 @@ L1:
 	            setSDCSync (the_sdcFlag);
 	         }
 	      }
+
 	      updateTimer --;
 	      if (updateTimer == 0) {
 	         update_GUI ();
@@ -288,11 +292,19 @@ L1:
 	      }
 	      my_mscProcessor ->  processFrame (outbank);
 	   }
+//
+//	if we - for whatever reason - left the loop,
+//	we're done, either need to stop or lost sync
 	   if (!running. load ())
 	      return;
 	   goto L1;
 	}
 	catch (int e) {}
+	
+	for (i = 0; i < symbolsperFrame; i ++) {
+	   delete [] inbank [i];
+	   delete [] outbank [i];
+	}
 }
 
 void	frameHandler::selectService	(int stream) {

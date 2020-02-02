@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>drm+ radio</string>
+   <string>drm+ radio -0.6</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QwtPlot" name="hfSpectrum">

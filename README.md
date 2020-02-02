@@ -48,7 +48,7 @@ equipped with an FM decoder: the main widget shows a button with which
 one selects the deceder.
 
 ------------------------------------------------------------------------
-Work to be done
+Work to be done / being done
 ------------------------------------------------------------------------
 
 DRM+ is transmitted using OFDM. OFDM is an interesting technique, 
@@ -60,7 +60,11 @@ of a symbol. With one of the example files, we encountered a shift
 of app 1 sample per 2 or 3 frames (a frame consists of 40 symbols). While
 an offset of a few samples is not killing, this example showed
 that after a few hundred frames, we had skipped 30 to 40 samples
-in the input.
+in the input. The software in the 0.6 version now 
+reports on the (average) number
+of symbols (each symbol 480 samples on an inputrate of 192000)
+that pass per sample over- or underflow: the larger the number the 
+better.
  - (b) frequency drift. Frequency errors are typically handled
 in two steps, the "coarse" error, with a step size of the carrier
 distance in the decoded ofdm symbols, and a "fine" error, a resulting error

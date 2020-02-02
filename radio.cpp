@@ -76,7 +76,7 @@ QString	FrequencytoString (int32_t freq) {
 }
 //
 //	inputrate = 192K, wide enough to show - if available -
-//	the drm+ signal and its surroundings
+//	the DRM+ signal and its surroundings
 	RadioInterface::RadioInterface (QSettings	*sI,
 	                                QString		stationList,
 	                                int		inputRate,
@@ -124,8 +124,6 @@ QString	FrequencytoString (int32_t freq) {
 	displaySize		= 1024;
 	scopeWidth		= inputRate;
 	theBand. currentOffset	= 0;
-	theBand. lowF		= -48000;
-	theBand. highF		= 48000;
 //	scope and settings
 	hfScopeSlider	-> setValue (50);
         hfScope		= new fftScope (hfSpectrum,
@@ -255,11 +253,7 @@ void	RadioInterface::adjustFrequency_khz (int32_t n) {
 }
 
 void	RadioInterface::adjustFrequency_hz (int32_t n) {
-int	lowF	= theBand. lowF;
-int	highF	= theBand. highF;
-int	currOff	= theBand. currentOffset;
-
-	int32_t newFreq = theDevice -> getVFOFrequency () +
+int32_t newFreq = theDevice -> getVFOFrequency () +
 	                                   theBand. currentOffset + n;
 	setFrequency (newFreq);
 	hfScope -> setScope (theDevice -> getVFOFrequency (), 0);
@@ -313,7 +307,6 @@ int	i, j;
 void    RadioInterface::set_hfscopeLevel (int level) {
         hfScope -> setLevel (level);
 }
-
 
 void	RadioInterface::updateTime		(void) {
 QDateTime currentTime = QDateTime::currentDateTime ();
@@ -376,7 +369,7 @@ std::complex<float> buffer [rate / 10];
 }
 
 deviceHandler	*RadioInterface::setDevice (const QString &s,
-	                                   RingBuffer<std::complex<float>> *b) {
+	                                    RingBuffer<std::complex<float>> *b) {
 QString	file;
 deviceHandler	*inputDevice	= nullptr;
 ///	OK, everything quiet, now let us see what to do

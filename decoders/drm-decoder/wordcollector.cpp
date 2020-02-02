@@ -102,7 +102,7 @@ std::complex<float> gamma	= std::complex<float> (0, 0);
 int	wordCollector::samplerateError	() {
 	if ((nrSymbols == 0) || (totalOffset == 0))
 	   return 0;
-	return nrSymbols / totalOffset;
+	return nrSymbols / symbolsperFrame / totalOffset;
 }
 
 float	wordCollector::getWord (drmParameters *p,
@@ -151,6 +151,16 @@ float	timeOffsetFractional;
 	      phasePointer -= SAMPLE_RATE;
 	   temp [i] *= freqVector [phasePointer];
 	   phasePointer += offset_in_Hz;
+	}
+
+	if (offset_in_Hz > carrierDifference / 2) {
+	   offset_in_Hz -= carrierDifference;
+	   p -> freqOffset_integer += carrierDifference;
+	}
+	else
+	if (offset_in_Hz < - carrierDifference / 2) {
+	   offset_in_Hz += carrierDifference;
+	   p -> freqOffset_integer -= carrierDifference;
 	}
 
 	for (i = Tg_t; i < Ts_t; i ++)
