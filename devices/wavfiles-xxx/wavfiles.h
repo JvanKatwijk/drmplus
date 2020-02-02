@@ -17,53 +17,49 @@
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with DRM+Decoder; if not, write to the Free Software
+ *    along with DRM+ Decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __WAVREADER__
-#define	__WAVREADER__
+#ifndef __WAVFILES__
+#define	__WAVFILES__
 
-#include	<QThread>
+#include	<QWidget>
+#include	<QFrame>
 #include	<QString>
-#include	<sndfile.h>
-#include	<atomic>
-#include	"radio-constants.h"
+#include	"device-handler.h"
+#include	"ui_filereader-widget.h"
 #include	"ringbuffer.h"
-//
-//
-class	wavReader: public QThread {
+
+class	QLabel;
+class	wavReader;
+class	RadioInterface;
+/*
+ */
+class	wavFiles: public deviceHandler,
+	                        public Ui_filereaderWidget {
 Q_OBJECT
 public:
-	wavReader	(QString, int32_t,
-	                        RingBuffer<std::complex<float> > *);
-	~wavReader	(void);
-//	
-//	functions really for this rig
-	bool		restartReader	(void);
-	void		stopReader	(void);
-	int32_t		Samples		(void);
-	int32_t		getSamples	(std::complex<float> *, int32_t, uint8_t);
-	void		reset		(void);
-	int32_t		setFileat	(int32_t);
+		wavFiles		(RadioInterface *,
+	                                 int32_t, 
+	                                 RingBuffer<std::complex<float>> *);
+		~wavFiles		(void);
+	int32_t	getRate			(void);
+
+	bool	restartReader		(void);
+	void	stopReader		(void);
+	int16_t	bitDepth		(void);
+	void	exit			(void);
+	bool	isOK			(void);
 protected:
-virtual void		run		(void);
+	int32_t		setup_Device	(void);
+	QFrame		*myFrame;
+	wavReader	*myReader;
+	int32_t		lastFrequency;
 	int32_t		theRate;
-	QString		f;
-	RingBuffer<std::complex<float> >	*_I_Buffer;
-	QString		fileName;
-	int32_t		readBuffer	(float *data, int32_t length);
-	SNDFILE		*filePointer;
-	bool		readerOK;
-	int32_t		sampleRate;
-	int16_t		bitsperSample;
-	int32_t		samplesinFile;
-	int32_t		currPos;
-	int16_t		numofChannels;
-	std::atomic<bool> running;
-	bool		resetRequest;
-signals:
-	void		dataAvailable	(int);
+private slots:
+	void		reset		(void);
+	void		handle_progressBar (int);
 	void		set_progressBar	(int);
 };
 #endif

@@ -52,7 +52,7 @@ virtual void		run		(void);
 	QString		f;
 	RingBuffer<std::complex<float> >	*_I_Buffer;
 	QString		fileName;
-	int32_t		readBuffer	(float *data, int32_t length);
+	int32_t		readBuffer	(std::complex<float> *data, int32_t length);
 	SNDFILE		*filePointer;
 	bool		readerOK;
 	int32_t		sampleRate;
