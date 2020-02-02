@@ -296,9 +296,9 @@ int	i, j;
 
 	(void)amount;
 	while (inputData -> GetRingBufferReadAvailable () > SEGMENT_SIZE) {
-	   inputData	-> getDataFromBuffer (buffer, SEGMENT_SIZE);
+	   int a = inputData -> getDataFromBuffer (buffer, SEGMENT_SIZE);
 	   hfScope	-> addElements (buffer, SEGMENT_SIZE);
-	   bufferData	-> putDataIntoBuffer (buffer, SEGMENT_SIZE);
+	   bufferData	-> putDataIntoBuffer (buffer, a);
 	   if (dumpfilePointer != NULL) {
               for (i = 0; i < SEGMENT_SIZE; i ++) {
                  dumpBuffer [2 * i]     = real (buffer [i]);
@@ -371,7 +371,7 @@ std::complex<float> buffer [rate / 10];
         while (audioData -> GetRingBufferReadAvailable () >
                                                  (uint32_t)rate / 10) {
            audioData	-> getDataFromBuffer (buffer, rate / 10);
-	   audioHandler      -> putSamples (buffer, rate / 10);
+	   audioHandler	-> putSamples (buffer, rate / 10);
         }
 }
 

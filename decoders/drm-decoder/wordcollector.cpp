@@ -27,71 +27,102 @@
 
 	wordCollector::wordCollector	(theReader *myReader) {
 	this	-> myReader	= myReader;
-	wordVector      = (std::complex<float> *)
+	fftVector      = (std::complex<float> *)
                                fftwf_malloc (sizeof (fftwf_complex) * Tu_t);
 
         plan    	=
 	    fftwf_plan_dft_1d (Tu_t,
-                               reinterpret_cast <fftwf_complex *>(wordVector),
-                               reinterpret_cast <fftwf_complex *>(wordVector),
+                               reinterpret_cast <fftwf_complex *>(fftVector),
+                               reinterpret_cast <fftwf_complex *>(fftVector),
                                FFTW_FORWARD, FFTW_ESTIMATE);
         freqVector      = new std::complex<float> [SAMPLE_RATE];
         for (int i = 0; i < SAMPLE_RATE; i ++)
            freqVector [i] =
 	          std::complex<float> (cos (2 * M_PI * i / SAMPLE_RATE),
                                        sin (2 * M_PI * i / SAMPLE_RATE));
-	offsetIndex	= 0;
+	phasePointer	= 0;
         theAngle        = 0;
-	sampleOffset	= 0;
-	avgRateOffset	= 0;
+	actualBase	= 0;
 }
 
 	wordCollector::~wordCollector	() {
         fftwf_destroy_plan      (plan);
-        fftwf_free              (wordVector);
+        fftwf_free		(fftVector);
         delete freqVector;
 }
 
 void	wordCollector::reset	() {
-	theAngle = 0;
+	theAngle	= 0;
+	phasePointer	= 0;
+	actualBase	= 0;
 }
 
-float	wordCollector::getWord (std::complex<float> *out,
-	                        drmParameters *p, int offset) {
+int	wordCollector::fine_timeSync (drmParameters *p,
+	                              std::complex<float> *buffer) {
+double mse, best_mse;
+int	bestIndex	= -1;
+double	squares		= 0;
+std::complex<float> gamma	= std::complex<float> (0, 0);
+
+	best_mse	= 1E50;
+	for (int i = actualBase  - 8; i < actualBase + 8; i ++) {
+	   mse	= 0;
+	   gamma	= std::complex<float> (0, 0);
+	   squares	= 0;
+	   for (int symbols = 0; symbols < FINE_TIME_BLOCKS; symbols ++) {
+	      for (int j = i; j < i + 48; j ++) {
+	         int index = symbols * Ts_t + Ts_t / 2 + j;
+	         std::complex<float> first	= buffer [index];
+	         std::complex<float> second	= buffer [index + Tu_t];
+	         squares	+= abs (first * conj (first)) +
+	                           abs (second * conj (second));
+	         gamma		+= first * conj (second);
+	      }
+	   }
+
+	   mse = abs (squares - 2 * abs (gamma));
+           if (mse < best_mse) {
+              best_mse = mse;
+              bestIndex = i;
+	   }
+	}
+//
+//	slow down a little on too fast a movement
+	if (bestIndex - actualBase > 6)
+	   actualBase ++;
+	if (actualBase - bestIndex > 6)
+	   actualBase --;
+	return actualBase;
+}
+
+float	wordCollector::getWord (drmParameters *p,
+	                        std::complex<float> *buffer,
+	                        std::complex<float> *out) {
 std::complex<float> temp [Ts_t];
 int	i;
 std::complex<float> angle	= std::complex<float> (0, 0);
-int     base			= myReader -> currentIndex;
-int	bufMask			= myReader -> bufMask;
 int16_t	d = 0;
 float	timeOffsetFractional;
 
-	myReader	-> waitfor (Ts_t + 10);
-
+	float timeDelay	= - p -> timeOffset_fractional;
 //	correction of the time offset by interpolation
-	float timeDelay	= p -> timeOffset_fractional;
-	if (timeDelay < 0)
-	   timeDelay = 0;
-	d	= floor (timeDelay + 0.5);
-	timeOffsetFractional	= timeDelay - d;
-
-//      keep it simple, just linear interpolation
-        int f = (myReader -> currentIndex + d) & bufMask;
-
-        if (sampleOffset < 0) {
-           sampleOffset = 1 + sampleOffset;
-           f -= 1;
-        }
+	if (timeDelay < -0.5) {
+	   timeDelay ++;
+	   d	= -1;
+	   timeOffsetFractional = timeDelay;
+	}
+	else {
+	   d	= floor (timeDelay + 0.5);
+	   timeOffsetFractional	= timeDelay - d;
+	}
 
 //	correction of the time offset by interpolation
         for (i = 0; i < Ts_t; i ++) {
-           std::complex<float> one = myReader -> data [(f + i) & bufMask];
-           std::complex<float> two = myReader -> data [(f + i + 1) & bufMask];
+           std::complex<float> one = buffer [Ts_t / 2 + p -> timeOffset_integer + i];
+           std::complex<float> two = buffer [Ts_t / 2 + p -> timeOffset_integer + i + 1];
            temp [i] = cmul (one, 1 - timeOffsetFractional) +
-                                    cmul (two, timeOffsetFractional);
+                                          cmul (two, timeOffsetFractional);
         }
-
-	myReader -> currentIndex = (f + Ts_t) & bufMask;
 
 	for (i = 0; i < Tg_t; i ++)
 	   angle += conj (temp [Tu_t + i]) * temp [i];
@@ -102,24 +133,29 @@ float	timeOffsetFractional;
 	   theAngle	= 0.9 * theAngle + 0.1 * arg (angle);
 
 	int offset_in_Hz = theAngle / (2 * M_PI) * SAMPLE_RATE / Tu_t;
-	offset_in_Hz -= p -> freqOffset_integer * SAMPLE_RATE / Tu_t;
 	for (i = 0; i < Ts_t; i ++) {
-	   if (offsetIndex < 0)
-	      offsetIndex += SAMPLE_RATE;
-	   if (offsetIndex >= SAMPLE_RATE)
-	      offsetIndex -= SAMPLE_RATE;
-	   temp [i] *= freqVector [offsetIndex];
-	   offsetIndex += offset_in_Hz;
+	   if (phasePointer < 0)
+	      phasePointer += SAMPLE_RATE;
+	   if (phasePointer >= SAMPLE_RATE)
+	      phasePointer -= SAMPLE_RATE;
+	   temp [i] *= freqVector [phasePointer];
+	   phasePointer += offset_in_Hz;
 	}
 
 	for (i = Tg_t; i < Ts_t; i ++)
-	   wordVector [i - Tg_t] = temp [i];
+	   fftVector [i - Tg_t] = temp [i];
 
 	fftwf_execute (plan);
-	memcpy (out, &wordVector [Tu_t + K_min],
+	memcpy (out, &fftVector [Tu_t + K_min],
 	       - K_min * sizeof (std::complex<float>));
-	memcpy (&out [nrCarriers - K_max - 1], &wordVector [0],
+	memcpy (&out [nrCarriers - K_max - 1], &fftVector [0],
 	             (K_max + 1) * sizeof (std::complex<float>));
+
+	memmove (buffer, &buffer [Ts_t],
+	             FINE_TIME_BLOCKS * Ts_t * sizeof (std::complex<float>));
+	myReader -> waitfor (Ts_t);
+	myReader -> read (&buffer [FINE_TIME_BLOCKS * Ts_t],
+	                  Ts_t, p -> freqOffset_integer);
 	return theAngle;
 }
 

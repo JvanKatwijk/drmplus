@@ -198,7 +198,7 @@ int hp_sum	= 0;
 
 void	drmDecoder::selectChannel_2	(void) {
 int hp_sum	= 0;
-	stationLabel	-> setText (params. theStreams [1]. serviceName);
+	stationLabel	-> setText (params. theStreams [2]. serviceName);
 	for (int i = 0; i < 4; i ++)
 	   if (params. theStreams [i]. inUse)
 	      hp_sum += params. theStreams [i]. lengthHigh;
@@ -373,34 +373,42 @@ void	drmDecoder::cleanup_db		() {
 QString monthTable [] = {"jan", "feb", "mar", "apr", "may", "jun",
 	                 "jul", "aug", "sep", "oct", "nov", "dec"};
 
+bool	channels [] = {false, false, false, false};
+
 void	drmDecoder::update_GUI		() {
 	if (params. theStreams [0]. inUse) {
-	   if (channel_0 -> text () == "not available") {
-	      channel_0 -> setText (params. theStreams [0]. serviceName);
+	   channel_0 -> setText (params. theStreams [0]. serviceName);
+	   if (!channels [0]) { 
 	      connect (channel_0, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_0 ()));
+	      channels [0] = true;
 	   }
 	}
+
 	if (params. theStreams [1]. inUse) {
-	   if (channel_1 -> text () == "not available") {
-	      channel_1 -> setText (params. theStreams [1]. serviceName);
+	   channel_1 -> setText (params. theStreams [1]. serviceName);
+	   if (!channels [1]) {
 	      connect (channel_1, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_1 ()));
-	      fprintf (stderr, "%s \n", params. theStreams [1]. serviceName. toUtf8 (). data ());
+	      channels [1] = true;
 	   }
 	}
+
 	if (params. theStreams [2]. inUse) {
-	   if (channel_2 -> text () == "not available") {
-	      channel_2 -> setText (params. theStreams [2]. serviceName);
+	   channel_2 -> setText (params. theStreams [2]. serviceName);
+	   if (!channels [2]) {
 	      connect (channel_2, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_2 ()));
+	      channels [2] = true;
 	   }
 	}
+
 	if (params. theStreams [3]. inUse) {
-	   if (channel_3 -> text () == "not available") {
-	      channel_3 -> setText (params. theStreams [3]. serviceName);
+	   channel_3 -> setText (params. theStreams [3]. serviceName);
+	   if (!channels [3]) {
 	      connect (channel_3, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_3 ()));
+	      channels [3] = true;
 	   }
 	}
 
@@ -417,7 +425,7 @@ void	drmDecoder::update_GUI		() {
 }
 
 void	drmDecoder::show_audioData (drmParameters *drm, int subchId) {
-streamParameters *sc 	= & (drm -> theStreams [subchId]);
+streamParameters *sc 	= &(drm -> theStreams [subchId]);
 	if (!sc -> is_audio) {
 	   fprintf (stderr, "Sorry, not an audio channel\n");
 	   return;

@@ -44,13 +44,11 @@ SF_INFO	*sf_info;
 
 	fileName		= f;
 	theRate			= rate;
-	readerOK		= false;
 	_I_Buffer		= b;
 
 	sf_info			= (SF_INFO *)alloca (sizeof (SF_INFO));
 	sf_info	-> format	= 0;
-	readerOK		= false;
-	filePointer		= sf_open (fileName. toLatin1 (). data (),
+	filePointer		= sf_open (fileName. toUtf8 (). data (),
 	                                   SFM_READ, sf_info);
 	if (filePointer == NULL) {
 	   fprintf (stderr, "file %s no legitimate sound file\n",
@@ -60,24 +58,23 @@ SF_INFO	*sf_info;
 
 	samplesinFile	= sf_info	-> frames;
 	sampleRate	= sf_info	-> samplerate;
+	if (sampleRate != 192000) {
+	   fprintf (stderr, "sorry, right now we only handle drm+ files 192000\n");
+	   throw (23);
+	}
+	
 	theRate		= rate;
 	numofChannels	= sf_info	-> channels;
-	readerOK	= true;
 	resetRequest	= false;
-
-	currPos		= 0;
+	running. store (false);
 }
 
 	wavReader::~wavReader (void) {
-	if (!readerOK)
-	   return;
 	stopReader ();
 	sf_close (filePointer);
 }
 
 bool	wavReader::restartReader	(void) {
-	if (!readerOK)
-	   return false;
 	if (running. load ())
 	   return true;
 	start ();
@@ -92,45 +89,27 @@ void	wavReader::stopReader	(void) {
            usleep (100);
 }
 
-int32_t	wavReader::Samples	(void) {
-	if (!running. load ())
-	   return 0;
-	return _I_Buffer -> GetRingBufferReadAvailable () / 2;
-}
-
-/*	length is number of FLOATS (not full samples) that we read.
- *	In case of mono, we add zeros to the right channel
- *	and therefore only read length / 2 floats
- *	Notice that sf_readf_xxx reads frames (samples * numofchannels)
- */
-int32_t	wavReader::readBuffer (float *data, int32_t length) {
+float	temp [10 * 192000];
+int32_t	wavReader::readBuffer (std::complex<float> *data, int32_t length) {
 int32_t	n, i;
-float	*tempBuffer;
-static	int cnt	= 0;
+static int cnt	= 0;
 
-	if (numofChannels == 2) 
-	   n = sf_readf_float (filePointer, data, length / 2);
-	else {
-//	apparently numofChannels == 1
-	   tempBuffer	= (float *)alloca (length / 2 * sizeof (float));
-	   n		= sf_readf_float (filePointer, tempBuffer, length / 2);
-	   for (i = 0; i < n; i ++) {
-	      data [2 * i] = tempBuffer [i];
-	      data [2 * i + 1] = 0;
-	   }
-	}
-
-	if (n < length / 2) {
+	n = sf_readf_float (filePointer, temp, length);
+	if (n < length) {
 	   sf_seek (filePointer, 0, SEEK_SET);
-	   fprintf (stderr, "eof reached, starting again\n");
+	   fprintf (stderr, "End of file, restarting\n");
+	   return 0;
 	}
+
+	for (i = 0; i < n; i ++)
+	   data [i] = std::complex<float> (temp [2 * i], temp [2 * i + 1]);
 
 	if (++cnt > 5) {
-	   currPos		= sf_seek (filePointer, 0, SEEK_CUR);
+	   int currPos		= sf_seek (filePointer, 0, SEEK_CUR);
 	   emit set_progressBar (currPos * 100 / samplesinFile);
 	   cnt = 0;
 	}
-	return	2 * n;
+	return	 n;
 }
 
 int32_t	wavReader::setFileat	(int32_t f) {
@@ -146,126 +125,37 @@ void	wavReader::reset	(void) {
  *	for processing the file-io we start a separate thread
  *	In this thread, we also apply samplerate conversions
  *	- if any
- *	Note we want buffers of app the size of BUFSIZE to
- *	get out from here (which is not the same as setting
- *	the buffersize for reading files to BUFSIZE
  */
+
+std::complex<float> bi [10 * 192000];
 void	wavReader::run (void) {
 int32_t	t, i;
-float	*bi;
-int32_t	bufferSize;
+int	bufferSize	= 5 * 192000;
 int32_t	period;
 int64_t	nextStop;
 
-	if (!readerOK)
-	   return;
-
-//	We emulate the sending baudrate by building in some
-//	delays. The period is 100000 / (baudrate / 10) usecs
-	period		= 100000;
 	running. store (true);
-	if (theRate == sampleRate) {	
-	   bufferSize	= 2 * theRate / 10;
-	   bi		= new float [bufferSize];
-	   nextStop	= getMyTime ();
-	   while (running. load ()) {
-	      if (resetRequest) {
-	         sf_seek (filePointer, 0, SEEK_SET);
-	         resetRequest = false;
-	      }
-	    
-	      while (_I_Buffer -> WriteSpace () < bufferSize + 10) {
+	period		= (bufferSize * 1000) / 192;	// full IQś read
+	nextStop	= getMyTime ();
+	fprintf (stderr, "Period = %ld\n", period);
+	nextStop	= getMyTime ();
+	while (running. load ()) {
+	   nextStop += period;
+	   t = readBuffer (bi, bufferSize);
+	   for (int k = 0; k < 20; k ++) {
+	      while (_I_Buffer -> WriteSpace () < bufferSize / 20) {
 	         if (!running. load ())
 	            break;
 	         usleep (100);
 	      }
-
-	      nextStop += period;
-	      t = readBuffer (bi, bufferSize);
-	      if (t <= 0) {
-	         for (i = 0; i < bufferSize; i ++)
-	             bi [i] = 0;
-	         t = bufferSize;
-	      }
-	       _I_Buffer -> putDataIntoBuffer ((std::complex<float> *)bi, t / 2);
-	      if (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10) {
-	         emit dataAvailable (theRate / 10);
-	         usleep (100000);
-	      }
-	   }
-	}
-	else {		// conversion needed
-	   int32_t	outputLimit	= theRate / 10;
-	   double	ratio	= (double)theRate / sampleRate;
-//
-//	inputbuffer size:
-	   int inputSize	= ceil (outputLimit / ratio);
-	   bi			= new float [2 * inputSize];
-	   int		error;
-//	outputbuffer size
-	   float	bo [2 * outputLimit];
-	   SRC_STATE	*converter	= src_new (SRC_LINEAR, 2, &error);
-	   SRC_DATA	*src_data	= new SRC_DATA;
-	   if (converter == 0) {
-	      fprintf (stderr, "error creating a converter %d\n", error);
-	      return;
+	      _I_Buffer -> putDataIntoBuffer (& bi [k * bufferSize / 20],
+	                                           bufferSize / 20);
+	      emit dataAvailable (theRate / 10);
+	      usleep (1000000 / 10);
 	   }
 
-	   fprintf (stderr,
-	               "Starting converter with ratio %f (in %d, out %d)\n",
-	                                       ratio, sampleRate, theRate);
-	   src_data -> data_in		= bi;
-	   src_data -> data_out		= bo;
-	   src_data -> src_ratio	= ratio;
-	   src_data -> end_of_input	= 0;
-	   nextStop			= getMyTime ();
-	   while (running. load ()) {
-	      int res;
-	      if (resetRequest) {
-	         sf_seek (filePointer, 0, SEEK_SET);
-	         resetRequest = false;
-	      }
-
-	      while (_I_Buffer -> WriteSpace () < 2 * outputLimit + 10) {
-	         if (!running. load ())
-	            break;
-	         usleep (100);
-	      }
-
-	      nextStop	+= period;
-	      t = sf_readf_float (filePointer, bi, inputSize);
-//	      t = readBuffer (bi, 2 * inputSize);
-	      if (t <= 0) {
-	         for (i = 0; i < 2 * inputSize; i ++)
-	            bi [i] = 0;
-	         t = inputSize;
-	         sf_seek (filePointer, 0, SEEK_SET);
-	      }
-
-	      src_data -> input_frames	= t;
-	      src_data -> output_frames	= outputLimit;
-//	we are reading continously, after eof we just start all over again,
-//	therefore end_of_input flag is not altered
-	      res	= src_process	(converter, src_data);
-	      if (res != 0) {
-	         fprintf (stderr, "error %s\n", src_strerror (t));
-	      }
-	      else {
-	         int numofOutputs = src_data -> output_frames_gen;
-	         _I_Buffer -> putDataIntoBuffer ((std::complex<float>*)src_data -> data_out,
-                                                 numofOutputs);
-	      }
-
-	      while (_I_Buffer -> GetRingBufferReadAvailable () > theRate / 10)
-	         emit dataAvailable (theRate / 10);
-	                                      
-	      if (nextStop - getMyTime () > 0)
-	         usleep (nextStop - getMyTime ());
-	   }
-
-	   delete	bi;
-	   src_delete (converter);
-	   delete src_data;
+//	   if (nextStop - getMyTime () > 0)
+//	      usleep (nextStop - getMyTime ());
 	}
 	fprintf (stderr, "taak voor replay eindigt hier\n");
 }

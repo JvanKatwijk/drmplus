@@ -217,13 +217,16 @@ QString	s;
 	   case 1:	// label entity
 	      shortId = get_SDCBits (data, base, 2);
 //	      params -> theStreams [shortId]. inUse = true;
-	      if (params -> theStreams [shortId]. serviceName. isEmpty ()) {
+//	      if (params -> theStreams [shortId]. serviceName. isEmpty ()) {
+	      {
 	         char temp [bodySize + 1];
 	         for (int i = 0; i < bodySize; i ++)
 	            temp [i] = get_SDCBits (data, base + 4 + 8 * i, 8);
 	         temp [bodySize] = 0;
-	         params -> theStreams [shortId]. serviceName = 
-	                             QString::fromUtf8 (temp, bodySize);
+	         if (bodySize > 1) {
+	            params -> theStreams [shortId]. serviceName = 
+	                                QString::fromUtf8 (temp, bodySize);
+	         }
 	      }
 	      return index + 16 + 8 * bodySize;
 

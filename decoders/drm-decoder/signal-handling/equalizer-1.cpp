@@ -77,7 +77,7 @@ float	*THETA;
 //	Based on table 92 ETSI ES 201980
 
 //	first shorthands 
-	symbols_per_window	=  4;
+	symbols_per_window	=  6;
 	symbols_to_delay	= floor (symbols_per_window / 2);
 	periodforSymbols	= symbolspergroup;
 	periodforPilots		= pilotDistance;
@@ -271,7 +271,6 @@ int16_t	i;
 	int		offs3	= 0;
 	int		offsb	= 0;
 	std::complex<float>	offs7	= std::complex<float> (0, 0);
-	std::complex<float>	offs8	= std::complex<float> (0, 0);
 	
 	for (carrier = K_min; carrier <= K_max; carrier ++) {
 	   std::complex<float> oldValue	= 
@@ -298,27 +297,7 @@ int16_t	i;
 	                   conj (getGainValue (helpme, carrier));
 	      offs7 += f1 * conj (f2);
 	   }
-
-	   if (isBoostCell (newSymbol, carrier)) {
-	      int16_t old_3 = realSym (newSymbol - 3);
-	      int16_t old_2 = realSym (newSymbol - 2);
-	      int16_t old_1 = realSym (newSymbol - 1);
-	      std::complex<float> f0 =
-	               testFrame [old_3][indexFor (carrier)] *
-	                   conj (getGainValue (old_3, carrier));
-	      std::complex<float> f1 =
-	               testFrame [old_2][indexFor (carrier)] *
-	                   conj (getGainValue (old_2, carrier));
-	      std::complex<float> f2 =
-	               testFrame [old_1][indexFor (carrier)] *
-	                   conj (getGainValue (old_1, carrier));
-	      std::complex<float> f3 =
-	               testFrame [newSymbol][indexFor (carrier)] *
-	                   conj (getGainValue (newSymbol, carrier));
-	      offs8 += f3 * conj (f2) + f2 * conj (f1) + f1 * conj (f0);
-	   }
 	}
-//	fprintf (stderr, "offs7 = %f, offs8 = %f\n", arg (offs7), arg (offs8));
 //	For an estimate of the residual sample time offset (includes
 //	the phase offset of the LO), we look at the average of the
 //	phase offsets of the subsequent pilots in the current symbol
@@ -329,8 +308,9 @@ int16_t	i;
 //	Formula 5.26 (page 99, Tsai et al), average phase offset
 	      if (offs3 > 0) 
 	         offs2 += (testRow [indexFor (carrier)] * 
-	                      conj (getGainValue (newSymbol, carrier))) *
-	                   conj (prev_1 * conj (prev_2));
+	                      conj (prev_1)) *
+                          (conj (getGainValue (newSymbol, carrier)) *
+	                                      conj (prev_2));
 	         
 	      offs3 += 1;
 	      prev_1 = testRow [indexFor (carrier)];
@@ -346,7 +326,6 @@ int16_t	i;
 //	still wondering about the scale
 	*offset_fractional	= arg (offs2) / (2 * M_PI * periodforPilots);
 //	the frequency error we measure in radials
-//	we may choose here between two ways of computing
 //	offs7 means using all pilots over two near symbols with the same
 //	pilot layout
 	*delta_freq_offset	=  arg (offs7) / periodforSymbols;

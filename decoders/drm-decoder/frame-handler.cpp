@@ -35,14 +35,13 @@ static	int goodFrames	= 0;
 	                            drmParameters	*params,
 	                            RingBuffer<std::complex<float>> *eqBuffer,
 	                            RingBuffer<std::complex<float>> *iqBuffer):
-	                               myReader         (b, 4 * 32768),
-	                               my_timeSyncer	(&myReader, 30),
+	                               myReader         (b, 8 * 32768),
+	                               my_timeSyncer	(&myReader,
+	                                                 symbolsperFrame),
 	                               my_freqSyncer	(&myReader),
 	                               my_wordCollector (&myReader),
 	                               my_timeCorrelator (),
 	                               my_equalizer	(theRadio, eqBuffer),
-//	                               my_mscProcessor  (theRadio,
-//	                                                 params, iqBuffer),
 	                               my_facProcessor	(theRadio,
 	                                                 params, iqBuffer),
 	                               my_sdcProcessor	(theRadio,
@@ -51,7 +50,6 @@ static	int goodFrames	= 0;
 	this	-> params	= params;
 	this	-> eqBuffer	= eqBuffer;
 	this	-> iqBuffer	= iqBuffer;
-	this	-> nSymbols	= 20;
 
 	my_mscProcessor	= new mscProcessor (theRadio, params, iqBuffer);
 	connect (this, SIGNAL (setTimeSync (bool)),
@@ -87,13 +85,15 @@ static	int goodFrames	= 0;
 	   usleep (1000);
 }
 
-
 void	frameHandler::run () {
 std::complex<float> *inbank  [symbolsperFrame];
 theSignal	    *outbank [symbolsperFrame];
+//int	bufMask	= myReader. bufMask;
 int	symbol_no;
 int	i;
 int	updateTimer	= 10;
+std::complex<float> fine_timeBlocks [(FINE_TIME_BLOCKS + 1) * Ts_t];
+
 	for (i = 0; i < symbolsperFrame; i ++) {
 	   inbank [i]	= new std::complex<float> [nrCarriers];
 	   outbank [i]	= new theSignal [nrCarriers];
@@ -113,9 +113,11 @@ L1:
            setFACSync	(false);
 	   int lc	= 0;
 	   bool	frameReady	= false;
+//
+//	first step: find the start of a symbol, use lots of symbols
 	   bool timeSynced	= my_timeSyncer. dosync (params);
 	   while (!timeSynced && running. load ()) {
-	      myReader. shiftBuffer (Ts_t / 4);
+	      myReader. shiftBuffer (Ts_t / 2);
 	      timeSynced = my_timeSyncer. dosync (params);
 	   }
 	   if (!running. load ())
@@ -134,23 +136,40 @@ L1:
 	           (int)(params -> freqOffset_fract / (2 * M_PI) * 192000 / Tu_t));
 	   myReader. shiftBuffer (floor (params -> timeOffset_integer));
 	   params -> timeOffset_integer = 0;
+//
+//	second step: figure out the course frequency offset
            my_freqSyncer. sync (params);
+//	.... and write that in Hz rather than bins
+	   params -> freqOffset_integer =
+	             params -> freqOffset_integer * 192000 / Tu_t;
 
-	   int32_t intOffset = params -> freqOffset_integer;
-//	we now read in a full frame to detect/determine
-//	the very first symbol of that frame
+//
+//	We work with a "working buffer" of size FINE_TIME_BLOCKS + 1
+//	since we want to be able to handle negative time shifts
+//	we start the symbols at position Ts_t / 2, so we might use
+//	FINE_TIME_BLOCKS symbols for fine time syncing
+	   myReader. shiftBuffer (Ts_t / 2);
+	   myReader. read (fine_timeBlocks,
+	                   (FINE_TIME_BLOCKS + 1) * Ts_t,
+	                   params -> freqOffset_integer);
+//
+//	OK, here we really start, read in a full frame
 	   for (int symbol = 0;
                 symbol < symbolsperFrame; symbol ++) {
-	      my_wordCollector. getWord (inbank [symbol], params);
+	      my_wordCollector. getWord (params,
+	                                 fine_timeBlocks, inbank [symbol]);
 	      my_timeCorrelator. getCorr (symbol, inbank [symbol]);
-//	      params -> timeOffset_fractional +=
-//	                           Ts_t * params -> sampleRate_offset;
 	   }
 //
 //	continue reading until we find a "first" symbol
 	   lc = 0;
 	   while (running. load ()) {
-	      my_wordCollector. getWord (inbank [lc], params);
+	      params -> timeOffset_integer =
+	                  my_wordCollector.
+	                             fine_timeSync (params,
+	                                            fine_timeBlocks);
+	      my_wordCollector. getWord (params,
+	                                 fine_timeBlocks, inbank [lc]);
 	      my_timeCorrelator. getCorr (lc, inbank [lc]);
 //	      params -> timeOffset_fractional +=
 //	                           Ts_t * params -> sampleRate_offset;
@@ -161,6 +180,8 @@ L1:
 
 	   if (!running. load ())
 	      return;
+//
+//	and equalize the first frame encountered
 	   for (symbol_no = 0;
                    symbol_no < symbolsperFrame; symbol_no ++)
                  (void) my_equalizer.
@@ -169,11 +190,17 @@ L1:
 
 	   symbol_no         = 0;
 	   frameReady        = false;
+//
+//	our equalizer will take some symbols as look ahead,
+//	so we continue
 	   while (!frameReady && running. load ()) {
+	      params -> timeOffset_integer =
+	                  my_wordCollector.
+	                             fine_timeSync (params,
+	                                            fine_timeBlocks);
 	      my_wordCollector.
-                      getWord (inbank [lc], params);
-//	      params -> timeOffset_fractional +=
-//	                           Ts_t * params -> sampleRate_offset;
+                      getWord (params,
+	                       fine_timeBlocks, inbank [lc]);
 	      frameReady = my_equalizer. equalize (inbank [lc],
                                                    symbol_no,
                                                    outbank);
@@ -183,7 +210,8 @@ L1:
 
 	   if (!running. load ())
 	      return;
-
+//
+//	it seems we have a frame, check the FAC
 	   bool fac_synced	= false;
 	   fprintf (stderr, "lc = %d\n", lc);
 	   if (my_facProcessor. processFAC (outbank, 
@@ -193,46 +221,53 @@ L1:
 	      fac_synced	= true;
 	   }
 	   else {
-	      setFACSync (false);
+	      setFACSync (false);	// sorry ....
 	      goto L1;
 	   }
 
 	   bool firstTime = true;
 	   while (running. load ()) {
-	      float	offsetFractional	= 0;    //
-	      int16_t	offsetInteger		= 0;
-	      float	deltaFreqOffset		= 0;
-	      float	sampleclockOffset	= 0;
 	      float	angle			= 0;
+	      float v;
 	      frameReady	= false;
 	      for (i = 0; !frameReady && (i < symbolsperFrame); i ++) {
-	         float v;
+	          params -> timeOffset_integer =
+	                  my_wordCollector.
+	                             fine_timeSync (params,
+	                                            fine_timeBlocks);
 	         angle = my_wordCollector.
-	              getWord (inbank [(lc + i) % symbolsperFrame], params);
+	              getWord (params,
+	                       fine_timeBlocks,
+	                       inbank [(lc + i) % symbolsperFrame]);
 	         frameReady = my_equalizer.
 	                 equalize (inbank [(lc + i) % symbolsperFrame],
 	                           (symbol_no + i) % symbolsperFrame,
 	                           outbank,
 	                           &params -> timeOffset_fractional,
-	                           &params -> freqOffset_fract,
+	                           &v,
 	                           &params -> sampleRate_offset);
 	      }
+
 	      static int displayDelay = 0;
 	      if (++ displayDelay > 4) {
 	         float temp = SAMPLE_RATE / (float)Tu_t * 1.0 / (2 * M_PI);
 	         show_angle		(angle * temp);
-	         show_fineOffset	(deltaFreqOffset * temp);
-	         show_coarseOffset	(params -> freqOffset_integer * SAMPLE_RATE / (float)Tu_t);
+	         show_coarseOffset	(params -> freqOffset_integer);
 	         show_timeDelay		(params -> timeOffset_fractional);
 	         show_clockOffset	(params -> sampleRate_offset);
+	         show_fineOffset	(v * temp);
+	        
 	         displayDelay = 0;
 	      }
+
 	      if (!my_facProcessor. processFAC (outbank,
 	                                        my_equalizer. getMeanEnergy (),
 	                                        my_equalizer. getChannels ())) {
 	         setFACSync (false);
-	         fprintf (stderr, "%d good frames before error\n",
-	                                                       goodFrames);
+	         fprintf (stderr, "%d good frames before error with time error %f and timeOffset %d\n",
+	                               goodFrames,
+	                               params -> timeOffset_fractional,
+	                               params -> timeOffset_integer);
 	         break;
 	      }
 

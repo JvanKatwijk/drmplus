@@ -1,10 +1,11 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.5
+DRMPLUS-0.6
 ------------------------------------------------------------------
 
-DRMPLUS-0.5 is experimental software for the decoding of
-DRM+ signals.
+DRMPLUS-0.6 is experimental software for the decoding of
+DRM+ signals. The software is "in development" and far from
+error free.
 
 ![drm-plus](/drmplus-drm.png?raw=true)
 
@@ -45,6 +46,30 @@ decoder.
 Since the DRM+ signals are in the FM Band, the DRM+ decoder is also
 equipped with an FM decoder: the main widget shows a button with which
 one selects the deceder.
+
+------------------------------------------------------------------------
+Work to be done
+------------------------------------------------------------------------
+
+DRM+ is transmitted using OFDM. OFDM is an interesting technique, 
+typical problems in decoding occur through 
+
+ - (a) clock errors, that lead to having too many samples (or too few)
+for the OFDM symbol at hand, leading to a shift in the "first" sample
+of a symbol. With one of the example files, we encountered a shift
+of app 1 sample per 2 or 3 frames (a frame consists of 40 symbols). While
+an offset of a few samples is not killing, this example showed
+that after a few hundred frames, we had skipped 30 to 40 samples
+in the input.
+ - (b) frequency drift. Frequency errors are typically handled
+in two steps, the "coarse" error, with a step size of the carrier
+distance in the decoded ofdm symbols, and a "fine" error, a resulting error
+in the range of this carrier distance.
+Drift in the frequency may lead to the "fine" error to grow such a way
+that it has effect on the coarse error.
+
+While in 0.6 an attempt is made to handle these error, error recovery
+is far from complete as yet.
 
 ------------------------------------------------------------------------
 Operation of the decoder

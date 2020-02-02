@@ -44,6 +44,8 @@ public:
 	void			waitfor		(int32_t);
 	void			shiftBuffer	(int16_t);
 	void			setStart	(int);
+	void			read		(std::complex<float> *,
+	                                          int, int);
 	uint32_t		bufSize;
 	uint32_t		bufMask;
 	std::complex<float>	*data;

@@ -34,9 +34,9 @@
 	ringBuffer		= r;
 	this	-> bufSize	= size;
 	if ((size & (size - 1)) != 0)
-	   size = 2 * 32768;
-	this	-> bufMask		= size - 1;
-	data			= new std::complex<float> [size];
+	   bufSize = 8 * 32768;
+	this	-> bufMask		= bufSize - 1;
+	data			= new std::complex<float> [bufSize];
 	memset (data, 0, bufSize * sizeof (std::complex<float>));
 	currentIndex		= 0;
 	firstFreeCell		= 0;
@@ -50,6 +50,23 @@
 	theReader::~theReader		(void) {
 	running. store (false);
 	delete []	data;
+}
+
+static int currentPhase	= 0;
+void	theReader::read			(std::complex<float> *t,
+	                                 int a, int shifter) {
+	waitfor (a);
+	for (int i = 0; i < a; i ++) {
+	   t [i] = data [(currentIndex + i) & bufMask] *
+	                                         freqVec [currentPhase];
+	   currentPhase -= shifter;	// shifter in Hz
+	   if (currentPhase < 0)
+	      currentPhase += 192000;
+	   else
+	   if (currentPhase >= 192000)
+	      currentPhase -= 192000;
+	}
+	currentIndex = (currentIndex + a) & bufMask;
 }
 
 void	theReader::setStart		(int offset) {
@@ -72,7 +89,7 @@ void	theReader::waitfor (int32_t amount) {
 uint32_t	tobeRead;
 int32_t		contents	= Contents ();
 
-	if (contents >= amount)
+	if (contents > amount)
 	   return;
 	tobeRead	= amount - contents;
 	while ((ringBuffer -> GetRingBufferReadAvailable () < tobeRead) &&
@@ -86,36 +103,19 @@ int32_t		contents	= Contents ();
 	   return;
 //	Ok, if the amount of samples to be read fits in a contiguous part
 //	one read will suffice, otherwise it will be in two parts
-	if (firstFreeCell + tobeRead <= bufSize) {
-	   ringBuffer -> getDataFromBuffer (&data [firstFreeCell], tobeRead);
-	   for (int i = 0; i < tobeRead; i ++) {
-	      data [firstFreeCell + i] *= freqVec [freqPos];
-	      freqPos -= OFFSET;
-	      if (freqPos < 0)
-	         freqPos += 192000;
-	      if (freqPos >= 192000)
-	         freqPos -= 192000;
-	   }
+
+	for (int i = 0; i < tobeRead; i ++) {
+	   std::complex<float> temp;
+	   ringBuffer -> getDataFromBuffer (&temp, 1);
+	   temp = temp * freqVec [freqPos];
+	   freqPos -= OFFSET;
+	   if (freqPos < 0)
+	      freqPos += 192000;
+	   if (freqPos >= 192000)
+	      freqPos -= 192000;
+	   data [firstFreeCell] = temp;
+	   firstFreeCell = (firstFreeCell + 1) % bufSize;
 	}
-	else {
-	   ringBuffer -> getDataFromBuffer (&data [firstFreeCell],
-	                                     bufSize - firstFreeCell);
-	   for (int i = 0; i < bufSize - firstFreeCell; i ++) {
-	      data [firstFreeCell + i] *= freqVec [freqPos];
-              freqPos += OFFSET;
-              if (freqPos >= 192000)
-                 freqPos -= 192000;
-           }
-	   ringBuffer -> getDataFromBuffer (&data [0],
-	                                tobeRead - (bufSize - firstFreeCell));
-	   for (int i = 0; i < tobeRead - (bufSize - firstFreeCell); i ++) {
-	      data [i] *= freqVec [freqPos];
-	      freqPos += OFFSET;
-	      if (freqPos >= 192000)
-	         freqPos -= 192000;
-	   }
-	}
-	firstFreeCell = (firstFreeCell + tobeRead) % bufSize;
 }
 
 void	theReader::shiftBuffer (int16_t n) {

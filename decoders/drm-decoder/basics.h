@@ -31,14 +31,15 @@
 
 #define	SAMPLE_RATE	192000
 
-enum    {
-        QAM4, QAM16, QAM64
-};
+//enum    {
+//        QAM4, QAM16, QAM64
+//};
+//
+//enum    {
+//        AUDIO_STREAM, DATA_STREAM
+//};
 
-enum    {
-        AUDIO_STREAM, DATA_STREAM
-};
-
+#define	FINE_TIME_BLOCKS	6
 typedef struct {
 	uint8_t		Identity;		// FAC
 	uint8_t		RMFlag;

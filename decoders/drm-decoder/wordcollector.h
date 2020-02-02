@@ -36,20 +36,21 @@ class   theReader;
 class   wordCollector {
 public:
 
-        wordCollector	(theReader *);
-        ~wordCollector	();
-float	getWord		(std::complex<float> *,
-	                        drmParameters *, int offset = 0);
-void	reset		();
+        wordCollector		(theReader *);
+        ~wordCollector		();
+float	getWord			(drmParameters * params,
+	                         std::complex<float> *, std::complex<float> *);
+int	fine_timeSync (drmParameters *p, std::complex<float> *buffer);
+
+void	reset			();
 private:
         theReader       *myReader;
-        std::complex<float> *wordVector;
         fftwf_plan      plan;
+        std::complex<float> *fftVector;
         std::complex<float> *freqVector;
+	int32_t		phasePointer;
 	float		theAngle;
-	int		offsetIndex;
-	float		sampleOffset;
-	float		avgRateOffset;
+	int32_t		actualBase;
 };
 
 #endif
