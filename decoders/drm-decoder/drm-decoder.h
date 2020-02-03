@@ -73,7 +73,7 @@ public slots:
 	void		show_mer		(float);
 	void		show_audioMode		(QString);
 	void		show_coarseOffset	(float);
-	void		show_fineOffset		(float);
+	void		show_inputShift		(int);
 	void		show_timeDelay		(float);
 	void		show_timeOffset		(float);
 	void		show_clockOffset	(float);

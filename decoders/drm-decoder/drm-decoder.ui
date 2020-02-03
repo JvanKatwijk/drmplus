@@ -58,10 +58,11 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLCDNumber" name="show_small_offset">
+        <widget class="QLCDNumber" name="inputShiftDisplay">
          <property name="toolTip">
-          <string>Samplerate error: the average number of symbols (40 symbols in a frame) per missing
-or superfluous sample.</string>
+          <string>In case of a clock error the number of samples read will be either too large or too small
+and some correction is needed. The number indicates the number of samples off
+in the last 10 frames (10 frames = 10 * 40 * 480 samples)</string>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>

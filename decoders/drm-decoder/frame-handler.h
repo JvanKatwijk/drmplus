@@ -74,7 +74,6 @@ signals:
 	void		setTimeSync		(bool);
 	void		setFACSync		(bool);
 	void		setSDCSync		(bool);
-	void		show_fineOffset		(float);
 	void		show_coarseOffset	(float);
 	void		show_timeDelay		(float);
 	void		show_timeOffset		(float);

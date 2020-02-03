@@ -78,12 +78,12 @@
 	delete	my_eqDisplay;
 }
 
-void	drmDecoder::show_coarseOffset (float offset) {
+void	drmDecoder::show_coarseOffset	(float offset) {
 	show_int_offset	-> display (offset);
 }
 
-void	drmDecoder::show_fineOffset (float offset) {
-	show_small_offset -> display (offset);
+void	drmDecoder::show_inputShift	(int shift) {
+	inputShiftDisplay -> display (shift);
 }
 
 void	drmDecoder::show_angle		(float angle) {

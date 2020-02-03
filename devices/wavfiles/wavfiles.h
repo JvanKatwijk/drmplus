@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2008, 2009, 2010
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -27,12 +27,13 @@
 #include	<QWidget>
 #include	<QFrame>
 #include	<QString>
+#include	<sndfile.h>
 #include	"device-handler.h"
 #include	"ui_filereader-widget.h"
 #include	"ringbuffer.h"
 
 class	QLabel;
-class	wavReader;
+class	wavreaderBase;
 class	RadioInterface;
 /*
  */
@@ -54,7 +55,8 @@ public:
 protected:
 	int32_t		setup_Device	(void);
 	QFrame		*myFrame;
-	wavReader	*myReader;
+	wavreaderBase	*myReader;
+	SNDFILE		*filePointer;
 	int32_t		lastFrequency;
 	int32_t		theRate;
 private slots:

@@ -24,13 +24,17 @@
 #include	<QFileDialog>
 #include	"radio-constants.h"
 #include	"radio.h"
-#include	"wav-reader.h"
+#include	"wav-reader-base.h"
+#include	"wav-reader-nconv.h"
+#include	"wav-reader-conv.h"
 #include	"wavfiles.h"
 
 	wavFiles::wavFiles	(RadioInterface *mr,
 	                         int32_t rate,
 	                         RingBuffer<std::complex<float>> *b):
 	                              deviceHandler (mr) {
+SF_INFO	*sf_info;
+
 	theRate		= rate;
 	this	-> myFrame	= new QFrame;
 	setupUi		(myFrame);
@@ -43,7 +47,30 @@
 	                                  QDir::homePath (),
 	                                  tr ("sound (*.wav)"));
 	replayFile	= QDir::toNativeSeparators (replayFile);
-	myReader	= new wavReader (replayFile, rate, b);
+
+	sf_info                 = (SF_INFO *)alloca (sizeof (SF_INFO));
+        sf_info -> format       = 0;
+        filePointer             = sf_open (replayFile. toLatin1 (). data (),
+                                           SFM_READ, sf_info);
+        if (filePointer == NULL) {
+           fprintf (stderr, "file %s no legitimate sound file\n",
+                            replayFile. toLatin1 (). data ());
+	   throw (21);
+        }
+
+	if (sf_info -> channels != 2) {
+	   fprintf (stderr, "file %d no legitimate drm+ sdr file\n",
+	                     replayFile. toLatin1 (). data ());
+	   throw (22);
+	}
+
+	if (theRate == sf_info -> samplerate)
+	   myReader	= new wavReader_nconv (sf_info,
+	                                       filePointer, b);
+	else
+	   myReader	= new wavReader_conv  (sf_info,
+	                                       filePointer, b);
+
 	connect (myReader, SIGNAL (set_progressBar (int)),
 	         this, SLOT (set_progressBar (int)));
 	connect (myReader, SIGNAL (dataAvailable (int)),
@@ -51,14 +78,13 @@
 	nameofFile	-> setText (replayFile);
 	set_progressBar	(0);
 	this	-> lastFrequency	= Khz (94000);
-	connect (fileProgress, SIGNAL (valueChanged (int)),
-	         this, SLOT (handle_progressBar (int)));
 }
 //
 	wavFiles::~wavFiles	(void) {
 	if (myReader != nullptr)
 	   delete myReader;
 	myReader	= NULL;
+	sf_close (filePointer);
 	delete myFrame;
 }
 

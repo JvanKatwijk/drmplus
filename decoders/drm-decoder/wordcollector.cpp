@@ -22,10 +22,12 @@
  */
 
 #include	"wordcollector.h"
+#include	"drm-decoder.h"
 #include	"reader.h"
 #include	"radio-constants.h"
 
-	wordCollector::wordCollector	(theReader *myReader) {
+	wordCollector::wordCollector	(drmDecoder *theDecoder,
+	                                 theReader *myReader) {
 	this	-> myReader	= myReader;
 	fftVector      = (std::complex<float> *)
                                fftwf_malloc (sizeof (fftwf_complex) * Tu_t);
@@ -40,6 +42,8 @@
            freqVector [i] =
 	          std::complex<float> (cos (2 * M_PI * i / SAMPLE_RATE),
                                        sin (2 * M_PI * i / SAMPLE_RATE));
+	connect (this, SIGNAL (show_inputShift (int)),
+	         theDecoder, SLOT (show_inputShift (int)));
 	phasePointer	= 0;
         theAngle        = 0;
 	actualBase	= 0;
@@ -97,12 +101,6 @@ std::complex<float> gamma	= std::complex<float> (0, 0);
 	if (actualBase - bestIndex > 6)
 	   actualBase --;
 	return actualBase;
-}
-
-int	wordCollector::samplerateError	() {
-	if ((nrSymbols == 0) || (totalOffset == 0))
-	   return 0;
-	return nrSymbols / symbolsperFrame / totalOffset;
 }
 
 float	wordCollector::getWord (drmParameters *p,
@@ -184,8 +182,13 @@ float	timeOffsetFractional;
 	myReader -> waitfor (toRead);
 	myReader -> read (&buffer [amount], toRead, p -> freqOffset_integer);
 	totalOffset	+= actualBase;
-	actualBase = 0;
+	if (nrSymbols > 10 * symbolsperFrame) {
+	   show_inputShift (totalOffset);
+	   totalOffset	= 0;
+	   nrSymbols	= 0;
+	}
 
+	actualBase = 0;
 	return theAngle;
 }
 

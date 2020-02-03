@@ -39,7 +39,8 @@ static	int goodFrames	= 0;
 	                               my_timeSyncer	(&myReader,
 	                                                 symbolsperFrame),
 	                               my_freqSyncer	(&myReader),
-	                               my_wordCollector (&myReader),
+	                               my_wordCollector (theRadio,
+	                                                 &myReader),
 	                               my_timeCorrelator (),
 	                               my_equalizer	(theRadio, eqBuffer),
 	                               my_facProcessor	(theRadio,
@@ -58,8 +59,6 @@ static	int goodFrames	= 0;
                  theRadio, SLOT (setFACSync (bool)));
 	connect (this, SIGNAL (setSDCSync (bool)),
                  theRadio, SLOT (executeSDCSync (bool)));
-	connect (this, SIGNAL (show_fineOffset (float)),
-                 theRadio, SLOT (show_fineOffset (float)));
         connect (this, SIGNAL (show_coarseOffset (float)),
                  theRadio, SLOT (show_coarseOffset (float)));
         connect (this, SIGNAL (show_timeDelay   (float)),
@@ -258,9 +257,6 @@ L1:
 	         show_coarseOffset	(params -> freqOffset_integer);
 	         show_timeDelay		(params -> timeOffset_fractional);
 	         show_clockOffset	(params -> sampleRate_offset);
-	         show_fineOffset	(my_wordCollector.
-	                                      samplerateError ());
-	        
 	         displayDelay = 0;
 	      }
 

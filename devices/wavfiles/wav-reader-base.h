@@ -21,8 +21,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __WAVREADER__
-#define	__WAVREADER__
+#ifndef __WAVREADER_BASE__
+#define	__WAVREADER_BASE__
 
 #include	<QThread>
 #include	<QString>
@@ -32,36 +32,18 @@
 #include	"ringbuffer.h"
 //
 //
-class	wavReader: public QThread {
+class	wavreaderBase: public QThread {
 Q_OBJECT
 public:
-	wavReader	(QString, int32_t,
-	                        RingBuffer<std::complex<float> > *);
-	~wavReader	(void);
+	wavreaderBase	();
+virtual	~wavreaderBase	(void);
 //	
-//	functions really for this rig
-	bool		restartReader	(void);
-	void		stopReader	(void);
-	int32_t		Samples		(void);
-	int32_t		getSamples	(std::complex<float> *, int32_t, uint8_t);
-	void		reset		(void);
-	int32_t		setFileat	(int32_t);
+virtual	bool		restartReader	(void);
+virtual	void		stopReader	(void);
+virtual	void		reset		(void);
+virtual	int32_t		setFileat	(int32_t);
 protected:
 virtual void		run		(void);
-	int32_t		theRate;
-	QString		f;
-	RingBuffer<std::complex<float> >	*_I_Buffer;
-	QString		fileName;
-	int32_t		readBuffer	(float *data, int32_t length);
-	SNDFILE		*filePointer;
-	bool		readerOK;
-	int32_t		sampleRate;
-	int16_t		bitsperSample;
-	int32_t		samplesinFile;
-	int32_t		currPos;
-	int16_t		numofChannels;
-	std::atomic<bool> running;
-	bool		resetRequest;
 signals:
 	void		dataAvailable	(int);
 	void		set_progressBar	(int);

@@ -25,6 +25,7 @@
 #ifndef __WORD_COLLECTOR__
 #define __WORD_COLLECTOR__
 
+#include	<QObject>
 #include        "basics.h"
 #include        <stdio.h>
 #include        <stdint.h>
@@ -32,18 +33,19 @@
 #include        <complex>
 
 class   theReader;
+class	drmDecoder;
 
-class   wordCollector {
+class   wordCollector: public QObject {
+Q_OBJECT
 public:
 
-        wordCollector		(theReader *);
+        wordCollector		(drmDecoder *, theReader *);
         ~wordCollector		();
 float	getWord			(drmParameters * params,
 	                         std::complex<float> *, std::complex<float> *);
 int	fine_timeSync (drmParameters *p, std::complex<float> *buffer);
 
 void	reset			();
-int	samplerateError		();
 private:
         theReader       *myReader;
         fftwf_plan      plan;
@@ -54,6 +56,8 @@ private:
 	int32_t		actualBase;
 	int		nrSymbols;
 	int		totalOffset;
+signals:
+	void		show_inputShift	(int);
 };
 
 #endif

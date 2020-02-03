@@ -48,7 +48,6 @@ HEADERS += ./radio.h \
 	   ./various/utilities.h \
 	   ./various/program-list.h \
 	   ./various/popup-keypad.h \
-	   ./various/s-meter.h \
 	   ./various/Xtan2.h \
 	   ./output/upconverter.h \
            ./output/audiosink.h \
@@ -59,7 +58,9 @@ HEADERS += ./radio.h \
            ./scopes-qwt6/fft-scope.h \
 	   ./devices/device-handler.h \
 	   ./devices/wavfiles/wavfiles.h \
-	   ./devices/wavfiles/wav-reader.h \
+	   ./devices/wavfiles/wav-reader-base.h \
+	   ./devices/wavfiles/wav-reader-conv.h \
+	   ./devices/wavfiles/wav-reader-nconv.h \
 	   ./devices/rawfiles-192-8/rawfiles-192-8.h \
 	   ./devices/rawfiles-192-8/raw-reader-192-8.h \
 	   ./devices/rawfiles-192-16/rawfiles-192-16.h \
@@ -90,7 +91,9 @@ SOURCES += ./main.cpp \
 	   ./scopes-qwt6/audio-scope.cpp \
 	   ./devices/device-handler.cpp \
 	   ./devices/wavfiles/wavfiles.cpp \
-	   ./devices/wavfiles/wav-reader.cpp \
+	   ./devices/wavfiles/wav-reader-base.cpp \
+	   ./devices/wavfiles/wav-reader-conv.cpp \
+	   ./devices/wavfiles/wav-reader-nconv.cpp \
 	   ./devices/rawfiles-192-8/rawfiles-192-8.cpp \
 	   ./devices/rawfiles-192-8/raw-reader-192-8.cpp  \
 	   ./devices/rawfiles-192-16/rawfiles-192-16.cpp \
@@ -114,13 +117,15 @@ LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -l
 }
 
 win32 {
-DESTDIR		= ../../windows-swradio
+DESTDIR		= .
 CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
 #CONFIG		+= pmsdr
 #CONFIG		+= extio
 #CONFIG		+= cardreader
+CONFIG          += drm
+CONFIG          += fm
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
