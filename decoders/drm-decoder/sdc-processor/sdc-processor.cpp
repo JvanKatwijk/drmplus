@@ -147,16 +147,19 @@ int	index	= 0;
 int	sdcProcessor::sdcField (uint8_t *data, int index) {
 int	bodySize	= get_SDCBits (data, index, 7);
 int	entity		= get_SDCBits (data, index + 8, 4);
-int	shortId;
+int	shortId, streamId;
 int	base		= index + 12;
 QString	languageCode;
 QString	countryCode;
 QString	s;
+int	lengthHigh	= 0, lengthLow	= 0;
+int	temp1		= 0, temp2	= 0;
+
 //	fprintf (stderr, "sdcField key %d, length %d\n",
 //	                 entity, bodySize);
 
 	switch (entity) {
-	   case 0:
+	   case 0:		// multiplex description
 	      if (bodySize < 2)
 	         break;
 	      params	-> protLevelA	= get_SDCBits (data, base, 2);
@@ -167,64 +170,81 @@ QString	s;
 	                        get_SDCBits (data, index, 12);
 	         params -> theStreams [i]. lengthLow =
 	                       get_SDCBits (data, index + 12, 12);
-
-//	         fprintf (stderr, "subchId %d (%d %d) lengths %d %d\n",
-//	                    i, params -> protLevelA, params -> protLevelB,
-//	                    get_SDCBits (data, index, 12),
-//	                    get_SDCBits (data, index + 12, 12));
+	         lengthHigh	+= get_SDCBits (data, index, 12);
+	         lengthLow	+= get_SDCBits (data, index + 12, 12);
+#if 0
+	         fprintf (stderr, "stream %d (%d %d) lengths %d %d\n",
+	                    i, params -> protLevelA, params -> protLevelB,
+	                    get_SDCBits (data, index, 12),
+	                    get_SDCBits (data, index + 12, 12));
+#endif
 	         params -> theStreams [i]. inUse = true;
+	      }
+	      temp1	= 0; temp2	= lengthHigh;
+	      for (int i = 0; i < bodySize / 3; i ++) {
+	         params -> theStreams [i]. offsetHigh	=  temp1;
+	         temp1 += params -> theStreams [i]. lengthHigh;
+	         params -> theStreams [i]. offsetLow	= temp2;
+	         temp2 += params -> theStreams [i]. lengthLow;
 	      }
 	      return index + 16 + 8 * bodySize;
 
 	   case 5:
 	      shortId	= get_SDCBits (data, base, 2);
-	      params -> theStreams [shortId]. streamId =
-	                                get_SDCBits (data, base + 2, 2);
-	      params -> theStreams [shortId]. packetModeInd =
+	      streamId	= get_SDCBits (data, base + 2, 2);
+	      params	-> subChannels [shortId]. streamId =
+	                                             streamId;
+	      params	-> theStreams [streamId]. packetModeInd =
 	                                get_SDCBits (data, base + 4, 1);
-	      if (params -> theStreams [shortId]. packetModeInd == 0) {
+	      if (params -> theStreams [streamId]. packetModeInd == 0) {
 //	synchronous stream
-	         params -> theStreams [shortId]. enhancementFlag =
+	         params -> theStreams [streamId]. enhancementFlag =
 	                                get_SDCBits (data, base + 8, 1);
-	         params -> theStreams [shortId]. domain =
+	         params -> theStreams [streamId]. domain =
 	                                get_SDCBits (data, base + 9, 3);
 	      }
 	      else {
 //	packet mode
-	         params -> theStreams [shortId]. dataUnitIndicator =
+	         params -> theStreams [streamId]. dataUnitIndicator =
                                          get_SDCBits (data, base + 5, 1);
-	         params -> theStreams [shortId]. packetId =
+	         params -> theStreams [streamId]. packetId =
 	                                 get_SDCBits (data, base + 6, 2);
-	         params -> theStreams [shortId]. enhancementFlag =
+	         params -> theStreams [streamId]. enhancementFlag =
 	                                 get_SDCBits (data, base + 8, 1);
-	         params -> theStreams [shortId]. domain =
+	         params -> theStreams [streamId]. domain =
 	                                 get_SDCBits (data, base + 9, 3);
-	         params -> theStreams [shortId]. packetLength =
+	         params -> theStreams [streamId]. packetLength =
 	                                 get_SDCBits (data, base + 12, 8);
-	         if (params -> theStreams [shortId]. domain == 0)
-	            params -> theStreams [shortId]. applicationId =
+	         if (params -> theStreams [streamId]. domain == 0)
+	            params -> theStreams [streamId]. applicationId =
 	                                 get_SDCBits (data, base + 20, 16);
 	         else
-	         if (params -> theStreams [shortId]. domain == 1)
-	            params -> theStreams [shortId]. applicationId =
+	         if (params -> theStreams [streamId]. domain == 1)
+	            params -> theStreams [streamId]. applicationId =
 	                                 get_SDCBits (data, base + 25, 11);
 	      }
 	      return index + 16 + 8 * bodySize;
 
+	   case 3:
+	   case 4:
+	   case 11:
+	   case 13:	// all to do with afs
+	         return index + 16 + 8 * bodySize;
+	       
 	   default:
+//	         fprintf (stderr, "entity %d not supported yet\n", entity);
 	         return index + 16 + 8 * bodySize;
 	                
 	   case 1:	// label entity
 	      shortId = get_SDCBits (data, base, 2);
-//	      params -> theStreams [shortId]. inUse = true;
-//	      if (params -> theStreams [shortId]. serviceName. isEmpty ()) {
+	      params -> subChannels [shortId]. inUse = true;
 	      {
 	         char temp [bodySize + 1];
 	         for (int i = 0; i < bodySize; i ++)
 	            temp [i] = get_SDCBits (data, base + 4 + 8 * i, 8);
 	         temp [bodySize] = 0;
 	         if (bodySize > 1) {
-	            params -> theStreams [shortId]. serviceName = 
+	            params -> subChannels [shortId]. serviceName = 
 	                                QString::fromUtf8 (temp, bodySize);
 	         }
 	      }
@@ -238,8 +258,8 @@ QString	s;
 	      for (int i = 0; i < 2; i ++)
 	         countryCode.
 	               append (get_SDCBits (data, base + 28 + 8 * i, 8));
-	      params -> theStreams [shortId]. languagetxt = languageCode;
-	      params -> theStreams [shortId]. country     = countryCode;
+	      params	-> subChannels [shortId]. languagetxt	= languageCode;
+	      params	-> subChannels [shortId]. country	= countryCode;
 	      return index + 16 + 8 * bodySize;
 
 	   case 8:	// time and date
@@ -276,36 +296,41 @@ QString	s;
 
 	   case 9:	// audio information
 	      shortId	= get_SDCBits (data, base, 2);
-	      params -> theStreams [shortId]. streamId = 
-	                               get_SDCBits (data, base + 2, 2);
-	      params -> theStreams [shortId]. audioCoding =
+	      streamId	= get_SDCBits (data, base + 2, 2);
+	      params	-> subChannels [shortId]. streamId = streamId;
+	      params	-> theStreams [streamId]. audioCoding =
 	                               get_SDCBits (data, base + 4, 2);
-	      params -> theStreams [shortId]. sbrFlag =
+	      params	-> theStreams [streamId]. sbrFlag =
 	                               get_SDCBits (data, base + 6, 1);
-	      params -> theStreams [shortId]. audioMode =
+	      params	-> theStreams [streamId]. audioMode =
 	                               get_SDCBits (data, base + 7, 2);
-	      params -> theStreams [shortId]. audioSamplingRate =
+	      params	-> theStreams [streamId]. audioSamplingRate =
 	                               get_SDCBits (data, base + 9, 3);
-	      params -> theStreams [shortId]. textFlag =
+	      params	-> theStreams [streamId]. textFlag =
 	                               get_SDCBits (data, base + 12, 1);
-	      params -> theStreams [shortId]. enhancementFlag =
+	      params	-> theStreams [streamId]. enhancementFlag =
 	                               get_SDCBits (data, base + 13, 1);
-	      params -> theStreams [shortId]. coderField =
+	      params	-> theStreams [streamId]. coderField =
 	                               get_SDCBits (data, base + 14, 5);
+	      (void) get_SDCBits (data, base + 19, 3);
+//	      if (params -> theStreams [streamId]. audioCoding)
+//	         fprintf (stderr, "code specific length %d\n",
+//	                              6 + 8 * bodySize - 22);
+//	      else
+//	        fprintf (stderr, "klopt het (stream %d) length %d\n",
+//	                          streamId,
+//	                          6 + 8 * bodySize - 22);
 	      return index + 16 + 8 * bodySize;
 
-	   case 10:	//packet stream FEC parameters
-	      shortId	= get_SDCBits (data, base, 2);
-	      params	-> theStreams [shortId]. streamId =
-	                                get_SDCBits (data, base + 2, 2);
-	      params	-> theStreams [shortId]. R =
+	   case 14:	//packet stream FEC parameters
+	      streamId	= get_SDCBits (data, base + 2, 2);
+	      params	-> theStreams [streamId]. R =
 	                                get_SDCBits (data, base + 4, 8);
-	      params	-> theStreams [shortId]. C =
+	      params	-> theStreams [streamId]. C =
 	                                get_SDCBits (data, base + 12, 8);
-	      params	-> theStreams [shortId]. packetLength =
+	      params	-> theStreams [streamId]. packetLength =
 	                                get_SDCBits (data, base + 20, 8);
-	      params	-> theStreams [shortId]. FEC	= true;
-	      return index + 16 + 8 * bodySize;
+	      params	-> theStreams [streamId]. FEC	= true;
 	}
 	return index + 12;
 }

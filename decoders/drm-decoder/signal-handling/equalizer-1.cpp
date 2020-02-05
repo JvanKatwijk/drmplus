@@ -77,7 +77,7 @@ float	*THETA;
 //	Based on table 92 ETSI ES 201980
 
 //	first shorthands 
-	symbols_per_window	=  6;
+	symbols_per_window	=  8;
 	symbols_to_delay	= floor (symbols_per_window / 2);
 	periodforSymbols	= symbolspergroup;
 	periodforPilots		= pilotDistance;

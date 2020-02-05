@@ -61,6 +61,10 @@ private:
 	                                 int16_t, int16_t, int16_t, int16_t);
 	void		handle_eep_audio (uint8_t *, int16_t,
 	                                          int16_t, int16_t);
+	void		process_usac	(uint8_t *v, int16_t mscIndex,
+                                         int16_t startHigh, int16_t lengthHigh,
+                                         int16_t startLow, int16_t lengthLow);
+
 	void		writeOut	(int16_t *, int16_t, int32_t);
 	void		toOutput	(float *, int16_t);
 	void		playOut		(int16_t);

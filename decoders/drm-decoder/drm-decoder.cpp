@@ -165,87 +165,26 @@ void	drmDecoder::showSNR		(float snr) {
 
 void	drmDecoder::selectChannel_0	(void) {
 int hp_sum	= 0;
-	stationLabel	-> setText (params. theStreams [0]. serviceName);
-//
-//	we compute the offset of the lower protected part;
-	for (int i = 0; i < 4; i ++)
-	   if (params. theStreams [i]. inUse)
-	      hp_sum += params. theStreams [i]. lengthHigh;
-	params. theStreams [0]. offsetHigh = 0;
-	params. theStreams [0]. offsetLow  = hp_sum;
+	stationLabel	-> setText (params. subChannels [0]. serviceName);
 	show_audioData (&params, 0);
 	my_frameHandler	-> selectService (0);
 }
 
 void	drmDecoder::selectChannel_1	(void) {
-int hp_sum	= 0;
-	stationLabel	-> setText (params. theStreams [1]. serviceName);
+	stationLabel	-> setText (params. subChannels [1]. serviceName);
 //	we compute the offset of the lower protected part;
-	for (int i = 0; i < 4; i ++)
-	   if (params. theStreams [i]. inUse)
-	      hp_sum += params. theStreams [i]. lengthHigh;
-	params. theStreams [0]. offsetHigh = 0;
-	params. theStreams [0]. offsetLow  = hp_sum;
-	params. theStreams [1]. offsetHigh = 
-	                     params. theStreams [0]. offsetHigh +
-	                     params. theStreams [0]. lengthHigh;
-	params. theStreams [1]. offsetLow =
-	                     params. theStreams [0]. offsetLow +
-	                     params. theStreams [0]. lengthLow;
 	show_audioData (&params, 1);
 	my_frameHandler	-> selectService (1);
 }
 
 void	drmDecoder::selectChannel_2	(void) {
-int hp_sum	= 0;
-	stationLabel	-> setText (params. theStreams [2]. serviceName);
-	for (int i = 0; i < 4; i ++)
-	   if (params. theStreams [i]. inUse)
-	      hp_sum += params. theStreams [i]. lengthHigh;
-	params. theStreams [0]. offsetHigh = 0;
-	params. theStreams [0]. offsetHigh  = hp_sum;
-	params. theStreams [1]. offsetHigh = 
-	                     params. theStreams [0]. offsetHigh +
-	                     params. theStreams [0]. lengthHigh;
-	params. theStreams [1]. offsetLow =
-	                     params. theStreams [0]. offsetLow +
-	                     params. theStreams [0]. lengthLow;
-	params. theStreams [2]. offsetHigh = 
-	                     params. theStreams [1]. offsetHigh +
-	                     params. theStreams [1]. lengthHigh;
-	params. theStreams [2]. offsetLow =
-	                     params. theStreams [1]. offsetLow +
-	                     params. theStreams [1]. lengthLow;
+	stationLabel	-> setText (params. subChannels [2]. serviceName);
 	show_audioData (&params, 2);
 	my_frameHandler	-> selectService (2);
 }
 
 void	drmDecoder::selectChannel_3	(void) {
-int hp_sum	= 0;
-	stationLabel	-> setText (params. theStreams [1]. serviceName);
-	for (int i = 0; i < 4; i ++)
-	   if (params. theStreams [i]. inUse)
-	      hp_sum += params. theStreams [i]. lengthHigh;
-	params. theStreams [0]. offsetHigh = 0;
-	params. theStreams [0]. offsetHigh  = hp_sum;
-	params. theStreams [1]. offsetHigh = 
-	                     params. theStreams [0]. offsetHigh +
-	                     params. theStreams [0]. lengthHigh;
-	params. theStreams [1]. offsetLow =
-	                     params. theStreams [0]. offsetLow +
-	                     params. theStreams [0]. lengthLow;
-	params. theStreams [2]. offsetHigh = 
-	                     params. theStreams [1]. offsetHigh +
-	                     params. theStreams [1]. lengthHigh;
-	params. theStreams [2]. offsetLow =
-	                     params. theStreams [1]. offsetLow +
-	                     params. theStreams [1]. lengthLow;
-	params. theStreams [3]. offsetHigh = 
-	                     params. theStreams [2]. offsetHigh +
-	                     params. theStreams [2]. lengthHigh;
-	params. theStreams [3]. offsetLow =
-	                     params. theStreams [2]. offsetLow +
-	                     params. theStreams [2]. lengthLow;
+	stationLabel	-> setText (params. subChannels [1]. serviceName);
 	show_audioData (&params, 3);
 	my_frameHandler	-> selectService (3);
 
@@ -297,10 +236,6 @@ void	drmDecoder::show_country (QString s) {
 	countryLabel	-> setText (s);
 }
 
-void	drmDecoder::show_programType (QString s) {
-	programTypeLabel	-> setText (s);
-}
-
 void	drmDecoder::show_time	(QString s) {
 	timeLabel		-> setText (s);
 }
@@ -347,15 +282,14 @@ float	pixS	= 1.0 / 128;
 }
 
 void	drmDecoder::cleanup_db		() {
-	params. theChannel. nrServices = 0;
+	params. theChannel. nrAudioServices = 0;
+	params. theChannel. nrDataServices = 0;
 	params. hours	= -1;
 	for (int i = 0; i < 4; i ++) {
-	   params. theStreams [i]. inUse	= false;
-	   params. theStreams [i]. serviceName = "";
-	   params. theStreams [i]. programType = "";
-	   params. theStreams [i]. languagetxt = "";
-	   params. theStreams [i]. country	= "";
+	   params. subChannels [i]. inUse	= false;
+	   params. subChannels [i]. serviceName = "";
 	}
+	
 	disconnect (channel_0, SIGNAL (clicked (void)),
                     this, SLOT (selectChannel_0 (void)));
 	channel_0	-> setText ("not available");
@@ -376,8 +310,8 @@ QString monthTable [] = {"jan", "feb", "mar", "apr", "may", "jun",
 bool	channels [] = {false, false, false, false};
 
 void	drmDecoder::update_GUI		() {
-	if (params. theStreams [0]. inUse) {
-	   channel_0 -> setText (params. theStreams [0]. serviceName);
+	if (params. subChannels [0]. inUse) {
+	   channel_0 -> setText (params. subChannels [0]. serviceName);
 	   if (!channels [0]) { 
 	      connect (channel_0, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_0 ()));
@@ -385,8 +319,8 @@ void	drmDecoder::update_GUI		() {
 	   }
 	}
 
-	if (params. theStreams [1]. inUse) {
-	   channel_1 -> setText (params. theStreams [1]. serviceName);
+	if (params. subChannels [1]. inUse) {
+	   channel_1 -> setText (params. subChannels [1]. serviceName);
 	   if (!channels [1]) {
 	      connect (channel_1, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_1 ()));
@@ -394,8 +328,8 @@ void	drmDecoder::update_GUI		() {
 	   }
 	}
 
-	if (params. theStreams [2]. inUse) {
-	   channel_2 -> setText (params. theStreams [2]. serviceName);
+	if (params. subChannels [2]. inUse) {
+	   channel_2 -> setText (params. subChannels [2]. serviceName);
 	   if (!channels [2]) {
 	      connect (channel_2, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_2 ()));
@@ -403,8 +337,8 @@ void	drmDecoder::update_GUI		() {
 	   }
 	}
 
-	if (params. theStreams [3]. inUse) {
-	   channel_3 -> setText (params. theStreams [3]. serviceName);
+	if (params. subChannels [3]. inUse) {
+	   channel_3 -> setText (params. subChannels [3]. serviceName);
 	   if (!channels [3]) {
 	      connect (channel_3, SIGNAL (clicked ()),
 	               this, SLOT (selectChannel_3 ()));
@@ -424,65 +358,45 @@ void	drmDecoder::update_GUI		() {
 	   timeLabel	-> setText (" ");
 }
 
-void	drmDecoder::show_audioData (drmParameters *drm, int subchId) {
-streamParameters *sc 	= &(drm -> theStreams [subchId]);
-	if (!sc -> is_audio) {
+void	drmDecoder::show_audioData (drmParameters *drm, int shortId) {
+streamParameters *theStream;
+int	streamId;
+	if (!drm -> subChannels [shortId]. is_audioService) {
 	   fprintf (stderr, "Sorry, not an audio channel\n");
 	   return;
 	}
 
-	audioData. streamId	-> display (sc -> streamId);
-	audioData. serviceName	-> setText (sc -> serviceName);
+	streamId	= drm	-> subChannels [shortId]. streamId;
+	theStream	= &(drm	-> theStreams [streamId]);
+	audioData. streamId	-> display (streamId);
+	audioData. serviceName	->
+	           setText (drm -> subChannels [shortId].serviceName);
 	audioData. QamLabel	-> setText (drm -> theChannel. MSC_Mode == 0 ?
 	                                    "16 QAM" : "4 QAM");
 	audioData. protection_High -> display (drm -> protLevelA);
 	audioData. protection_Low  -> display (drm -> protLevelB);
-	audioData. prot_A_Length -> display (sc -> lengthHigh);
-	audioData. prot_B_Length -> display (sc -> lengthLow);
-	audioData. start_High	-> display (sc -> offsetHigh);
-	audioData. start_Low	-> display (sc -> offsetLow);
+	audioData. prot_A_Length -> display (theStream -> lengthHigh);
+	audioData. prot_B_Length -> display (theStream -> lengthLow);
+	audioData. start_High	-> display  (theStream -> offsetHigh);
+	audioData. start_Low	-> display  (theStream -> offsetLow);
 	audioData. samplingrateDisplay	-> display (
-	              sc -> audioCoding == 0 ?
-	                  sc -> audioSamplingRate == 1 ? 12000:
-	                  sc -> audioSamplingRate == 3 ? 24000: 48000 :
-	                  sc -> audioSamplingRate == 0 ? 9600 :
-	                  sc -> audioSamplingRate == 1 ? 12000  :
-	                  sc -> audioSamplingRate == 2 ? 16000 :
-	                  sc -> audioSamplingRate == 3 ? 19200 :
-	                  sc -> audioSamplingRate == 4 ? 24000 :
-	                  sc -> audioSamplingRate == 5 ? 32000 :
-	                  sc -> audioSamplingRate == 6 ? 38400 :
-	                  sc -> audioSamplingRate == 7 ? 48000 : -1);
-	fprintf (stderr, "audioCoding %s\n",
-	              sc -> audioCoding == 0 ? "aac" :
-	              sc -> audioCoding == 3 ? "xHE-AAC" : "????");
-	fprintf (stderr, "SBR %s used\n",
-	              sc -> sbrFlag ? "": "not");
-	fprintf (stderr, "audioMode %s\n",
-	              sc -> audioMode == 0 ? "mono" :
-	              sc -> audioMode == 1 ? "parametric stereo" :
-	              sc -> audioMode == 2 ? "stereo" : "???");
-	fprintf (stderr, "audioSamplingRate %s\n",
-	              sc -> audioCoding == 0 ?
-	                  sc -> audioSamplingRate == 1 ? "12 KHz":
-	                  sc -> audioSamplingRate == 3 ? "24 KHz": "48 KHz" :
-	                  sc -> audioSamplingRate == 0 ? "9,6 KHz" :
-	                  sc -> audioSamplingRate == 1 ? "12 KHz"  :
-	                  sc -> audioSamplingRate == 2 ? "16 KHz" :
-	                  sc -> audioSamplingRate == 3 ? "19,2 KHz" :
-	                  sc -> audioSamplingRate == 4 ? "24 KHz" :
-	                  sc -> audioSamplingRate == 5 ? "32 KHz" :
-	                  sc -> audioSamplingRate == 6 ? "38,4 KHz" :
-	                  sc -> audioSamplingRate == 7 ? "48 KHz" : "???");
+	              theStream -> audioCoding == 0 ?
+	                  theStream -> audioSamplingRate == 1 ? 12000:
+	                  theStream -> audioSamplingRate == 3 ? 24000: 48000 :
+	                  theStream -> audioSamplingRate == 0 ? 9600 :
+	                  theStream -> audioSamplingRate == 1 ? 12000  :
+	                  theStream -> audioSamplingRate == 2 ? 16000 :
+	                  theStream -> audioSamplingRate == 3 ? 19200 :
+	                  theStream -> audioSamplingRate == 4 ? 24000 :
+	                  theStream -> audioSamplingRate == 5 ? 32000 :
+	                  theStream -> audioSamplingRate == 6 ? 38400 :
+	                  theStream -> audioSamplingRate == 7 ? 48000 : -1);
+	if (drm -> subChannels [shortId]. is_audioService) {
+	   int programType = drm -> subChannels [shortId]. serviceDescriptor;
+	   programTypeLabel	-> setText (getProgramType (programType));
+	}
 	fprintf (stderr, "stream contains %smessage\n",
-	              sc -> textFlag ? "a " : "no ");
-	if (!sc -> languagetxt. isEmpty ())
-	   fprintf (stderr, "Language %s\n", sc -> languagetxt. toLatin1 (). data ());
-	if (!sc -> country. isEmpty ())
-	   fprintf (stderr, "Country %s\n", sc -> country. toLatin1 (). data ());
-	if (!sc -> programType. isEmpty ())
-	   fprintf (stderr, "Program type %s\n", 
-	                            sc -> programType. toLatin1 (). data ());
+	              theStream -> textFlag ? "a " : "no ");
 }
 
 void	drmDecoder::handle_techData	() {
@@ -503,3 +417,40 @@ void	drmDecoder::handle_constellation	(const QString &s) {
 	my_frameHandler	-> set_constellationView (s);
 }
 
+QString	drmDecoder::getProgramType	(int programType) {
+	switch (programType) {
+	   case 0:     return "No programme type";
+	   case 1:     return "News";
+	   case 2:     return "Current Affairs";
+	   case 3:     return "Information";
+	   case 4:     return "Sport";
+	   case 5:     return "Education";
+	   case 6:     return "Drama";
+	   case 7:     return "Culture";
+	   case 8:     return "Science";
+	   case 9:     return "Varied";    //Talk
+	   case 10:    return "Pop Music";
+	   case 11:    return "Rock Music";
+	   case 12:    return "Easy Listening Music";
+	   case 13:    return "Light Classical";
+	   case 14:    return "Serious Classical";
+	   case 15:    return "Other Music";
+	   case 16:    return "Weather/meteorology";
+	   case 17:    return "Finance/Business";
+	   case 18:    return "Children's programmes";
+	   case 19:    return "Social Affairs";    //Factual
+	   case 20:    return "Religion";
+	   case 21:    return "Phone In";
+	   case 22:    return "Travel";
+	   case 23:    return "Leisure";
+	   case 24:    return "Jazz Music";
+	   case 25:    return "Country Music";
+	   case 26:    return "National Music";
+	   case 27:    return "Oldies Music";
+	   case 28:    return "Folk Music";
+	   case 29:    return "Documentary";
+	   case 30:    return "unknown programme type 30";
+	   case 31:    return "unknown programme type 31";
+	   default:    return "unknown programme type";
+	}
+}

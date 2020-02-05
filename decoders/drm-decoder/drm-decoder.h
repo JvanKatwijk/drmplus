@@ -66,6 +66,7 @@ private:
 	float		phaseOffset;
 	drmParameters	params;
 	void		show_audioData		(drmParameters *, int);
+	QString		getProgramType		(int);
 public slots:
 	void		show_stationLabel	(const QString &);
 	void		show_eqsymbol		(int);
@@ -83,7 +84,6 @@ public slots:
 	void		showMOT			(QByteArray, int);
 	void		aacData			(QString);
 	void		show_country		(QString);
-	void		show_programType	(QString);
 	void		show_time		(QString);
 	void		setTimeSync		(bool);
 	void		setFACSync		(bool);

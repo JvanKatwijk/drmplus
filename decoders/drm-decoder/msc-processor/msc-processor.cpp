@@ -196,30 +196,32 @@ static	bool toggler = false;
 	}
 }
 
-void	mscProcessor::selectService	(int stream) {
+void	mscProcessor::selectService	(int shortId) {
 	locker. lock ();
 	if (my_mscHandler != nullptr)
 	   delete my_mscHandler;
 
 	if (the_postProcessor != nullptr)
 	   delete the_postProcessor;
-	if (params  -> theStreams [stream]. is_audio) {
-	   fprintf (stderr, "we selected an audio stream\n");
+	if (params  -> subChannels [shortId]. is_audioService) {
+	   fprintf (stderr, "we selected an audio stream (shortId %d, streamId %d)\n",
+	                     shortId,
+	                     params -> subChannels [shortId]. streamId);
 	   the_postProcessor = new audioProcessor (theParent, params);
 	}
 	else {
 	   fprintf (stderr, "we selected a data stream\n");
-	   the_postProcessor = new dataProcessor (theParent, params, stream);
+	   the_postProcessor = new dataProcessor (theParent, params, shortId);
 	}
 
 	if (params -> theChannel. MSC_Mode == 0)
 	   my_mscHandler	= new qam16_handler (params,
 	                                             the_postProcessor, 
-	                                             muxLength, stream);
+	                                             muxLength, shortId);
 	else
 	   my_mscHandler	= new qam4_handler (params,
 	                                            the_postProcessor,
-	                                            muxLength, stream);
+	                                            muxLength, shortId);
 	locker. unlock ();
 }
 

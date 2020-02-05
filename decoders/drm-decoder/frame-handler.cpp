@@ -303,8 +303,8 @@ L1:
 	}
 }
 
-void	frameHandler::selectService	(int stream) {
-	my_mscProcessor -> selectService (stream);
+void	frameHandler::selectService	(int shortId) {
+	my_mscProcessor -> selectService (shortId);
 }
 
 void	frameHandler::set_constellationView	(const QString &s) {

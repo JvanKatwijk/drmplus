@@ -97,7 +97,7 @@ int64_t	period	= (BUFFERSIZE * 1000000) / 192000;  // full IQś read
 
 	      if (++teller >= 20) {
 	         int xx = ftell (filePointer);
-	         float progress = (float)xx / samplesinFile;
+	         float progress = (float)xx / 8  / samplesinFile;
 	         set_progressBar ((int)(progress * 100));
                  teller = 0;
 	      }

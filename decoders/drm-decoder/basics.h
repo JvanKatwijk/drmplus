@@ -31,13 +31,6 @@
 
 #define	SAMPLE_RATE	192000
 
-//enum    {
-//        QAM4, QAM16, QAM64
-//};
-//
-//enum    {
-//        AUDIO_STREAM, DATA_STREAM
-//};
 
 #define	FINE_TIME_BLOCKS	2
 typedef struct {
@@ -47,26 +40,31 @@ typedef struct {
 	uint8_t		MSC_Mode;
 	uint8_t		sdcMode;
 	uint8_t		serviceEncoding;
-	int		nrServices;
+	int		nrAudioServices;
+	int		nrDataServices;
 	uint8_t		toggleFlag;
 } channelParameters;
 
 typedef struct {
 	bool		inUse;
-	uint32_t	serviceId;
 	uint8_t		shortId;
+	uint32_t	serviceId;
+	uint8_t		streamId;
 	QString		serviceName;
-	QString		programType;
+	int		language;		// set by FAC
+	bool		is_audioService;
+	int		serviceDescriptor;
 	QString		languagetxt;
 	QString		country;
-	int		language;		// set by FAC
-	bool		is_audio;
-	uint8_t		serviceDescriptor;
-	uint8_t		streamId;
+} subChannelParameters;
+
+typedef struct {
+	bool		inUse;
 	int16_t		lengthHigh;
 	int16_t		lengthLow;
 	int		offsetHigh;
 	int		offsetLow;
+	QString		programType;
 	uint8_t		audioCoding;
 	uint8_t		sbrFlag;
 	uint8_t		audioMode;
@@ -96,6 +94,7 @@ typedef struct	{
 //
 	channelParameters	theChannel;
 	streamParameters	theStreams [4];
+	subChannelParameters	subChannels [4];
 	uint8_t		protLevelA;		// set by SDC
 	uint8_t		protLevelB;		// set by SDC
 	int		muxLength;

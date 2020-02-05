@@ -5,10 +5,10 @@ TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
 TARGET	= drm-plus-0.6
-QMAKE_CFLAGS	+= -ffast-math -flto
-QMAKE_CXXFLAGS	+= -ffast-math -flto
-#QMAKE_LFLAGS	+= -g
-#QMAKE_CXXFLAGS	+= -g 
+#QMAKE_CFLAGS	+= -ffast-math -flto
+#QMAKE_CXXFLAGS	+= -ffast-math -flto
+QMAKE_LFLAGS	+= -g
+QMAKE_CXXFLAGS	+= -g 
 RC_ICONS        =  drmplus.ico
 RESOURCES       += resources.qrc
 

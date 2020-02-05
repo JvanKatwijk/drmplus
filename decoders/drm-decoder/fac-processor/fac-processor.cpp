@@ -191,8 +191,10 @@ void	facProcessor::channelData (uint8_t *facBits) {
 	params	-> theChannel. serviceEncoding =
 	                          facBits [11] * 8 + facBits [12] * 4 +
 	                          facBits [13] * 2 + facBits [14];
-	params	-> theChannel. nrServices	=
-	                 key_to_number (params -> theChannel. serviceEncoding);
+	params	-> theChannel. nrAudioServices	=
+	                          (facBits [11] << 1) | (facBits [12]);
+	params	-> theChannel. nrDataServices	=
+	                          (facBits [13] << 1) | (facBits [14]);
 	params	-> theChannel. toggleFlag = facBits [18];
 }
 
@@ -203,23 +205,24 @@ uint32_t serviceId	= 0;
 	   serviceId <<= 1;
 	   serviceId |= serviceBits [i];
 	}
-	params -> theStreams [shortId]. serviceId = serviceId;
+	params	-> subChannels [shortId]. serviceId = serviceId;
+	params	-> subChannels [shortId]. shortId  = shortId;
 
 	uint8_t language = 0;
 	for (int i = 0; i < 4; i ++) {
 	   language <<= 1;
 	   language |= serviceBits [27 + i];
 	}
-	params -> theStreams [shortId]. language = language;
-
-	params	-> theStreams [shortId]. is_audio = serviceBits [31] == 0;
+	params	-> subChannels [shortId]. language = language;
+	params	-> subChannels [shortId]. is_audioService =
+	                                    serviceBits [31] == 0;
 
 	uint8_t serviceDescriptor = 0;
 	for (int i = 0; i < 5; i ++) {
 	   serviceDescriptor <<= 1;
 	   serviceDescriptor |= serviceBits [32 + i];
 	}
-	params -> theStreams [shortId]. serviceDescriptor = serviceDescriptor;
+	params -> subChannels [shortId]. serviceDescriptor = serviceDescriptor;
 }
 
 void	facProcessor::set_Viewer	(bool b) {

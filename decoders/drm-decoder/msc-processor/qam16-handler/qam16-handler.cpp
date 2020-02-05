@@ -104,80 +104,80 @@ float denom;
 //      the number of QAM cells in the A part, then the number of QAM cells
 //      in the lower protected part (the B part) follows
 
-        this    -> params		= params;
+	this    -> params		= params;
 	this	-> the_postProcessor	= the_postProcessor;
 	this	-> muxLength		= muxLength;
 	this	-> streamIndex		= streamIndex;
-        lengthA         = 0;
-        lengthB         = 0;
+	lengthA         = 0;
+	lengthB         = 0;
 
 	for (i = 0; i < 4; i ++) {
 	   if (params -> theStreams [i]. inUse) {
 	      lengthA += params  -> theStreams [i]. lengthHigh * 8;
-              lengthB += params  -> theStreams [i]. lengthLow * 8;
+	      lengthB += params  -> theStreams [i]. lengthLow * 8;
 //	      fprintf (stderr, " i = %d: lengthA = %d, lengthB = %d\n", 
 //	                i, lengthA, lengthB);
 	   }
 	}
 	firstBuffer	= new uint8_t [lengthA + lengthB];
 
-        if (lengthA != 0) {     // two real levels
+	if (lengthA != 0) {     // two real levels
 //      apply formula from section 7.2.1. to compute the number
 //      of MSC cells for the higher protected part given in bytes
-           RYlcm        = getRYlcm_16 (params -> protLevelA);
-           denom        = 0;
-           for (i = 0; i < 2; i ++)
-              denom += getRp (params -> protLevelA, i);
-           denom        *= 2 * RYlcm;
+	   RYlcm        = getRYlcm_16 (params -> protLevelA);
+	   denom        = 0;
+	   for (i = 0; i < 2; i ++)
+	      denom += getRp (params -> protLevelA, i);
+	   denom        *= 2 * RYlcm;
 //	   N1           = int16_t (ceil (8.0 * lengthA / denom) * RYlcm);
 	   N1           = int16_t (ceil (lengthA / denom) * RYlcm);
 //         fprintf (stderr, "N1 = %d (lengthA = %d)\n", N1, lengthA);
-           N2           	= muxLength - N1;
-           Y13mapper_high       = new Mapper (2 * N1, 13);
-           Y21mapper_high       = new Mapper (2 * N1, 21);
-           Y13mapper_low        = new Mapper (2 * N2, 13);
-           Y21mapper_low        = new Mapper (2 * N2, 21);
-        }
+	   N2           	= muxLength - N1;
+	   Y13mapper_high       = new Mapper (2 * N1, 13);
+	   Y21mapper_high       = new Mapper (2 * N1, 21);
+	   Y13mapper_low        = new Mapper (2 * N2, 13);
+	   Y21mapper_low        = new Mapper (2 * N2, 21);
+	}
 	else {
-           N1			= 0;
-           N2			= muxLength;
-           Y13mapper_high       = NULL;
-           Y21mapper_high       = NULL;
-           Y13mapper_low        = new Mapper (2 * N2, 13);
-           Y21mapper_low        = new Mapper (2 * N2, 21);
-        }
+	   N1			= 0;
+	   N2			= muxLength;
+	   Y13mapper_high       = NULL;
+	   Y21mapper_high       = NULL;
+	   Y13mapper_low        = new Mapper (2 * N2, 13);
+	   Y21mapper_low        = new Mapper (2 * N2, 21);
+	}
 
 //      we need two streamers:
 //      The N1 indicates the number of OFDM cells for the
 //      higher protected bits, N2 follows directly
 
-        stream_0        = new MSC_streamer (params, 0, N1,
-                                            Y13mapper_high, Y13mapper_low);
-        stream_1        = new MSC_streamer (params, 1, N1,
-                                            Y21mapper_high, Y21mapper_low);
-        thePRBS         = new prbs (stream_0 -> highBits () +
-                                    stream_1 -> highBits () +
-                                    stream_0 -> lowBits  () +
-                                    stream_1 -> lowBits  ());
+	stream_0        = new MSC_streamer (params, 0, N1,
+	                                    Y13mapper_high, Y13mapper_low);
+	stream_1        = new MSC_streamer (params, 1, N1,
+	                                    Y21mapper_high, Y21mapper_low);
+	thePRBS         = new prbs (stream_0 -> highBits () +
+	                            stream_1 -> highBits () +
+	                            stream_0 -> lowBits  () +
+	                            stream_1 -> lowBits  ());
 }
 
 	qam16_handler::~qam16_handler	() {
 	delete  stream_0;
-        delete  stream_1;
-        if (Y13mapper_high != nullptr)
+	delete  stream_1;
+	if (Y13mapper_high != nullptr)
 	   delete Y13mapper_high;
-        if (Y21mapper_high != nullptr)
+	if (Y21mapper_high != nullptr)
 	   delete Y21mapper_high;
-        delete  Y13mapper_low;
-        delete  Y21mapper_low;
-        delete  thePRBS;
+	delete  Y13mapper_low;
+	delete  Y21mapper_low;
+	delete  thePRBS;
 }
 
 void	qam16_handler::process		(theSignal *mux, bool toggler) {
 int16_t highProtectedBits       = stream_0 -> highBits () +
-                                  stream_1 -> highBits ();
+	                          stream_1 -> highBits ();
 int16_t lowProtectedBits        = stream_0 -> lowBits () +
-                                  stream_1 -> lowBits ();
+	                          stream_1 -> lowBits ();
 uint8_t bitsOut [highProtectedBits + lowProtectedBits];
 uint8_t bits_0 [stream_0 -> highBits () + stream_0 -> lowBits ()];
 uint8_t bits_1 [stream_1 -> highBits () + stream_1 -> lowBits ()];
@@ -187,31 +187,31 @@ metrics Y1      [2 * muxLength];
 uint8_t level_0 [muxLength];
 uint8_t level_1 [muxLength];
 
-//	First the "normal" decoding. leading to two bit rows
-        myDecoder. computemetrics (mux, muxLength, 0, Y0,
-                                           false, level_0, level_1);
-        stream_0        -> process      (Y0, bits_0, level_0);
-        myDecoder. computemetrics (mux, muxLength, 1, Y1,
-                                           false, level_0, level_1);
-        stream_1        -> process      (Y1, bits_1, level_1);
-//
-       memcpy (&bitsOut [0],
-                &bits_0 [0],
-                stream_0 -> highBits ());
-        memcpy (&bitsOut [stream_0 -> highBits ()],
-                &bits_1 [0],
-                stream_1 -> highBits ());
-        memcpy (&bitsOut [stream_0 -> highBits () +
-                          stream_1 -> highBits ()],
-                &bits_0 [stream_0 -> highBits ()],
-                stream_0 -> lowBits ());
-        memcpy (&bitsOut [stream_0 -> highBits () +
-                          stream_1 -> highBits () +
-                          stream_0 -> lowBits ()],
-                &bits_1 [stream_0 -> highBits ()],
-                stream_1 -> lowBits ());
+	for (int i = 0; i < 4; i ++) {
+	   myDecoder. computemetrics (mux, muxLength, 0, Y0,
+	                                      i > 0, level_0, level_1);
+	   stream_0        -> process      (Y0, bits_0, level_0);
+	   myDecoder. computemetrics (mux, muxLength, 1, Y1,
+	                                      i > 0, level_0, level_1);
+	   stream_1        -> process      (Y1, bits_1, level_1);
+	}
+	memcpy (&bitsOut [0],
+	        &bits_0 [0],
+	        stream_0 -> highBits ());
+	memcpy (&bitsOut [stream_0 -> highBits ()],
+	        &bits_1 [0],
+	        stream_1 -> highBits ());
+	memcpy (&bitsOut [stream_0 -> highBits () +
+	                  stream_1 -> highBits ()],
+	        &bits_0 [stream_0 -> highBits ()],
+	        stream_0 -> lowBits ());
+	memcpy (&bitsOut [stream_0 -> highBits () +
+	                  stream_1 -> highBits () +
+	                  stream_0 -> lowBits ()],
+	        &bits_1 [stream_0 -> highBits ()],
+	        stream_1 -> lowBits ());
 //	apply PRBS
-        thePRBS -> doPRBS (bitsOut);
+	thePRBS -> doPRBS (bitsOut);
 	if (toggler)
 	   memcpy (firstBuffer, bitsOut, lengthA + lengthB);
 	else

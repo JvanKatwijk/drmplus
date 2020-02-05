@@ -56,49 +56,26 @@ uint16_t        res     = 0;
 }
 
 void	audioProcessor::process		(uint8_t *buf_1, uint8_t *buf_2,
-	                                                 int stream) {
-int	startPosA	= 0;
-int	startPosB	= 0;
+	                                                      int shortId) {
+int	streamId	= params -> subChannels [shortId]. streamId;
+int	startPosA	= params -> theStreams [streamId]. offsetHigh;
+int	startPosB	= params -> theStreams [streamId]. offsetLow;
+int	lengthA		= params -> theStreams [streamId]. lengthHigh;
+int	lengthB		= params -> theStreams [streamId]. lengthLow;
 
-//	we first compute the length of the HP part, which - apparently -
-//	is the start of the LP part
-	for (int i = 0; i < 4; i ++) 
-	   if (params -> theStreams [i]. inUse)
-	      startPosB += params -> theStreams [i]. lengthHigh;
-
-#if 0
-	for (int i = 0; i < 4; i ++)	
-	   if (params -> theStreams [i]. inUse)
-	   fprintf (stderr, "subch %d, stream %d, %d %d\n",
-	                         i,  params -> theStreams [i]. streamId,
-	                             params -> theStreams [i]. lengthHigh,
-	                             params -> theStreams [i]. lengthLow);
-#endif
-//	Note that length and startPos are in bytes, input not yet packed though
-	for (int i = 0; i < 4; i ++) {
-	   if (params -> theStreams [i]. inUse) {
-	      int lengthA = params -> theStreams [i]. lengthHigh;
-	      int lengthB = params -> theStreams [i]. lengthLow;
-	      if (stream == i)  {	// build up the logical frame
-	         uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
-	         memcpy (dataVec, &buf_1 [startPosA * 8], lengthA * 8);
-	         memcpy (&dataVec [lengthA * 8],
-	                          &buf_2 [startPosA * 8], lengthA * 8);
-	         memcpy (&dataVec [2 * lengthA * 8],
-	                          &buf_1 [startPosB * 8], lengthB * 8);
-	         memcpy (&dataVec [2 * lengthA * 8 + lengthB * 8],
-	                          &buf_2 [startPosB * 8], lengthB * 8);
-	         processAudio (dataVec, i,
-	                       0, 	    2 * lengthA,
-	                       2 * lengthA, 2 * lengthB);
-	         my_messageProcessor. processMessage (dataVec,
-	                                   8 * (2 * (lengthA + lengthB) - 4));
-	         break;
-	      }
-	      startPosA	+= lengthA;
-	      startPosB	+= lengthB;
-	   }
-	}
+	uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
+	memcpy (dataVec, &buf_1 [startPosA * 8], lengthA * 8);
+	memcpy (&dataVec [lengthA * 8],
+	                   &buf_2 [startPosA * 8], lengthA * 8);
+	memcpy (&dataVec [2 * lengthA * 8],
+	                   &buf_1 [startPosB * 8], lengthB * 8);
+	memcpy (&dataVec [(2 * lengthA + lengthB) * 8],
+	                   &buf_2 [startPosB * 8], lengthB * 8);
+	processAudio (dataVec, streamId,
+	              0,     2 * lengthA,
+	              2 * lengthA, 2 * lengthB);
+	my_messageProcessor.
+	         processMessage (dataVec, 8 * (2 * (lengthA + lengthB) - 4));
 }
 
 void	audioProcessor::processAudio (uint8_t *v, int16_t streamIndex,
@@ -108,11 +85,17 @@ uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
 
 	switch (audioCoding) {
 	   case 0:		// AAC
-	   case 3:		// xHE_AAC
 	      show_audioMode (QString ("AAC"));
 	      process_aac (v, streamIndex,
 	                   startHigh, lengthHigh,
 	                   startLow,  lengthLow);
+	      return;
+
+	   case 3:		// xHE_AAC
+	      show_audioMode (QString ("xHE-AAC"));
+	      process_usac (v, streamIndex,
+	                    startHigh, lengthHigh,
+	                    startLow,  lengthLow);
 	      return;
 
 //	   case 1:		// CELP
@@ -231,22 +214,19 @@ int16_t		headerLength;
 int16_t		crc_start;
 int16_t		payLoad_start;
 int16_t		payLoad_length = 0;
-//
+
+//	we could assert that startLow == 0
 //	in mode E we have 24 Khz -> 5, 48 Khz -> 10
 	numFrames = params -> theStreams [mscIndex].
 	                           audioSamplingRate == 03 ? 5 : 10;
 	headerLength = numFrames == 10 ? (9 * 12 + 4) / 8 : (4 * 12) / 8;
-	static int teller = 0;
-//	startLow in bytes!!
-	teller++;
+//	length in bytes
+
 	f [0]. startPos = 0;
 	for (i = 1; i < numFrames; i ++) {
-	   f [i]. startPos = get_MSCBits (v,
-	                                  startLow * 8 + 12 * (i - 1), 12);
-//	      fprintf (stderr, "%d ", f [i]. startPos);
+	   f [i]. startPos = get_MSCBits (v, 12 * (i - 1), 12);
 	}
-//	   fprintf (stderr, "length = %d\n", lengthLow);
-	   teller = 0;
+
 	for (i = 1; i < numFrames; i ++) {
 	   f [i - 1]. length = f [i]. startPos - f [i - 1]. startPos;
 	   if (f [i - 1]. length < 0 ||
@@ -281,6 +261,26 @@ int16_t		payLoad_length = 0;
 	}
 	playOut (mscIndex);
 }
+//
+//	xHE-AAC is handled here
+void	audioProcessor::process_usac	(uint8_t *v, int16_t mscIndex,
+                                         int16_t startHigh, int16_t lengthHigh,
+                                         int16_t startLow, int16_t lengthLow) {
+int	frameBorderCount	= get_MSCBits (v, 0, 4);
+int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
+int	crc			= get_MSCBits (v, 8, 8);
+int	length			= lengthHigh + lengthLow - 4;
+	if (frameBorderCount > 0) {
+	   for (int i = 0; i < frameBorderCount; i ++) {
+	      int frameBorderDescr =
+	              get_MSCBits (v, (length - 2 - 2 * i) * 8, 16);
+	      fprintf (stderr, "index = %d, cnt = %d\n",
+	                        frameBorderDescr >> 4,
+	                        frameBorderDescr & 0xF);
+	   }
+	}
+}
+
 
 void	audioProcessor::playOut (int16_t	mscIndex) {
 int16_t	i;
@@ -307,8 +307,10 @@ uint8_t	audioMode		= params -> theStreams [mscIndex].
 	   int32_t	rate;
 	   if (f [index]. length < 0)
 	      continue;
-//	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
-//	                          index, numFrames, f [index]. length + 1);
+#if 0
+	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
+	                          index, numFrames, f [index]. length + 1);
+#endif
 	   my_aacDecoder.  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
 	                                 f [index]. length + 1,
 	                                 &convOK,

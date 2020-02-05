@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -136,11 +136,12 @@ uint16_t	i;
 
 	*pcmRate	= hInfo. samplerate;
 	*conversionOK	= !hInfo. error;
-
-//	fprintf (stderr, "samples %d, sbr %d ps %d ch %d sr %d consumed %d\n",
-//	                 hInfo. samples, hInfo. sbr,
-//	                 hInfo. ps, hInfo. channels, 
-//	                 hInfo. samplerate, hInfo. bytesconsumed);
+#if 0
+	fprintf (stderr, "samples %d, sbr %d ps %d ch %d sr %d consumed %d\n",
+	                 hInfo. samples, hInfo. sbr,
+	                 hInfo. ps, hInfo. channels, 
+	                 hInfo. samplerate, hInfo. bytesconsumed);
+#endif
 	if (hInfo. error != 0) {
 	   fprintf (stderr, "Warning %s\n",
 	                     faacDecGetErrorMessage (hInfo. error));
