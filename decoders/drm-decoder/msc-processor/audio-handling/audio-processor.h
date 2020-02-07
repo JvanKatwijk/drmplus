@@ -28,7 +28,7 @@
 #include        <QObject>
 #include        <cstring>
 #include	"fir-filters.h"
-#include        "drm-aacdecoder.h"
+#include	"decoder-base.h"
 #include	"message-processor.h"
 #include	"post-processor.h"
 
@@ -43,14 +43,15 @@ class	drmDecoder;
 class	audioProcessor: public postProcessor {
 Q_OBJECT
 public:
-			audioProcessor	(drmDecoder *, drmParameters *);
+			audioProcessor	(drmDecoder *,
+	                                 drmParameters *, int);
 			~audioProcessor	();
 	void		process		(uint8_t *, uint8_t *, int);
 private:
 	drmDecoder	*parent;
 	drmParameters	*params;
 	messageProcessor my_messageProcessor;
-	DRM_aacDecoder	my_aacDecoder;
+	decoderBase	*my_aacDecoder;
 	LowPassFIR      upFilter_24000;
 	int		numFrames;
 	void		processAudio	(uint8_t *, int16_t,

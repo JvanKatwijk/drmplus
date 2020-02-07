@@ -4,11 +4,11 @@
 TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
-TARGET	= drm-plus-0.6
-#QMAKE_CFLAGS	+= -ffast-math -flto
-#QMAKE_CXXFLAGS	+= -ffast-math -flto
-QMAKE_LFLAGS	+= -g
-QMAKE_CXXFLAGS	+= -g 
+TARGET	= drm-plus-0.7
+QMAKE_CFLAGS	+= -ffast-math -flto
+QMAKE_CXXFLAGS	+= -ffast-math -flto
+#QMAKE_LFLAGS	+= -g
+#QMAKE_CXXFLAGS	+= -g 
 RC_ICONS        =  drmplus.ico
 RESOURCES       += resources.qrc
 
@@ -104,16 +104,36 @@ SOURCES += ./main.cpp \
 
 unix {
 DESTDIR		= ./linux-bin
+CONFIG		+= qwt
 CONFIG		+= sdrplay
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 CONFIG		+= lime
 CONFIG		+= drm
 CONFIG		+= fm
+#CONFIG		+= fdk-aac
+CONFIG		+= faad
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 INCLUDEPATH	+= /usr/include/qt5/qwt
-LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -lfaad_drm -ldl
+LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl
+}
+
+fdk-aac {
+DEFINES		+= __WITH_FDK_AAC__
+INCLUDEPATH     += /usr/local/include/fdk-aac
+LIBS		+= -lfdk-aac
+
+SOURCES		+=./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.cpp 
+HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.h
+}
+
+faad	{
+DEFINES		+= __WITH_FAAD__
+LIBS		+= -lfaad_drm
+
+SOURCES		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.cpp 
+HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.h
 }
 
 win32 {
@@ -154,6 +174,7 @@ DEPENDPATH += decoders/drm-decoder \
 	      decoders/drm-decoder/sdc-processor \
 	      decoders/drm-decoder/msc-processor \
 	      decoders/drm-decoder/msc-processor/data-handling \
+	      decoders/drm-decoder/msc-processor/audio-handling \
 	      decoders/drm-decoder/msc-processor/qam4-handler \
 	      decoders/drm-decoder/msc-processor/qam16-handler \
 	      decoders/drm-decoder/utilities \
@@ -167,6 +188,7 @@ INCLUDEPATH += decoders/drm-decoder \
 	      decoders/drm-decoder/sdc-processor \
 	      decoders/drm-decoder/msc-processor \
 	      decoders/drm-decoder/msc-processor/data-handling \
+	      decoders/drm-decoder/msc-processor/audio-handling \
 	      decoders/drm-decoder/msc-processor/qam4-handler \
 	      decoders/drm-decoder/msc-processor/qam16-handler \
 	      decoders/drm-decoder/utilities \
@@ -189,8 +211,6 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/audio-processor.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/drm-aacdecoder.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
@@ -199,6 +219,8 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
+	   ./decoders/drm-decoder/msc-processor/audio-handling/audio-processor.h \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.h \
 	   ./decoders/drm-decoder/utilities/checkcrc.h \
 	   ./decoders/drm-decoder/utilities/mapper.h \
 	   ./decoders/drm-decoder/utilities/prbs.h \
@@ -235,8 +257,6 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-metrics.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/audio-processor.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/drm-aacdecoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
@@ -245,6 +265,8 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
+	   ./decoders/drm-decoder/msc-processor/audio-handling/audio-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.cpp \
 	   ./decoders/drm-decoder/utilities/checkcrc.cpp \
 	   ./decoders/drm-decoder/utilities/mapper.cpp \
 	   ./decoders/drm-decoder/utilities/prbs.cpp \

@@ -1,0 +1,13 @@
+
+	audioEncoding	2 bits 00 or 11
+	sbrFlag		1 bit  deoends on audioencoding
+	audioMode	2 bits deoends on audioencofing
+	samplingRate	3 bits
+	textflag	1 bit
+	enhanceFlag	1 bit
+	coderField	5 bits (3 + 2)
+	rfa		1 bit
+
+voor aac dus 2 bytes
+
+

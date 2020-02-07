@@ -8,7 +8,7 @@
 class	postProcessor: public QObject {
 public:
 		postProcessor	();
-		~postProcessor	();
+virtual		~postProcessor	();
 virtual	void	process		(uint8_t *, uint8_t *, int);
 };
 

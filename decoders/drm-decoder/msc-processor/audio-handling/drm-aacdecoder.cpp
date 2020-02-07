@@ -25,66 +25,33 @@
 #include	<stdio.h>
 #include	"drm-decoder.h"
 
-	DRM_aacDecoder::DRM_aacDecoder (drmDecoder *drm) {
-	the_drmDecoder	= drm;
-	the_aacDecoder	= nullptr;
-	SBR_flag	= false;
-	audioMode	= 0x77;
-	audioRate	= 0x77;
-	connect (this, SIGNAL (aacData (QString)),
-	         drm,  SLOT (aacData (QString)));
-}
-
-	DRM_aacDecoder::~DRM_aacDecoder (void) {
-	closeDecoder ();
-}
-//
-//	AudioParams contains the relevant parameters:
-//	- audioSampleRate
-//	- SBR_used
-//	- audioMode
-//
-bool	DRM_aacDecoder::checkfor (uint8_t	audioRate,
-	                          bool		newSBR,
-	                          uint8_t	audioMode) {
-	if (the_aacDecoder == nullptr)
-	   the_aacDecoder = NeAACDecOpen ();
-	if (the_aacDecoder == nullptr)
-	   return false;
-
-	if (newSBR ==  this -> SBR_flag &&
-	    audioMode == this -> audioMode &&
-	    audioRate == this -> audioRate)
-	   return true;
-	this	-> audioRate		= audioRate;
-	this	-> SBR_flag		= newSBR;
-	this	-> audioMode		= audioMode;
-	return initDecoder (this -> audioRate,
-	                    this -> SBR_flag, this -> audioMode);
-}
-
-bool DRM_aacDecoder::initDecoder (int16_t	audioSampleRate,
-	                          bool		SBR_used,
-	                          uint8_t	audioMode) {
+	DRM_aacDecoder::DRM_aacDecoder (drmDecoder *drm,
+	                                drmParameters *params,
+	                                int streamId) {
 int16_t aacRate = 24000;
 uint8_t	aacMode	= DRMCH_SBR_PS_STEREO;
 int	s;
 QString	text;
 
-	if (the_aacDecoder == nullptr)
-	   the_aacDecoder = NeAACDecOpen ();
-	if (the_aacDecoder == nullptr) 	// should not happen
-	   return false;
+	the_drmDecoder	= drm;
+	SBR_flag	= params -> theStreams [streamId]. sbrFlag;
+	audioMode	= params -> theStreams [streamId]. audioMode;
+	audioRate	= params -> theStreams [streamId]. audioSamplingRate;
+	connect (this, SIGNAL (aacData (QString)),
+	         drm,  SLOT (aacData (QString)));
 
+	the_aacDecoder	= NeAACDecOpen ();
+	if (the_aacDecoder == nullptr)
+	   fprintf (stderr, "foute boel\n");
 // Only 24 kHz and 48 kHz with DRM+
-	aacRate = audioSampleRate == 03 ? 24000 : 48000;
+	aacRate = audioRate == 03 ? 24000 : 48000;
 	text = QString::number (aacRate);
 	text. append (" ");
 
 // Number of channels for AAC: Mono, PStereo, Stereo 
 	switch (audioMode) {
 	   case 0:		// audioMode == 0, MONO
-	      if (SBR_used) 
+	      if (SBR_flag) 
 	         aacMode = DRMCH_SBR_MONO;
 	      else 
 	         aacMode = DRMCH_MONO;
@@ -99,7 +66,7 @@ QString	text;
 	
 	   default:
 	   case 2:
-	      if (SBR_used) 
+	      if (SBR_flag) 
 	         aacMode = DRMCH_SBR_STEREO;
 	      else
 	         aacMode = DRMCH_STEREO;
@@ -109,13 +76,17 @@ QString	text;
 
 	aacData (text);
 	s = NeAACDecInitDRM (&the_aacDecoder, aacRate, (uint8_t)aacMode);
-	return s >= 0;
+	fprintf (stderr, "DRM is %s inited %d\n", s < 0 ? "not" : "", s);
+}
+
+	DRM_aacDecoder::~DRM_aacDecoder (void) {
+	closeDecoder ();
 }
 //
 //	Later on, we'll change this such that the return
 //	vector is for further processing
 void	DRM_aacDecoder::decodeFrame (uint8_t	*AudioFrame,
-	                             int16_t	frameSize,
+	                             uint32_t	frameSize,
 	                             bool	*conversionOK,
 	                             int16_t	*buffer,
 	                             int16_t	*samples,
@@ -123,6 +94,7 @@ void	DRM_aacDecoder::decodeFrame (uint8_t	*AudioFrame,
 int16_t* outBuf = NULL;
 NeAACDecFrameInfo hInfo;
 uint16_t	i;
+
 	hInfo.channels	= 1;
 	hInfo.error	= 1;
 //	ensure we have a decoder:
@@ -149,18 +121,20 @@ uint16_t	i;
 	   return;
 	}
 
-	if (hInfo. channels == 2)
+	if (hInfo. channels == 2) {
 	   for (i = 0; i < hInfo. samples; i ++)
 //	   for (i = 0; i < 2 * hInfo. samples; i ++)
 	      buffer [i] = outBuf [i];
+	   *samples = hInfo. samples / 2;
+	}
 	else
-	if (hInfo. channels == 1)
+	if (hInfo. channels == 1) {
 	   for (i = 0; i < hInfo. samples; i ++) {
 	      buffer [2 * i]	= ((int16_t *)outBuf) [i];
 	      buffer [2 * i + 1] = buffer [2 * i];
 	   }
-	*samples = hInfo. samples;
-	return;
+	   *samples = hInfo. samples;
+	}
 }
 
 void DRM_aacDecoder::closeDecoder() {

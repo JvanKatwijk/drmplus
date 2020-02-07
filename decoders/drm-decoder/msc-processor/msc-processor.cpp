@@ -207,7 +207,9 @@ void	mscProcessor::selectService	(int shortId) {
 	   fprintf (stderr, "we selected an audio stream (shortId %d, streamId %d)\n",
 	                     shortId,
 	                     params -> subChannels [shortId]. streamId);
-	   the_postProcessor = new audioProcessor (theParent, params);
+	   the_postProcessor = new audioProcessor (theParent,
+		                                   params, 
+	                                           params -> subChannels [shortId]. streamId);
 	}
 	else {
 	   fprintf (stderr, "we selected a data stream\n");

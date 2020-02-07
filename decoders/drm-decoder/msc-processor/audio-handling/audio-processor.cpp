@@ -24,6 +24,11 @@
 #include	"basics.h"
 #include	"audio-processor.h"
 #include	"drm-decoder.h"
+#ifdef	__WITH_FDK_AAC__
+#include	"fdk-aac.h"
+#elif	__WITH_FAAD__
+#include	"drm-aacdecoder.h"
+#endif
 
 static  inline
 uint16_t        get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
@@ -37,22 +42,28 @@ uint16_t        res     = 0;
 }
 
 	audioProcessor::audioProcessor	(drmDecoder *drm,
-	                                 drmParameters *params):
+	                                 drmParameters *params, int streamId):
 	                                    my_messageProcessor (drm),
-	                                    my_aacDecoder (drm),
 	                                    upFilter_24000 (5, 12000, 48000) {
 	this	-> parent	= drm;
 	this	-> params	= params;
-
 	connect (this, SIGNAL (show_audioMode (QString)),
 	         parent, SLOT (show_audioMode (QString)));
 	connect (this, SIGNAL (putSample (float, float)),
 	         parent, SLOT (sampleOut (float, float)));
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (faadSuccess (bool)));
+#ifdef	__WITH_FDK_AAC__
+	my_aacDecoder		= new fdkAAC	(drm, params, streamId);
+#elif	__WITH_FAAD__
+	my_aacDecoder		= new DRM_aacDecoder (drm, params, streamId);
+#else
+	my_aacDecoder		= new decoderBase ();
+#endif
 }
 
 	audioProcessor::~audioProcessor	() {
+	delete my_aacDecoder;
 }
 
 void	audioProcessor::process		(uint8_t *buf_1, uint8_t *buf_2,
@@ -93,9 +104,11 @@ uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
 
 	   case 3:		// xHE_AAC
 	      show_audioMode (QString ("xHE-AAC"));
+#ifdef	__WITH_FDK_AAC__
 	      process_usac (v, streamIndex,
 	                    startHigh, lengthHigh,
 	                    startLow,  lengthLow);
+#endif
 	      return;
 
 //	   case 1:		// CELP
@@ -132,7 +145,7 @@ void	audioProcessor::process_aac (uint8_t *v, int16_t mscIndex,
 }
 
 static
-int16_t outBuffer [8 * 960];
+int16_t	outBuffer [8 * 960];
 static
 audioFrame f [20];
 void	audioProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
@@ -290,12 +303,6 @@ uint8_t	SBR_flag		= params -> theStreams [mscIndex].
 	                                                   sbrFlag;
 uint8_t	audioMode		= params -> theStreams [mscIndex].
 	                                                   audioMode;
-	if (!my_aacDecoder.  checkfor (audioSamplingRate,
-	                                        SBR_flag, 
-	                                        audioMode)) {
-	   faadSuccess (false);
-	   return;
-	}
 
 //	fprintf (stderr, "Coding %d, rate %d, sbr %d, mode %d\n",
 //	                  params -> theStreams [mscIndex]. audioCoding,
@@ -311,7 +318,7 @@ uint8_t	audioMode		= params -> theStreams [mscIndex].
 	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
 	                          index, numFrames, f [index]. length + 1);
 #endif
-	   my_aacDecoder.  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
+	   my_aacDecoder ->  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
 	                                 f [index]. length + 1,
 	                                 &convOK,
 	                                 outBuffer,
@@ -339,20 +346,21 @@ int16_t	i;
 void	audioProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                          int32_t pcmRate) {
 int16_t	i;
+
 	if (pcmRate == 48000) {
-	   float lbuffer [cnt];
-	   for (i = 0; i < cnt / 2; i ++) {
+	   float lbuffer [2 * cnt];
+	   for (i = 0; i < cnt; i ++) {
 	      lbuffer [2 * i]     = float (buffer [2 * i] / 32767.0);
 	      lbuffer [2 * i + 1] = float (buffer [2 * i + 1] / 32767.0);
 	   }
-	   toOutput (lbuffer, cnt);
+	   toOutput (lbuffer, 2 * cnt);
 	   return;
 	}
 
 
 	if (pcmRate == 24000) {
-	   float lbuffer [2 * cnt];
-	   for (i = 0; i < cnt / 2; i ++) {
+	   float lbuffer [4 * cnt];
+	   for (i = 0; i < cnt; i ++) {
 	      std::complex<float> help =
 	           upFilter_24000.
 	                Pass (std::complex<float> (buffer [2 * i] / 32767.0,
@@ -363,7 +371,7 @@ int16_t	i;
 	      lbuffer [4 * i + 2] = real (help);
 	      lbuffer [4 * i + 3] = imag (help);
 	   }
-	   toOutput (lbuffer, 2 * cnt);
+	   toOutput (lbuffer, 4 * cnt);
 	   return;
 	}
 }

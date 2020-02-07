@@ -26,9 +26,10 @@
 
 #include	<neaacdec.h>
 #include	<QObject>
-//#include	<faad.h>
+#include	"decoder-base.h"
 #include	<stdio.h>
 #include	<stdint.h>
+#include	"basics.h"
 
 class	drmDecoder;
 
@@ -37,20 +38,18 @@ class	drmDecoder;
 //	It turns out that faad2 supports DRM, so the interface
 //	can be kept pretty simple
 
-class DRM_aacDecoder: public QObject {
+class DRM_aacDecoder: public decoderBase {
 Q_OBJECT
 public:
-		DRM_aacDecoder	(drmDecoder *drm);
+		DRM_aacDecoder	(drmDecoder *, drmParameters *, int);
 	 	~DRM_aacDecoder (void);
-	bool	checkfor 	(uint8_t, bool, uint8_t);
-	bool	initDecoder	(int16_t, bool, uint8_t);
 	void	decodeFrame	(uint8_t *,
-	                         int16_t,
+	                         uint32_t,
 	                         bool *,
 	                         int16_t	*,		// buffer
 	                         int16_t	*, int32_t *);
 	void	closeDecoder	(void);
-protected:
+private:
 	drmDecoder	*the_drmDecoder;
 	NeAACDecHandle	the_aacDecoder;
 	bool		SBR_flag;

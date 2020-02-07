@@ -1,9 +1,9 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.6
+DRMPLUS-0.7
 ------------------------------------------------------------------
 
-DRMPLUS-0.6 is experimental software for the decoding of
+DRMPLUS-0.7 is experimental software for the decoding of
 DRM+ signals. The software is "in development" and far from
 error free.
 
@@ -20,6 +20,37 @@ of the drm decoder of my swradio-8 software.
 Since in the region I live there are no DRM + transmissions,
 the software was tested with some input files, comments and 
 suggestions are welcome.
+
+------------------------------------------------------------------------
+Current Status
+--------------------------------------------------------------------------
+
+While 0.7 is closer to 1.0 than 0.6, there is still a way to
+go before a first official release is there.
+
+DRM+ (and DRM as well) move (slowly) away from AAC towards xHE-AAC
+to encode audio signals.
+Unfortunately, the faad library used ((a.o for my qt-dab software)
+does not support xHE-AAC (maybe it will, but future is not very clear
+about that). Anyway, a move has to be made to another library, and
+the fdk-aac (from fraunhofer) is chosen.
+
+In version 0.7 a start is made in using the fdk-aac library for decoding the
+AAC encoded services. 
+The ".pro" file provides an option to configure the software to use
+the "faad" library for AAC decoding.
+Of course, when using the fdk-aac library, a recent version of the
+library and the include files have to be installed.
+Same of libfaad
+
+Note that xHE-AAC decoding is NOT YET implemented.
+Implementing the decoding of xHE-AAC might take a couple of days.
+
+Further issues:
+ - sometimes a crash on program termination, the reason forit not yet understood,
+ - there is an issue with the mapping of services and streams, it is
+not (yet) clear how to handle dynamically changing mappings
+
 
 -------------------------------------------------------------------------
 Introduction
