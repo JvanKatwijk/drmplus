@@ -20,16 +20,17 @@
  *    along with DRM+ decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#
+
+#ifdef	__WITH_FAAD__
 #ifndef __DRM_AACDECODER__
 #define __DRM_AACDECODER__
 
 #include	<neaacdec.h>
 #include	<QObject>
-#include	"decoder-base.h"
 #include	<stdio.h>
 #include	<stdint.h>
 #include	"basics.h"
+#include	"decoder-base.h"
 
 class	drmDecoder;
 
@@ -41,8 +42,9 @@ class	drmDecoder;
 class DRM_aacDecoder: public decoderBase {
 Q_OBJECT
 public:
-		DRM_aacDecoder	(drmDecoder *, drmParameters *, int);
+		DRM_aacDecoder	(drmDecoder *drm, drmParameters *);
 	 	~DRM_aacDecoder (void);
+	void	reinit		(std::vector<uint8_t>, int);
 	void	decodeFrame	(uint8_t *,
 	                         uint32_t,
 	                         bool *,
@@ -50,7 +52,11 @@ public:
 	                         int16_t	*, int32_t *);
 	void	closeDecoder	(void);
 private:
+	void	initDecoder	(int16_t       audioSampleRate,
+                                  bool          SBR_used,
+                                  uint8_t       audioMode);
 	drmDecoder	*the_drmDecoder;
+	drmParameters	*params;
 	NeAACDecHandle	the_aacDecoder;
 	bool		SBR_flag;
 	uint8_t		audioMode;
@@ -60,4 +66,4 @@ signals:
 };
 
 #endif // __DRM_AACDECODER
-
+#endif

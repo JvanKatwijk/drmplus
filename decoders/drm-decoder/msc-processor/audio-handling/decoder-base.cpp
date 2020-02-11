@@ -25,9 +25,13 @@
 #include	<vector>
 #include	"decoder-base.h"
 
-
 	decoderBase::decoderBase	() {}
 	decoderBase::~decoderBase	() {}
+
+void	decoderBase::reinit		(std::vector<uint8_t> v, int sI) {
+	(void)v; (void)sI;
+}
+
 void	decoderBase::decodeFrame (uint8_t	*audioFrame,
 	                          uint32_t	frameSize,
 	                          bool		*conversionOK,

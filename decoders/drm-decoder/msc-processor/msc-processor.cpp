@@ -27,8 +27,8 @@
 #include	"qam4-handler.h"
 #include	"qam16-handler.h"
 #include	"referenceframe.h"
-#include	"audio-processor.h"
 #include	"data-processor.h"
+#include	"post-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
 	                            drmParameters	*params,
@@ -203,19 +203,9 @@ void	mscProcessor::selectService	(int shortId) {
 
 	if (the_postProcessor != nullptr)
 	   delete the_postProcessor;
-	if (params  -> subChannels [shortId]. is_audioService) {
-	   fprintf (stderr, "we selected an audio stream (shortId %d, streamId %d)\n",
-	                     shortId,
-	                     params -> subChannels [shortId]. streamId);
-	   the_postProcessor = new audioProcessor (theParent,
-		                                   params, 
-	                                           params -> subChannels [shortId]. streamId);
-	}
-	else {
-	   fprintf (stderr, "we selected a data stream\n");
-	   the_postProcessor = new dataProcessor (theParent, params, shortId);
-	}
-
+	the_postProcessor	= new postProcessor (theParent,
+	                                             params,
+	                                             shortId);
 	if (params -> theChannel. MSC_Mode == 0)
 	   my_mscHandler	= new qam16_handler (params,
 	                                             the_postProcessor, 

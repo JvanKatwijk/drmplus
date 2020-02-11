@@ -20,8 +20,8 @@
  *    along with DRM+ Decoder; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__NEW_CONVERTER
-#define	__NEW_CONVERTER
+#ifndef	__RATE_CONVERTER__
+#define	__RATE_CONVERTER__
 
 #include	<math.h>
 #include	<complex>
@@ -31,7 +31,7 @@
 #include	<samplerate.h>
 #include	"radio-constants.h"
 
-class	newConverter {
+class	rateConverter {
 private:
 	int32_t		inRate;
 	int32_t		outRate;
@@ -44,13 +44,13 @@ private:
 	float		*outBuffer;
 	int32_t		inp;
 public:
-		newConverter (int32_t inRate, int32_t outRate, 
+		rateConverter (int32_t inRate, int32_t outRate, 
 	                      int32_t inSize);
 
-		~newConverter (void);
+		~rateConverter (void);
 
-bool	convert (DSPCOMPLEX v,
-	                       DSPCOMPLEX *out, int32_t *amount);
+bool	convert (std::complex<float> v,
+	                       std::complex<float> *out, int32_t *amount);
 
 int32_t	getOutputsize (void);
 };

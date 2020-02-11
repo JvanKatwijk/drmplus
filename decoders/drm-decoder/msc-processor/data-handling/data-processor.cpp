@@ -72,13 +72,13 @@ uint32_t y;
 
 	dataProcessor::dataProcessor	(drmDecoder *drm,
 	                                 drmParameters *params,
-	                                 int stream) {
+	                                 int streamId) {
 	this	-> drmMaster	= drm;
 	this	-> params	= params;
-	uint16_t applicationId	= params -> theStreams [stream].
-	                                                      applicationId;
-	my_packetAssembler	= new packetAssembler (params,
-	                                                       drmMaster,
+	uint16_t applicationId	=
+	                  params -> theStreams [streamId].  applicationId;
+	my_packetAssembler	=
+	                  new packetAssembler (params, drmMaster,
 	                                                       applicationId);
 	my_fecHandler		= new fecHandler (my_packetAssembler);
 }

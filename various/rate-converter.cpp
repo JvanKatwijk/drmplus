@@ -2,9 +2,9 @@
 /*
  *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the DRM+ decoder
+ *    This file is part of the DRM+ Decoder
  *
  *    DRM+ Decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include	"newconverter.h"
+#include	"rate-converter.h"
 
-	newConverter::newConverter (int32_t inRate, int32_t outRate, 
-	                            int32_t inSize) {
+	rateConverter::rateConverter (int32_t inRate, int32_t outRate, 
+	                              int32_t inSize) {
 int	err;
 	this	-> inRate	= inRate;
 	this	-> outRate	= outRate;
@@ -45,15 +45,15 @@ int	err;
 	inp			= 0;
 }
 
-	newConverter::~newConverter (void) {
+	rateConverter::~rateConverter (void) {
 	src_delete	(converter);
 	delete []	inBuffer;
 	delete []	outBuffer;
 	delete		src_data;
 }
 
-bool	newConverter::convert (DSPCOMPLEX v,
-	                       DSPCOMPLEX *out, int32_t *amount) {
+bool	rateConverter::convert (std::complex<float> v,
+	                        std::complex<float> *out, int32_t *amount) {
 int32_t	i;
 int32_t	framesOut;
 int	res;
@@ -74,12 +74,12 @@ int	res;
 	inp		= 0;
 	framesOut	= src_data -> output_frames_gen;
 	for (i = 0; i < framesOut; i ++)
-	   out [i] = DSPCOMPLEX (outBuffer [2 * i], outBuffer [2 * i + 1]);
+	   out [i] = std::complex<float> (outBuffer [2 * i], outBuffer [2 * i + 1]);
 	*amount		= framesOut;
 	return true;
 }
 
-int32_t		newConverter::getOutputsize (void) {
+int32_t	 rateConverter::getOutputsize (void) {
 	return outputLimit;
 }
 

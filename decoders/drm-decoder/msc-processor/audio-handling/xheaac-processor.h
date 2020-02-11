@@ -21,56 +21,55 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__AUDIO_PROCESSOR__
-#define	__AUDIO_PROCESSOR__
+#ifndef	__XHEAAC_PROCESSOR__
+#define	__XHEAAC_PROCESSOR__
 
 #include	"basics.h"
 #include        <QObject>
+#include	<stdint.h>
 #include        <cstring>
-#include	"fir-filters.h"
+#include	<vector>
+#include	<deque>
+#include	<complex>
+#include	"checkcrc.h"
 #include	"decoder-base.h"
 #include	"message-processor.h"
-#include	"post-processor.h"
-
-typedef struct frame {
-	int16_t length, startPos;
-	uint8_t aac_crc;
-	uint8_t audio [512];
-} audioFrame;
 
 class	drmDecoder;
+class	rateConverter;
 
-class	audioProcessor: public postProcessor {
+class	xheaacProcessor: public QObject {
 Q_OBJECT
 public:
-			audioProcessor	(drmDecoder *,
-	                                 drmParameters *, int);
-			~audioProcessor	();
-	void		process		(uint8_t *, uint8_t *, int);
-private:
-	drmDecoder	*parent;
-	drmParameters	*params;
-	messageProcessor my_messageProcessor;
-	decoderBase	*my_aacDecoder;
-	LowPassFIR      upFilter_24000;
-	int		numFrames;
-	void		processAudio	(uint8_t *, int16_t,
-	                                 int16_t, int16_t, int16_t, int16_t);
-	void		process_aac     (uint8_t *, int16_t, int16_t,
-	                                 int16_t, int16_t, int16_t);
-	void		handle_uep_audio (uint8_t *, int16_t,
-	                                 int16_t, int16_t, int16_t, int16_t);
-	void		handle_eep_audio (uint8_t *, int16_t,
-	                                          int16_t, int16_t);
+			xheaacProcessor	(drmDecoder *,
+	                                 drmParameters *,
+	                                 decoderBase *);
+			~xheaacProcessor	();
 	void		process_usac	(uint8_t *v, int16_t mscIndex,
                                          int16_t startHigh, int16_t lengthHigh,
                                          int16_t startLow, int16_t lengthLow);
-
+private:
+	void		resetBuffers	();
+	void		processFrame	(int);
+	drmDecoder	*parent;
+	drmParameters	*params;
+	messageProcessor my_messageProcessor;
+	checkCRC	theCRC;
+	int		currentRate;
+	std::vector<uint8_t>
+        		getAudioInformation (drmParameters *drm,
+                                                        int streamId);
+//	deque<uint8_t>	payload;
+//	deque<uint32_t> starters;
+//	vector<uint32_t> borders;
+//	vector<uint32_t> frameSize;
+	decoderBase	*my_aacDecoder;
+	rateConverter	*theConverter;
+	int		numFrames;
 	void		writeOut	(int16_t *, int16_t, int32_t);
-	void		toOutput	(float *, int16_t);
-	void		playOut		(int16_t);
+	void		toOutput	(std::complex<float> *, int16_t);
+	void		playOut		(std::vector<uint8_t>);
 signals:
-	void            show_audioMode  (QString);
 	void            putSample       (float, float);
 	void            faadSuccess     (bool);
 };

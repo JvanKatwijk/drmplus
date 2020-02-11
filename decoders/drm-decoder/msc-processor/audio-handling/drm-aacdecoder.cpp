@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2020
+ *    Copyright (C) 2013
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -25,24 +25,58 @@
 #include	<stdio.h>
 #include	"drm-decoder.h"
 
-	DRM_aacDecoder::DRM_aacDecoder (drmDecoder *drm,
-	                                drmParameters *params,
-	                                int streamId) {
+	DRM_aacDecoder::DRM_aacDecoder (drmDecoder *drm, 
+	                                drmParameters *params) {
+	the_drmDecoder		= drm;
+	this	-> params	= params;
+	the_aacDecoder		= nullptr;
+	connect (this, SIGNAL (aacData (QString)),
+	         drm,  SLOT (aacData (QString)));
+}
+
+	DRM_aacDecoder::~DRM_aacDecoder (void) {
+	closeDecoder ();
+}
+
+static
+std::vector <uint8_t> theDescriptor;
+
+void	DRM_aacDecoder::reinit	(std::vector<uint8_t> audioD, int streamId) {
+uint8_t audioRate		= params -> theStreams [streamId].
+                                                           audioSamplingRate;
+uint8_t SBR_flag                = params -> theStreams [streamId].
+                                                           sbrFlag;
+uint8_t audioMode               = params -> theStreams [streamId].
+                                                           audioMode;
+	if (the_aacDecoder == nullptr)
+	   the_aacDecoder = NeAACDecOpen ();
+
+	if (theDescriptor. size () != audioD. size ()) {
+	   theDescriptor = audioD;
+	   initDecoder (audioRate, SBR_flag, audioMode);
+	   return;
+	}
+
+	for (int i = 0; i < theDescriptor. size (); i ++) {
+	   if (theDescriptor. at (i) != audioD. at (i)) {
+	      theDescriptor = audioD;
+	      initDecoder (audioRate, SBR_flag, audioMode);
+	      return;
+	   }
+	}
+}
+
+void	DRM_aacDecoder::initDecoder (int16_t	audioRate,
+	                             bool	SBR_flag,
+	                             uint8_t	audioMode) {
 int16_t aacRate = 24000;
 uint8_t	aacMode	= DRMCH_SBR_PS_STEREO;
 int	s;
 QString	text;
 
-	the_drmDecoder	= drm;
-	SBR_flag	= params -> theStreams [streamId]. sbrFlag;
-	audioMode	= params -> theStreams [streamId]. audioMode;
-	audioRate	= params -> theStreams [streamId]. audioSamplingRate;
-	connect (this, SIGNAL (aacData (QString)),
-	         drm,  SLOT (aacData (QString)));
-
-	the_aacDecoder	= NeAACDecOpen ();
 	if (the_aacDecoder == nullptr)
-	   fprintf (stderr, "foute boel\n");
+	   the_aacDecoder = NeAACDecOpen ();
+
 // Only 24 kHz and 48 kHz with DRM+
 	aacRate = audioRate == 03 ? 24000 : 48000;
 	text = QString::number (aacRate);
@@ -76,11 +110,6 @@ QString	text;
 
 	aacData (text);
 	s = NeAACDecInitDRM (&the_aacDecoder, aacRate, (uint8_t)aacMode);
-	fprintf (stderr, "DRM is %s inited %d\n", s < 0 ? "not" : "", s);
-}
-
-	DRM_aacDecoder::~DRM_aacDecoder (void) {
-	closeDecoder ();
 }
 //
 //	Later on, we'll change this such that the return
@@ -94,7 +123,6 @@ void	DRM_aacDecoder::decodeFrame (uint8_t	*AudioFrame,
 int16_t* outBuf = NULL;
 NeAACDecFrameInfo hInfo;
 uint16_t	i;
-
 	hInfo.channels	= 1;
 	hInfo.error	= 1;
 //	ensure we have a decoder:
@@ -108,12 +136,11 @@ uint16_t	i;
 
 	*pcmRate	= hInfo. samplerate;
 	*conversionOK	= !hInfo. error;
-#if 0
-	fprintf (stderr, "samples %d, sbr %d ps %d ch %d sr %d consumed %d\n",
-	                 hInfo. samples, hInfo. sbr,
-	                 hInfo. ps, hInfo. channels, 
-	                 hInfo. samplerate, hInfo. bytesconsumed);
-#endif
+
+//	fprintf (stderr, "samples %d, sbr %d ps %d ch %d sr %d consumed %d\n",
+//	                 hInfo. samples, hInfo. sbr,
+//	                 hInfo. ps, hInfo. channels, 
+//	                 hInfo. samplerate, hInfo. bytesconsumed);
 	if (hInfo. error != 0) {
 	   fprintf (stderr, "Warning %s\n",
 	                     faacDecGetErrorMessage (hInfo. error));
@@ -123,7 +150,6 @@ uint16_t	i;
 
 	if (hInfo. channels == 2) {
 	   for (i = 0; i < hInfo. samples; i ++)
-//	   for (i = 0; i < 2 * hInfo. samples; i ++)
 	      buffer [i] = outBuf [i];
 	   *samples = hInfo. samples / 2;
 	}
@@ -132,8 +158,8 @@ uint16_t	i;
 	   for (i = 0; i < hInfo. samples; i ++) {
 	      buffer [2 * i]	= ((int16_t *)outBuf) [i];
 	      buffer [2 * i + 1] = buffer [2 * i];
-	   }
 	   *samples = hInfo. samples;
+	   }
 	}
 }
 

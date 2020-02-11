@@ -33,7 +33,7 @@ class	drmDecoder;
 class	packetAssembler;
 class	fecHandler;
 
-class	dataProcessor: public postProcessor {
+class	dataProcessor: public QObject {
 Q_OBJECT
 public:
 		dataProcessor	(drmDecoder *,

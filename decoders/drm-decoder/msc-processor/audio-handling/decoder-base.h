@@ -21,8 +21,8 @@
  */
 #
 
-#ifndef	__DECODER_BASE_X
-#define	__DECODER_BASE_X
+#ifndef	__DECODER_BASE_X__
+#define	__DECODER_BASE_X__
 
 #include	<QObject>
 #include	<stdio.h>
@@ -30,10 +30,11 @@
 #include	<vector>
 
 class	decoderBase : public QObject {
-Q_OBJECT
 public:
 	decoderBase	();
 virtual	~decoderBase	();
+virtual
+void	reinit		(std::vector<uint8_t>, int);
 virtual
 void	decodeFrame (uint8_t    *audioFrame,
 	             uint32_t	frameSize,

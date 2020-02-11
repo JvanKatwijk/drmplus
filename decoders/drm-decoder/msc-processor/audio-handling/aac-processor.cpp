@@ -22,13 +22,8 @@
  */
 
 #include	"basics.h"
-#include	"audio-processor.h"
 #include	"drm-decoder.h"
-#ifdef	__WITH_FDK_AAC__
-#include	"fdk-aac.h"
-#elif	__WITH_FAAD__
-#include	"drm-aacdecoder.h"
-#endif
+#include	"aac-processor.h"
 
 static  inline
 uint16_t        get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
@@ -41,116 +36,46 @@ uint16_t        res     = 0;
         return res;
 }
 
-	audioProcessor::audioProcessor	(drmDecoder *drm,
-	                                 drmParameters *params, int streamId):
+	aacProcessor::aacProcessor	(drmDecoder *drm,
+	                                 drmParameters *params,
+	                                 decoderBase	*my_aacDecoder):
 	                                    my_messageProcessor (drm),
 	                                    upFilter_24000 (5, 12000, 48000) {
 	this	-> parent	= drm;
 	this	-> params	= params;
-	connect (this, SIGNAL (show_audioMode (QString)),
-	         parent, SLOT (show_audioMode (QString)));
 	connect (this, SIGNAL (putSample (float, float)),
 	         parent, SLOT (sampleOut (float, float)));
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (faadSuccess (bool)));
-#ifdef	__WITH_FDK_AAC__
-	my_aacDecoder		= new fdkAAC	(drm, params, streamId);
-#elif	__WITH_FAAD__
-	my_aacDecoder		= new DRM_aacDecoder (drm, params, streamId);
-#else
-	my_aacDecoder		= new decoderBase ();
-#endif
+	this	-> my_aacDecoder = my_aacDecoder;
 }
 
-	audioProcessor::~audioProcessor	() {
-	delete my_aacDecoder;
-}
-
-void	audioProcessor::process		(uint8_t *buf_1, uint8_t *buf_2,
-	                                                      int shortId) {
-int	streamId	= params -> subChannels [shortId]. streamId;
-int	startPosA	= params -> theStreams [streamId]. offsetHigh;
-int	startPosB	= params -> theStreams [streamId]. offsetLow;
-int	lengthA		= params -> theStreams [streamId]. lengthHigh;
-int	lengthB		= params -> theStreams [streamId]. lengthLow;
-
-	uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
-	memcpy (dataVec, &buf_1 [startPosA * 8], lengthA * 8);
-	memcpy (&dataVec [lengthA * 8],
-	                   &buf_2 [startPosA * 8], lengthA * 8);
-	memcpy (&dataVec [2 * lengthA * 8],
-	                   &buf_1 [startPosB * 8], lengthB * 8);
-	memcpy (&dataVec [(2 * lengthA + lengthB) * 8],
-	                   &buf_2 [startPosB * 8], lengthB * 8);
-	processAudio (dataVec, streamId,
-	              0,     2 * lengthA,
-	              2 * lengthA, 2 * lengthB);
-	my_messageProcessor.
-	         processMessage (dataVec, 8 * (2 * (lengthA + lengthB) - 4));
-}
-
-void	audioProcessor::processAudio (uint8_t *v, int16_t streamIndex,
-	                              int16_t startHigh, int16_t lengthHigh,
-	                              int16_t startLow,  int16_t lengthLow) {
-uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
-
-	switch (audioCoding) {
-	   case 0:		// AAC
-	      show_audioMode (QString ("AAC"));
-	      process_aac (v, streamIndex,
-	                   startHigh, lengthHigh,
-	                   startLow,  lengthLow);
-	      return;
-
-	   case 3:		// xHE_AAC
-	      show_audioMode (QString ("xHE-AAC"));
-#ifdef	__WITH_FDK_AAC__
-	      process_usac (v, streamIndex,
-	                    startHigh, lengthHigh,
-	                    startLow,  lengthLow);
-#endif
-	      return;
-
-//	   case 1:		// CELP
-//	      show_audioMode (QString ("CELP"));
-//	      process_celp (v, mscIndex,
-//	                    startHigh, lengthHigh,
-//	                    startLow,  lengthLow);
-//	      return;
-//
-//	   case 2:		// HVXC
-//	      show_audioMode (QString ("HVXC"));
-//	      process_hvxc (v, mscIndex,
-//	                    startHigh, lengthHigh,
-//	                    startLow,  lengthLow);
-//	      return;
-
-	   default:
-	      fprintf (stderr,
-	               "unsupported format audioCoding (%d)\n", audioCoding);
-	      return;
-	}
+	aacProcessor::~aacProcessor	() {
 }
 
 //      little confusing: start- and length specifications are
 //      in bytes, we are working internally in bits
-void	audioProcessor::process_aac (uint8_t *v, int16_t mscIndex,
-                                     int16_t startHigh, int16_t lengthHigh,
-                                     int16_t startLow,  int16_t lengthLow) {
+void	aacProcessor::process_aac (uint8_t *v, int16_t streamId,
+                                   int16_t startHigh, int16_t lengthHigh,
+                                   int16_t startLow,  int16_t lengthLow) {
+	if (!params	-> theStreams [streamId]. audioStream)
+	   return;
         if (lengthHigh != 0)
-           handle_uep_audio (v, mscIndex, startHigh, lengthHigh,
+           handle_uep_audio (v, streamId, startHigh, lengthHigh,
                                                 startLow, lengthLow - 4);
         else
-           handle_eep_audio (v, mscIndex,  startLow, lengthLow - 4);
+           handle_eep_audio (v, streamId,  startLow, lengthLow - 4);
+	my_messageProcessor.
+                 processMessage (v, 8 * (2 * (lengthHigh + lengthLow) - 4));
 }
 
 static
 int16_t	outBuffer [8 * 960];
 static
 audioFrame f [20];
-void	audioProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
-	                                  int16_t startHigh, int16_t lengthHigh,
-	                                  int16_t startLow, int16_t lengthLow) {
+void	aacProcessor::handle_uep_audio (uint8_t *v, int16_t mscIndex,
+	                                int16_t startHigh, int16_t lengthHigh,
+	                                int16_t startLow, int16_t lengthLow) {
 int16_t	headerLength, i, j;
 int16_t	usedLength	= 0;
 int16_t	crcLength	= 1;
@@ -218,10 +143,10 @@ int16_t	payloadLength;
 //	Note that positions where the segments are to be found
 //	can be deduced from the start positions: just add the size
 //	of the header and the size of the crc block to the start position.
-void	audioProcessor::handle_eep_audio (uint8_t *v,
-	                                 int16_t mscIndex,
-	                                 int16_t startLow,
-	                                 int16_t lengthLow) {
+void	aacProcessor::handle_eep_audio (uint8_t *v,
+	                                int16_t mscIndex,
+	                                int16_t startLow,
+	                                int16_t lengthLow) {
 int16_t		i, j;
 int16_t		headerLength;
 int16_t		crc_start;
@@ -275,38 +200,18 @@ int16_t		payLoad_length = 0;
 	playOut (mscIndex);
 }
 //
-//	xHE-AAC is handled here
-void	audioProcessor::process_usac	(uint8_t *v, int16_t mscIndex,
-                                         int16_t startHigh, int16_t lengthHigh,
-                                         int16_t startLow, int16_t lengthLow) {
-int	frameBorderCount	= get_MSCBits (v, 0, 4);
-int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
-int	crc			= get_MSCBits (v, 8, 8);
-int	length			= lengthHigh + lengthLow - 4;
-	if (frameBorderCount > 0) {
-	   for (int i = 0; i < frameBorderCount; i ++) {
-	      int frameBorderDescr =
-	              get_MSCBits (v, (length - 2 - 2 * i) * 8, 16);
-	      fprintf (stderr, "index = %d, cnt = %d\n",
-	                        frameBorderDescr >> 4,
-	                        frameBorderDescr & 0xF);
-	   }
-	}
-}
 
-
-void	audioProcessor::playOut (int16_t	mscIndex) {
+void	aacProcessor::playOut (int16_t	streamId) {
 int16_t	i;
-uint8_t	audioSamplingRate	= params -> theStreams [mscIndex].
+uint8_t	audioSamplingRate	= params -> theStreams [streamId].
 	                                                   audioSamplingRate;
-uint8_t	SBR_flag		= params -> theStreams [mscIndex].
+uint8_t	SBR_flag		= params -> theStreams [streamId].
 	                                                   sbrFlag;
-uint8_t	audioMode		= params -> theStreams [mscIndex].
+uint8_t	audioMode		= params -> theStreams [streamId].
 	                                                   audioMode;
-
-//	fprintf (stderr, "Coding %d, rate %d, sbr %d, mode %d\n",
-//	                  params -> theStreams [mscIndex]. audioCoding,
-//	                  audioSamplingRate, SBR_flag, audioMode);
+std::vector<uint8_t> audioDescriptor =
+		getAudioInformation (params, streamId);
+	my_aacDecoder -> reinit (audioDescriptor, streamId);
 	for (i = 0; i < numFrames; i ++) {
 	   int16_t	index = i;
 	   bool		convOK;
@@ -335,7 +240,7 @@ uint8_t	audioMode		= params -> theStreams [mscIndex].
 }
 //
 
-void	audioProcessor::toOutput (float *b, int16_t cnt) {
+void	aacProcessor::toOutput (float *b, int16_t cnt) {
 int16_t	i;
 	if (cnt == 0)
 	   return;
@@ -343,7 +248,7 @@ int16_t	i;
 	   putSample (b [2 * i], b [2 * i + 1]);
 }
 
-void	audioProcessor::writeOut (int16_t *buffer, int16_t cnt,
+void	aacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                          int32_t pcmRate) {
 int16_t	i;
 
@@ -374,5 +279,26 @@ int16_t	i;
 	   toOutput (lbuffer, 4 * cnt);
 	   return;
 	}
+}
+
+std::vector<uint8_t>
+	aacProcessor::getAudioInformation (drmParameters *drm, int streamId) {
+std::vector<uint8_t> temp;
+streamParameters *sp = &(drm -> theStreams [streamId]);
+uint8_t	xxx	= 0;
+
+	xxx	= sp -> audioCoding << 6;
+	xxx	|= (sp -> sbrFlag << 5);
+	xxx	|= (sp -> audioMode << 3);
+	xxx	|= sp -> audioSamplingRate;
+	temp. push_back (xxx);
+	xxx	= 0;
+	xxx	= sp -> textFlag << 7;
+	xxx	|= (sp -> enhancementFlag << 6);
+	xxx	|= (sp -> coderField) << 1;
+	temp. push_back (xxx);
+	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
+	   temp. push_back (sp -> xHE_AAC. at (i));
+	return temp;
 }
 

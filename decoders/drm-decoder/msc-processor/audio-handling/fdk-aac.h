@@ -21,34 +21,40 @@
  */
 #
 
+#ifdef	__WITH_FDK_AAC__
 #ifndef	__FDK_AAC__
 #define	__FDK_AAC__
 
 #include	<aacdecoder_lib.h>
 #include	<stdio.h>
 #include	<vector>
+#include	"basics.h"
 #include	"decoder-base.h"
 
 class	drmDecoder;
 
 class	fdkAAC : public decoderBase {
+Q_OBJECT
 public:
-	fdkAAC	(drmDecoder *, drmParameters *, int streamId);
-	~fdkAAC	();
-void	decodeFrame (uint8_t    *audioFrame,
-	             uint32_t	frameSize,
-	             bool       *conversionOK,
-	             int16_t	*buffer,
-	             int16_t    *samples,
-	             int32_t    *pcmRate);
+		fdkAAC		(drmDecoder *, drmParameters *);
+		~fdkAAC		();
+	void	reinit		(std::vector<uint8_t>, int);
+	void	decodeFrame 	(uint8_t	*audioFrame,
+	             	         uint32_t	frameSize,
+	             	         bool		*conversionOK,
+	             	         int16_t	*buffer,
+	             	         int16_t	*samples,
+	             	         int32_t	*pcmRate);
 private:
+	void		init		();
 	HANDLE_AACDECODER	handle;
 	UCHAR		*theBuffer;
 	uint32_t	bufferP;
-std::vector<uint8_t>
+	std::vector<uint8_t>	currentConfig;
+	std::vector<uint8_t>
 			getAudioInformation (drmParameters *drm, int streamId);
 
 };
 
 #endif
-
+#endif

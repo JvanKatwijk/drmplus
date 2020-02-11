@@ -28,31 +28,49 @@
 #include	<vector>
 
 	fdkAAC::fdkAAC	(drmDecoder *p,
-	                 drmParameters *drm, int streamId) {
+	                 drmParameters *drm) {
 std::vector<uint8_t> codecInfo;
-
-	   handle = aacDecoder_Open (TT_DRM, 3);
-	   if (handle == nullptr) {
-	      throw (44);
-	   }
-	   codecInfo		= getAudioInformation (drm, streamId);
-	   UCHAR *codecP	= &codecInfo [0];
-	   uint32_t codecSize	= codecInfo. size ();
-	   AAC_DECODER_ERROR err =
-	                 aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
-	   if (err == AAC_DEC_OK) {
-	      CStreamInfo *pInfo = aacDecoder_GetStreamInfo (handle);
-	      if (pInfo == nullptr) {
-	         fprintf (stderr, "No stream info\n");
-	      }
-	   }
-	   else
-	      fprintf (stderr, "err\n");
+	handle = aacDecoder_Open (TT_DRM, 3);
+	if (handle == nullptr) {
+	   throw (44);
 	}
+}
 
 	fdkAAC::~fdkAAC	() {
 	if (handle != nullptr)
 	   aacDecoder_Close (handle);
+}
+
+void	fdkAAC::reinit	(std::vector<uint8_t> newConfig, int streamId) {
+	if (handle == nullptr)
+	   return;
+	if (currentConfig. size () != newConfig. size ()) {
+	   currentConfig = newConfig;
+	   init ();
+	   return;
+	}
+	for (int i = 0; i < newConfig. size (); i ++) {
+	   if (currentConfig. at (i) != newConfig. at (i)) {
+	      currentConfig = newConfig;
+	      init ();
+	      return;
+	   }
+	}
+}
+
+void	fdkAAC::init	() {
+	UCHAR *codecP	= &currentConfig [0];
+	uint32_t codecSize	= currentConfig. size ();
+	AAC_DECODER_ERROR err =
+	              aacDecoder_ConfigRaw (handle, &codecP, &codecSize);
+	if (err == AAC_DEC_OK) {
+	   CStreamInfo *pInfo = aacDecoder_GetStreamInfo (handle);
+	   if (pInfo == nullptr) {
+	      fprintf (stderr, "No stream info\n");
+	   }
+	}
+	else
+	   fprintf (stderr, "err\n");
 }
 
 static
@@ -75,7 +93,9 @@ uint32_t	bytesValid	= 0;
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
 	errorStatus =
-	     aacDecoder_DecodeFrame (handle, localBuffer, 3840, 0);
+	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, 0);
+	fprintf (stderr, "fdk-aac errorstatus %x\n",
+	                       errorStatus);
 	if (errorStatus == AAC_DEC_NOT_ENOUGH_BITS) {
 	   *conversionOK	= false;
 	   *samples		= 0;
@@ -101,6 +121,8 @@ uint32_t	bytesValid	= 0;
 	      buffer [2 * i + 1] = localBuffer [2 * i + i];
 	   }
 	}
+	fprintf (stderr, "frameSize %d, samplerate %d\n",
+	               fdk_info -> frameSize, fdk_info -> sampleRate);
 //	fprintf (stderr, "channel config %d (rate %d)\n",
 //	           fdk_info -> channelConfig, fdk_info -> sampleRate);
 	*samples	= fdk_info	-> frameSize;
@@ -124,6 +146,11 @@ uint8_t	xxx	= 0;
 	xxx	|= (sp -> enhancementFlag << 6);
 	xxx	|= (sp -> coderField) << 1;
 	temp. push_back (xxx);
+	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
+	   temp. push_back (sp -> xHE_AAC. at (i));
+	for (int i = 0; i < temp. size (); i ++)
+	   fprintf (stderr, "%x ", temp. at (i));
+	fprintf (stderr, "\n");
 	return temp;
 }
 

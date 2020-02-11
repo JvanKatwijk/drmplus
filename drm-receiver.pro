@@ -5,10 +5,10 @@ TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
 TARGET	= drm-plus-0.7
-QMAKE_CFLAGS	+= -ffast-math -flto
-QMAKE_CXXFLAGS	+= -ffast-math -flto
-#QMAKE_LFLAGS	+= -g
-#QMAKE_CXXFLAGS	+= -g 
+#QMAKE_CFLAGS	+= -ffast-math -flto
+#QMAKE_CXXFLAGS	+= -ffast-math -flto
+QMAKE_LFLAGS	+= -g
+QMAKE_CXXFLAGS	+= -g 
 RC_ICONS        =  drmplus.ico
 RESOURCES       += resources.qrc
 
@@ -49,6 +49,7 @@ HEADERS += ./radio.h \
 	   ./various/program-list.h \
 	   ./various/popup-keypad.h \
 	   ./various/Xtan2.h \
+	   ./various/rate-converter.h \
 	   ./output/upconverter.h \
            ./output/audiosink.h \
 	   ./scopes-qwt6/virtual-scope.h \
@@ -82,6 +83,7 @@ SOURCES += ./main.cpp \
 	   ./various/utilities.cpp \
 	   ./various/program-list.cpp \
 	   ./various/Xtan2.cpp \
+	   ./various/rate-converter.cpp \
 	   ./output/upconverter.cpp \
            ./output/audiosink.cpp \
 	   ./scopes-qwt6/virtual-scope.cpp \
@@ -111,8 +113,8 @@ CONFIG		+= hackrf
 CONFIG		+= lime
 CONFIG		+= drm
 CONFIG		+= fm
-#CONFIG		+= fdk-aac
-CONFIG		+= faad
+#CONFIG		+= faad
+CONFIG		+= fdk-aac
 LIBS		+= -L/usr/lib64
 LIBS		+= -L/lib64
 INCLUDEPATH	+= /usr/include/qt5/qwt
@@ -123,7 +125,6 @@ fdk-aac {
 DEFINES		+= __WITH_FDK_AAC__
 INCLUDEPATH     += /usr/local/include/fdk-aac
 LIBS		+= -lfdk-aac
-
 SOURCES		+=./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.cpp 
 HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.h
 }
@@ -206,11 +207,11 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.h \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.h \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.h \
+	   ./decoders/drm-decoder/msc-processor/post-processor.h \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
@@ -219,7 +220,8 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
-	   ./decoders/drm-decoder/msc-processor/audio-handling/audio-processor.h \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.h \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.h \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.h \
 	   ./decoders/drm-decoder/utilities/checkcrc.h \
 	   ./decoders/drm-decoder/utilities/mapper.h \
@@ -252,11 +254,11 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.cpp \
+	   ./decoders/drm-decoder/msc-processor/post-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-metrics.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/post-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
@@ -265,7 +267,8 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
-	   ./decoders/drm-decoder/msc-processor/audio-handling/audio-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.cpp \
 	   ./decoders/drm-decoder/utilities/checkcrc.cpp \
 	   ./decoders/drm-decoder/utilities/mapper.cpp \
@@ -307,7 +310,6 @@ HEADERS	+= \
 	   ./decoders/fm-decoder/fm-demodulator.h \
 	   ./decoders/fm-decoder/various/sincos.h \
 	   ./decoders/fm-decoder/various/pllC.h \
-	   ./decoders/fm-decoder/various/newconverter.h \
 	   ./decoders/fm-decoder/rds/rds-decoder.h \
 	   ./decoders/fm-decoder/rds/rds-group.h \
 	   ./decoders/fm-decoder/rds/rds-groupdecoder.h \
@@ -319,7 +321,6 @@ SOURCES	+= \
            ./decoders/fm-decoder/fm-demodulator.cpp \
            ./decoders/fm-decoder/various/sincos.cpp \
            ./decoders/fm-decoder/various/pllC.cpp \
-	   ./decoders/fm-decoder/various/newconverter.cpp \
 	   ./decoders/fm-decoder/rds/rds-decoder.cpp \
 	   ./decoders/fm-decoder/rds/rds-group.cpp \
 	   ./decoders/fm-decoder/rds/rds-groupdecoder.cpp \

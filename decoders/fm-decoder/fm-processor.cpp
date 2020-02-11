@@ -25,7 +25,7 @@
 #include	"fm-demodulator.h"
 #include	"rds-decoder.h"
 #include	"sincos.h"
-#include	"newconverter.h"
+#include	"rate-converter.h"
 #include	"squelchClass.h"
 
 #define	AUDIO_FREQ_DEV_PROPORTION 0.85f
@@ -63,9 +63,9 @@
 	this	-> leftChannel		= - (balance - 50.0) / 100.0;
 	this	-> rightChannel		= (balance + 50.0) / 100.0;
 	this	-> audioDecimator	=
-	                         new newConverter (fmRate,
-	                                           audioRate,
-	                                           audioRate / 200);
+	                         new rateConverter (fmRate,
+	                                            audioRate,
+	                                            audioRate / 200);
 	this	-> audioOut		=
 	                         new std::complex<float> [audioDecimator ->
 	                                                  getOutputsize ()];

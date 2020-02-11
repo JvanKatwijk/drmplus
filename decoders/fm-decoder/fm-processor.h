@@ -38,7 +38,7 @@ class		fmDecoder;
 class		fm_Demodulator;
 class		rdsDecoder;
 class		audioSink;
-class		newConverter;
+class		rateConverter;
 
 class	fmProcessor:public QThread {
 Q_OBJECT
@@ -79,7 +79,6 @@ virtual	void		run		(void);
 	int32_t		workingRate;
 	int32_t		audioRate;
 	void		sendSampletoOutput	(std::complex<float>);
-	newConverter	*theConverter;
 	std::atomic<bool>	running;
 	SinCos		*mySinCos;
 	uint8_t		fmModus;
@@ -95,7 +94,7 @@ virtual	void		run		(void);
 
 	bool		pilotLocked		();
 	float		get_dcComponent		();
-	newConverter	*audioDecimator;
+	rateConverter	*audioDecimator;
 	std::complex<float>	*audioOut;
 	rdsDecoder	*myRdsDecoder;
 

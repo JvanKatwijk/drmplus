@@ -1,10 +1,10 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.7
+DRMPLUS-0.8
 ------------------------------------------------------------------
 
-DRMPLUS-0.7 is experimental software for the decoding of
-DRM+ signals. The software is "in development" and far from
+DRMPLUS-0.8 is experimental software for the decoding of
+DRM+ signals. The software is "still in development" and certainly not
 error free.
 
 ![drm-plus](/drmplus-drm.png?raw=true)
@@ -21,39 +21,43 @@ Since in the region I live there are no DRM + transmissions,
 the software was tested with some input files, comments and 
 suggestions are welcome.
 
-------------------------------------------------------------------------
-Current Status
---------------------------------------------------------------------------
+----------------------------------------------------------------------------
+xHE-AAC decoding, services and streams
+----------------------------------------------------------------------------
 
-While 0.7 is closer to 1.0 than 0.6, there is still a way to
-go before a first official release is there.
+The current (0.8) version of drmplus is - in principle - able to decode 
+xHE-AAC encoded audio frames. *However, the ONLY source I currently
+have is a recording of a fragment of a transmission from Petersburg,
+in which the binding between service and (audio)stream changes
+constantly*. I do not know how to interpret the changing (at least the rapid
+changing) of the binding of streams to services!!!
 
-DRM+ (and DRM as well) move (slowly) away from AAC towards xHE-AAC
-to encode audio signals.
-Unfortunately, the faad library used ((a.o for my qt-dab software)
-does not support xHE-AAC (maybe it will, but future is not very clear
-about that). Anyway, a move has to be made to another library, and
-the fdk-aac (from fraunhofer) is chosen.
+Any suggestion is more than welcome
 
-In version 0.7 a start is made in using the fdk-aac library for decoding the
-AAC encoded services. 
+-----------------------------------------------------------------------
+CONFIGURING
+-----------------------------------------------------------------------
+
+In version 0.8 one may configure the "faad" library for decoding AAC encoded
+fragments, or "fdk-aac" for decoding AAC or xHE-AAC encoded fragments.
+
 The ".pro" file provides an option to configure the software to use
-the "faad" library for AAC decoding.
-Of course, when using the fdk-aac library, a recent version of the
-library and the include files have to be installed.
-Same of libfaad
+the "faad" library or the "fdk-aac" library.
 
-Note that xHE-AAC decoding is NOT YET implemented.
-Implementing the decoding of xHE-AAC might take a couple of days.
+The ".pro" file contains in the "unix" section lines
 
-Further issues:
- - sometimes a crash on program termination, the reason forit not yet understood,
- - there is an issue with the mapping of services and streams, it is
-not (yet) clear how to handle dynamically changing mappings
+	#CONFIG         += faad
+	CONFIG          += fdk-aac
 
+with which one (de)selects the library to be used.
+(Note that uncommenting both gives undefined results.
+
+Note further that if "faad" is selected, output of the xHE-AAC processor,
+that maps the audio super frames onto audio frames, is not passed on
+further.
 
 -------------------------------------------------------------------------
-Introduction
+What is DRM
 --------------------------------------------------------------------------
 
 DRM (Digital Radio Mondiale) is a form of digital radio,

@@ -192,6 +192,7 @@ int	temp1		= 0, temp2	= 0;
 	   case 5:
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);
+	      params 	-> theStreams [streamId]. audioStream = false;
 	      params	-> subChannels [shortId]. streamId =
 	                                             streamId;
 	      params	-> theStreams [streamId]. packetModeInd =
@@ -298,6 +299,7 @@ int	temp1		= 0, temp2	= 0;
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);
 	      params	-> subChannels [shortId]. streamId = streamId;
+	      params	-> theStreams [streamId]. audioStream = true;
 	      params	-> theStreams [streamId]. audioCoding =
 	                               get_SDCBits (data, base + 4, 2);
 	      params	-> theStreams [streamId]. sbrFlag =
@@ -312,14 +314,17 @@ int	temp1		= 0, temp2	= 0;
 	                               get_SDCBits (data, base + 13, 1);
 	      params	-> theStreams [streamId]. coderField =
 	                               get_SDCBits (data, base + 14, 5);
-	      (void) get_SDCBits (data, base + 19, 3);
-//	      if (params -> theStreams [streamId]. audioCoding)
-//	         fprintf (stderr, "code specific length %d\n",
-//	                              6 + 8 * bodySize - 22);
-//	      else
-//	        fprintf (stderr, "klopt het (stream %d) length %d\n",
-//	                          streamId,
-//	                          6 + 8 * bodySize - 22);
+	      (void) get_SDCBits (data, base + 19, 1);		// rfa
+//
+//	if xHE-AAC we need to collect the decoderspecific data
+	      if (params -> theStreams [streamId]. audioCoding == 03) {
+	         int bytes = (index + 16 + 8 * bodySize - (base + 20)) / 8;
+	         params -> theStreams [streamId]. xHE_AAC. resize (0);
+	         for (int i = 0; i < bytes; i ++) {
+	            uint8_t t = get_SDCBits (data, base + 20 + 8 * i, 8);
+	            params -> theStreams [streamId]. xHE_AAC.  push_back (t);
+	         }
+	      }
 	      return index + 16 + 8 * bodySize;
 
 	   case 14:	//packet stream FEC parameters

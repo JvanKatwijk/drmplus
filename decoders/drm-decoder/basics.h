@@ -28,6 +28,7 @@
 #include	<QString>
 #include	<stdint.h>
 #include	<complex>
+#include	<vector>
 
 #define	SAMPLE_RATE	192000
 
@@ -64,6 +65,7 @@ typedef struct {
 	int16_t		lengthLow;
 	int		offsetHigh;
 	int		offsetLow;
+	bool		audioStream;
 	QString		programType;
 	uint8_t		audioCoding;
 	uint8_t		sbrFlag;
@@ -72,7 +74,7 @@ typedef struct {
 	uint8_t		textFlag;
 	uint8_t		enhancementFlag;
 	uint8_t		coderField;
-
+	std::vector<uint8_t> xHE_AAC;
 	uint8_t		packetModeInd;
 	uint8_t		domain;
 	uint8_t		dataUnitIndicator;
