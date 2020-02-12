@@ -51,10 +51,20 @@ The ".pro" file contains in the "unix" section lines
 
 with which one (de)selects the library to be used.
 (Note that uncommenting both gives undefined results.
-
 Note further that if "faad" is selected, output of the xHE-AAC processor,
 that maps the audio super frames onto audio frames, is not passed on
 further.
+
+The same applies to configuring the input device(s),
+currently there is support for
+
+ - pcm files, with 2 channels and a sampling rate od 192000,
+ - raw files (8 bits IQ), raw files (16 bits IQ) and raw files (32 bits IQ),
+all recorded with a sampling rate of 192000,
+ - the SDRplay devices that are supported by the 2.13 library
+ - RT2932 based "dab" sticks,
+ - Hackrf devices
+ - limeSDR
 
 -------------------------------------------------------------------------
 What is DRM
