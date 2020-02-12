@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2008, 2009, 2010
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -46,7 +46,7 @@ protected:
 virtual void		run		(void);
 signals:
 	void		dataAvailable	(int);
-	void		set_progressBar	(int);
+	void		set_progressBar	(int, float, float);
 };
 #endif
 

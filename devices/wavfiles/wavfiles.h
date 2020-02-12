@@ -62,7 +62,7 @@ protected:
 private slots:
 	void		reset		(void);
 	void		handle_progressBar (int);
-	void		set_progressBar	(int);
+	void		set_progressBar	(int, float, float);
 };
 #endif
 

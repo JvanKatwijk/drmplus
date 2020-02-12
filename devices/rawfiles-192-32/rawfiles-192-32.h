@@ -66,7 +66,7 @@ private slots:
 	void            handle_progressBar (int);
 public slots:
 	void		handleData	(int);
-	void            set_progressBar (int);
+	void            set_progressBar (int, float, float);
 };
 
 #endif

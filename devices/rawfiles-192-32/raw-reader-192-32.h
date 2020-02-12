@@ -56,7 +56,7 @@ virtual void		run();
 
 signals:
 	void		dataAvailable	(int);
-        void            set_progressBar (int);
+        void            set_progressBar (int, float, float);
 };
 
 #endif

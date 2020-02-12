@@ -48,12 +48,12 @@
 	                                  tr ("iq (*.*)"));
 	replayFile	= QDir::toNativeSeparators (replayFile);
 	myReader_8	= new rawReader_8 (replayFile, rate, b);
-	connect (myReader_8, SIGNAL (set_progressBar (int)),
-	         this, SLOT (set_progressBar (int)));
+	connect (myReader_8, SIGNAL (set_progressBar (int, float, float)),
+	         this, SLOT (set_progressBar (int, float, float)));
 	connect (myReader_8, SIGNAL (dataAvailable (int)),
 	         this, SLOT (handleData (int)));
 	nameofFile	-> setText (replayFile);
-	set_progressBar	(0);
+	set_progressBar	(0, 0, 0);
 	this	-> lastFrequency	= Khz (94000);
 	connect (fileProgress, SIGNAL (valueChanged (int)),
 	         this, SLOT (handle_progressBar (int)));
@@ -70,8 +70,14 @@ void    rawFiles_8::handle_progressBar          (int f) {
         myReader_8        -> setFileat (f);
 }
 
-void    rawFiles_8::set_progressBar     (int f) {
-	fileProgress     -> setValue (f);
+void    rawFiles_8::set_progressBar     (int f, float c, float t) {
+	disconnect (fileProgress, SIGNAL (valueChanged (int)),
+                    this, SLOT (handle_progressBar (int)));
+	fileProgress	-> setValue (f);
+	currentTime	-> display  (c);
+	totalTime	-> display  (t);
+	disconnect (fileProgress, SIGNAL (valueChanged (int)),
+	            this, SLOT (handle_progressBar (int)));
 }
 
 bool	rawFiles_8::restartReader	() {

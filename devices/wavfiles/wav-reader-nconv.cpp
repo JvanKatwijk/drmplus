@@ -84,7 +84,10 @@ static	int cnt	= 0;
 
 	if (++cnt > 10) {
 	   currPos		= sf_seek (filePointer, 0, SEEK_CUR);
-	   emit set_progressBar (currPos * 100 / samplesinFile);
+	   float totalTime	= (float)samplesinFile / 192000;
+	   float currTime	= (float)currPos / 192000;
+	   emit set_progressBar (currPos * 100 / samplesinFile,
+	                                           currTime, totalTime);
 	   cnt = 0;
 	}
 	return	 n;

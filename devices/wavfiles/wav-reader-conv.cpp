@@ -92,7 +92,10 @@ static	int offset	= 0;
 
 	if (++cnt > 10) {
 	   currPos		= sf_seek (filePointer, 0, SEEK_CUR);
-	   emit set_progressBar (currPos * 100 / samplesinFile);
+	   float totalTime	= (float)samplesinFile / sampleRate;
+	   float currTime	= (float)currPos / sampleRate;
+	   emit set_progressBar (currPos * 100 / samplesinFile, 
+	                                       currTime, totalTime);
 	   cnt = 0;
 	}
 	offset += n;

@@ -48,7 +48,7 @@ struct timeval  tv;
            return;
 	}
 	fseek (filePointer, 0, SEEK_END);
-	samplesinFile		= ftell (filePointer) / 2;
+	samplesinFile		= ftell (filePointer) / 4;
 	sampleRate		= 192000;
 	readerOK		= true;
 	currPos			= 0;
@@ -97,8 +97,10 @@ int	period	= (BUFFERSIZE * 1000000) / 192000;  // full IQś read
 
 	      if (++teller >= 20) {
 	         int xx = ftell (filePointer);
-	         float progress = (float)xx / 2 / samplesinFile;
-	         set_progressBar (progress * 100);
+	         float progress = (float)xx / (4 * samplesinFile);
+	         float currentTime	= (float)xx / (4 * 192000);
+	         float totalTime	= (float)samplesinFile / 192000;
+	         set_progressBar (progress * 100, currentTime, totalTime);
                  teller = 0;
 	      }
 
@@ -141,7 +143,8 @@ void	rawReader_16::stopReader() {
 }
 
 void	rawReader_16::setFileat     (int32_t f) {
-	(void)f;
+int newPos	= f * samplesinFile / 100;
+	fseek (filePointer, newPos, SEEK_SET);
 }
 
 void    rawReader_16::reset (void) {

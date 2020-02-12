@@ -39,7 +39,7 @@ SF_INFO	*sf_info;
 	this	-> myFrame	= new QFrame;
 	setupUi		(myFrame);
 	myFrame	-> show ();
-	myReader	= NULL;
+	myReader	= nullptr;
 	QString	replayFile
 	              = QFileDialog::
 	                 getOpenFileName (myFrame,
@@ -71,12 +71,14 @@ SF_INFO	*sf_info;
 	   myReader	= new wavReader_conv  (sf_info,
 	                                       filePointer, b);
 
-	connect (myReader, SIGNAL (set_progressBar (int)),
-	         this, SLOT (set_progressBar (int)));
+	connect (myReader, SIGNAL (set_progressBar (int, float, float)),
+	         this, SLOT (set_progressBar (int, float, float)));
 	connect (myReader, SIGNAL (dataAvailable (int)),
 	         this, SIGNAL (dataAvailable (int)));
+	connect (fileProgress, SIGNAL (valueChanged (int)),
+	         this, SLOT (handle_progressBar (int)));
 	nameofFile	-> setText (replayFile);
-	set_progressBar	(0);
+	set_progressBar	(0, 0, 0);
 	this	-> lastFrequency	= Khz (94000);
 }
 //
@@ -92,8 +94,14 @@ void	wavFiles::handle_progressBar	(int f) {
 	myReader	-> setFileat (f);
 }
 
-void	wavFiles::set_progressBar	(int f) {
+void	wavFiles::set_progressBar	(int f, float c, float t) {
+	disconnect (fileProgress, SIGNAL (valueChanged (int)),
+                    this, SLOT (handle_progressBar (int)));
 	fileProgress	-> setValue (f);
+	currentTime	-> display (c);
+	totalTime	-> display (t);
+	connect (fileProgress, SIGNAL (valueChanged (int)),
+                 this, SLOT (handle_progressBar (int)));
 }
 
 bool	wavFiles::restartReader		(void) {

@@ -97,8 +97,11 @@ int64_t	period	= (BUFFERSIZE * 1000000) / 192000;  // full IQś read
 
 	      if (++teller >= 20) {
 	         int xx = ftell (filePointer);
-	         float progress = (float)xx / 8  / samplesinFile;
-	         set_progressBar ((int)(progress * 100));
+	         float progress		= (float)xx / 8  / samplesinFile;
+	         float currentTime	= (float)xx / (8 * 192000);
+	         float totalTime	= (float)samplesinFile / (8 * 192000);
+	         set_progressBar ((int)(progress * 100),
+	                                     currentTime, totalTime);
                  teller = 0;
 	      }
 
@@ -141,7 +144,8 @@ void	rawReader_32::stopReader() {
 }
 
 void	rawReader_32::setFileat     (int32_t f) {
-	(void)f;
+int newPos	= f * samplesinFile / 100;
+	fseek (filePointer, newPos, SEEK_SET);
 }
 
 void    rawReader_32::reset (void) {
