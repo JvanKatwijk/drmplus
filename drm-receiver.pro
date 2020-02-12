@@ -4,7 +4,7 @@
 TEMPLATE = app
 QT	+= widgets
 CONFIG	-= console
-TARGET	= drm-plus-0.7
+TARGET	= drm-plus-0.8
 #QMAKE_CFLAGS	+= -ffast-math -flto
 #QMAKE_CXXFLAGS	+= -ffast-math -flto
 QMAKE_LFLAGS	+= -g
@@ -207,7 +207,7 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.h \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.h \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.h \
-	   ./decoders/drm-decoder/msc-processor/post-processor.h \
+	   ./decoders/drm-decoder/msc-processor/frame-processor.h \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
@@ -220,6 +220,7 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
+	   ./decoders/drm-decoder/msc-processor/audio-handling/audioframe-processor.h\
 	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.h \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.h \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.h \
@@ -254,7 +255,7 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.cpp \
-	   ./decoders/drm-decoder/msc-processor/post-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/frame-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
@@ -267,6 +268,7 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
+	   ./decoders/drm-decoder/msc-processor/audio-handling/audioframe-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/decoder-base.cpp \

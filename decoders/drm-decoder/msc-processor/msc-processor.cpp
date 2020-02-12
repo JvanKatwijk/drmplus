@@ -28,7 +28,7 @@
 #include	"qam16-handler.h"
 #include	"referenceframe.h"
 #include	"data-processor.h"
-#include	"post-processor.h"
+#include	"audioframe-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
 	                            drmParameters	*params,
@@ -203,7 +203,12 @@ void	mscProcessor::selectService	(int shortId) {
 
 	if (the_postProcessor != nullptr)
 	   delete the_postProcessor;
-	the_postProcessor	= new postProcessor (theParent,
+	if (params -> subChannels [shortId]. is_audioService)
+	   the_postProcessor	= new audioFrameProcessor (theParent,
+	                                             params,
+	                                             shortId);
+	else
+	   the_postProcessor	= new dataProcessor (theParent,
 	                                             params,
 	                                             shortId);
 	if (params -> theChannel. MSC_Mode == 0)

@@ -21,13 +21,14 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#include	"data-processor.h"
-#include	"drm-decoder.h"
-#include	"basics.h"
 #include	<stdio.h>
-#include	"fec-handler.h"
 #include	<float.h>
 #include	<math.h>
+#include	"basics.h"
+#include	"data-processor.h"
+#include	"frame-processor.h"
+#include	"drm-decoder.h"
+#include	"fec-handler.h"
 #include	"packet-assembler.h"
 
 static	inline

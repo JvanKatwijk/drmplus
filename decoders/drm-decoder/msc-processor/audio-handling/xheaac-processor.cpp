@@ -29,10 +29,8 @@
 #include	<vector>
 #include	<complex>
 
-deque<uint8_t>  payload;
-deque<uint32_t> starters;
+deque<uint8_t>  frameBuffer;
 vector<uint32_t> borders;
-vector<uint32_t> frameSize;
 
 static
 const uint16_t crcPolynome [] = {
@@ -65,7 +63,7 @@ uint16_t        res     = 0;
 	this	-> my_aacDecoder	= my_aacDecoder;
 	this	-> theConverter		= nullptr;
 	currentRate			= 0;
-	payload. resize (0);
+	frameBuffer. resize (0);
 	borders. resize (0);
 }
 
@@ -83,7 +81,6 @@ int	frameBorderCount	= get_MSCBits (v, 0, 4);
 int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
 int	crc			= get_MSCBits (v, 8, 8);
 int	length			= lengthHigh + lengthLow - 4;
-std::vector<int16_t> indices;
 int	numChannels		=
 	         params -> theStreams [streamId]. audioMode == 0 ? 1 : 2;
 int	elementsUsed		= 0;
@@ -104,6 +101,7 @@ int	elementsUsed		= 0;
 	   std::vector<uint8_t> audioDescriptor =
 	                         getAudioInformation (params, streamId);
 	   my_aacDecoder -> reinit (audioDescriptor, streamId);
+
 	   for (int i = 0; i < frameBorderCount; i++) {
 	      uint32_t frameBorderIndex =
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i, 12);
@@ -119,70 +117,90 @@ int	elementsUsed		= 0;
 #endif
 	      borders [i] = frameBorderIndex;
 	      if (i == 0) {
+//
+//	The first frameBorderIndex might point to the last one or
+//	two bytes of the previous afs.
 	         switch (borders [0]) {
-	            case 0xffe: // delayed from previous superframe
-//	first frame has two bytes in previous superframe
-	               if (payload. size () < 2) {
+	            case 0xffe: // delayed from previous afs
+//	first frame has two bytes in previous afs
+	               if (frameBuffer. size () < 2) {
 	                  resetBuffers ();
 	                  return;
 	               }
-	               if (payload. size () > 2)
-	                  processFrame (payload. size () - 2);
+//
+//	if the "frameBuffer" contains more than 2 bytes, there was
+//	a non-empty last part in the previous afs
+	               if (frameBuffer. size () > 2)
+	                  processFrame (frameBuffer. size () - 2);
 	               elementsUsed = 0;
 	               break;
 
 	            case 0xfff:
-//	the start of the audio frame at the last byte of
-	               if (payload. size () < 1) {
+//	first frame has one byte in previous afs
+	               if (frameBuffer. size () < 1) {
 	                  resetBuffers ();
 	                  return;
 	               }
-	               if (payload. size () > 1)
-	                  processFrame (payload. size () - 1);
+	               if (frameBuffer. size () > 1)
+	                  processFrame (frameBuffer. size () - 1);
 	               elementsUsed = 0;
 	               break;
 
-	            default: // boundary in this superframe
+	            default: // boundary in this afs
+//	boundary in this afs, process the last part of the previous afs
+//	together with what is here as audioFrame
 	               if (borders [0] < 2) {
 	                  resetBuffers ();
 	                  return;
 	               }
+//
+//	elementsUsed will be used to keep track on the progress
+//	in handling the elements of this afs
 	               for (elementsUsed = 0; 
 	                    elementsUsed < borders [0]; elementsUsed ++)
-	                  payload. push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
-	               processFrame (payload. size ());
+	                  frameBuffer.
+	                  push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
+	               processFrame (frameBuffer. size ());
 	               break;
 	         }
 	      }
 	      else
 	      if (i < frameBorderCount - 1) {
-	// just read in the data and process the frame
+//	just read in the data and process the frame
 	         for (; elementsUsed < borders [i]; elementsUsed ++) 
-	            payload. push_back
+	            frameBuffer. push_back
 	                        (get_MSCBits (v, 16 + elementsUsed * 8, 8));
-	         processFrame (payload. size ());
+	         processFrame (frameBuffer. size ());
 	      }
-	      else	// at the end, save for the next round
+	      else	// at the end, save for the next afs
 	      for ( ; elementsUsed < directoryOffset; elementsUsed ++)
-	         payload. push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
+	         frameBuffer.
+		       push_back (get_MSCBits (v, 16 + elementsUsed * 8, 8));
 	   }
 	}
+	else {
+	   for (int i = 0; i < directoryOffset; i ++)
+	      frameBuffer. push_back (get_MSCBits (v, 16 + 8 * i, 8));
+	}
 }
-
+//
+//	In some cases we do not use the full content
+//	of the data gathered in the frameBuffer, so we pass on the size
 void	xheaacProcessor::processFrame	(int size) {
 std::vector<uint8_t> audioFrame;
-
+#if 0
 	fprintf (stderr, "process frame %d\n", size);
+#endif
 	while (size > 0) {
 	   size --;
-	   audioFrame. push_back (payload. front());
-	   payload. pop_front ();
+	   audioFrame. push_back (frameBuffer. front());
+	   frameBuffer. pop_front ();
 	}
 	playOut (audioFrame);
 }
 
 void	xheaacProcessor::resetBuffers	() {
-	payload. resize (0);
+	frameBuffer. resize (0);
 }
 
 static

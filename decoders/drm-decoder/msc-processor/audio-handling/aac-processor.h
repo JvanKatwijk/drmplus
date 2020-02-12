@@ -31,7 +31,6 @@
 #include	"fir-filters.h"
 #include	"decoder-base.h"
 #include	"message-processor.h"
-#include	"post-processor.h"
 
 typedef struct frame {
 	int16_t length, startPos;

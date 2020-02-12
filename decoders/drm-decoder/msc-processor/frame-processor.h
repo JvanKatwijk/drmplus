@@ -21,49 +21,24 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__MSC_PROCESSOR__
-#define	__MSC_PROCESSOR__
+#ifndef __FRAME_PROCESSOR__
+#define __FRAME_PROCESSOR__
 
-#include	<QObject>
-#include	"ringbuffer.h"
+#include        <QObject>
 #include	"basics.h"
-#include	<mutex>
-#include	<deinterleaver.h>
-#include	"frame-processor.h"
 
 class	drmDecoder;
-class	mscHandler;
 
-	class	mscProcessor: public QObject {
+class	frameProcessor: public QObject {
 Q_OBJECT
 public:
-			mscProcessor	(drmDecoder *,
-	                                 drmParameters *,
-	                                 RingBuffer<std::complex<float>> *);
-			~mscProcessor	();
-	void		processFrame	(theSignal ** outbank);
-	void		set_Viewer	(bool);
-	void		selectService	(int stream);
-private:
-	drmDecoder		*theParent;
-	drmParameters		*params;
-	RingBuffer<std::complex<float>> *iqBuffer;
-	bool			show_Constellation;
-	deInterleaver_long	*my_deInterleaver;
-	frameProcessor		*the_postProcessor;
-	int			start_frame_2;
-	int			start_frame_3;
-	int			start_frame_4;
-
-	int			muxLength;
-	int			muxCounter;
-	theSignal		*muxsampleBuf;
-	int			bufferP;
-	mscHandler		*my_mscHandler;
-	void			process_mux	(theSignal *, bool);
-	std::mutex		locker;
+		frameProcessor     ();
+virtual		~frameProcessor    ();
+virtual	void	process  (uint8_t *buf_1,
+                                 uint8_t *buf_2, int shortId);
 signals:
-	void			show_const	();
+	void	show_audioMode		(QString);
 };
 
 #endif
+

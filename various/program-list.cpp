@@ -4,17 +4,14 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the  SDR-J series.
- *    Many of the ideas as implemented in the SDR-J are derived from
- *    other work, made available through the (a) GNU general Public License. 
- *    All copyrights of the original authors are recognized.
+ *    This file is part of the DRM+ Decoder
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    DRM+ Decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DRM+ Decoder is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
@@ -70,7 +67,10 @@ void	programList::hide	(void) {
 void	programList::addRow (const QString &name, const QString &freq) {
 int16_t	row	= tableWidget -> rowCount ();
 
+	fprintf (stderr, "Name %s, freq %s\n",
+	           name. toLatin1 (). data (), freq. toLatin1 (). data ());
 	tableWidget	-> insertRow (row);
+
 	QTableWidgetItem *item0	= new QTableWidgetItem;
 	item0		-> setTextAlignment (Qt::AlignRight |Qt::AlignVCenter);
 	tableWidget	-> setItem (row, 0, item0);

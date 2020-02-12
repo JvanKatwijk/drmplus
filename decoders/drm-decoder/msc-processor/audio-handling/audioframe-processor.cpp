@@ -22,7 +22,7 @@
  */
 
 #include	"drm-decoder.h"
-#include	"post-processor.h"
+#include	"audioframe-processor.h"
 #include	"aac-processor.h"
 #include	"xheaac-processor.h"
 #ifdef  __WITH_FDK_AAC__
@@ -31,7 +31,7 @@
 #include        "drm-aacdecoder.h"
 #endif
 
-	postProcessor::postProcessor	(drmDecoder *drm,
+	audioFrameProcessor::audioFrameProcessor (drmDecoder *drm,
 	                                 drmParameters *params,
 	                                 int shortId) {
 	this	-> parent	= drm;
@@ -48,20 +48,19 @@
 	                                                      my_aacDecoder);
 	my_xheaacProcessor	= new xheaacProcessor	(drm, params,
 	                                                      my_aacDecoder);
-
 	connect (this, SIGNAL (show_audioMode (QString)),
                  parent, SLOT (show_audioMode (QString)));
 
 }
 
-	postProcessor::~postProcessor	() {
+	audioFrameProcessor::~audioFrameProcessor	() {
 	delete	my_aacDecoder;
 	delete	my_aacProcessor;
 	delete	my_xheaacProcessor;
 }
 
-void	postProcessor::process	(uint8_t *buf_1,
-	                         uint8_t *buf_2, int shortId) {
+void	audioFrameProcessor::process	(uint8_t *buf_1,
+	                                 uint8_t *buf_2, int shortId) {
 int	streamId	= params -> subChannels [shortId]. streamId;
 int	startPosA	= params -> theStreams [streamId]. offsetHigh;
 int	startPosB	= params -> theStreams [streamId]. offsetLow;
@@ -81,13 +80,9 @@ int	lengthB		= params -> theStreams [streamId]. lengthLow;
 	   processAudio (dataVec, streamId,
 	                 0,           2 * lengthA,
 	                 2 * lengthA, 2 * lengthB);
-//	else		// apparently a data service
-//	   processData (dataVec, streamId,
-//	                0,           2 * lengthA,
-//	                2 * lengthA, 2 * lengthB);
 }
 
-void	postProcessor::processAudio (uint8_t *v, int16_t streamIndex,
+void	audioFrameProcessor::processAudio (uint8_t *v, int16_t streamIndex,
 	                             int16_t startHigh, int16_t lengthHigh,
 	                             int16_t startLow,  int16_t lengthLow) {
 uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
@@ -102,11 +97,11 @@ uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
 
 	   case 3:		// xHE_AAC
 	      show_audioMode (QString ("xHE-AAC"));
-#ifdef	__WITH_FDK_AAC__
+//#ifdef	__WITH_FDK_AAC__
 	      my_xheaacProcessor -> process_usac (v, streamIndex,
 	                                          startHigh, lengthHigh,
 	                                          startLow,  lengthLow);
-#endif
+//#endif
 	      return;
 
 	   default:

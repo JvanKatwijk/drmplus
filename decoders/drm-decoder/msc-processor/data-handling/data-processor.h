@@ -27,13 +27,13 @@
 #include	<QObject>
 #include	<cstring>
 #include	"basics.h"
-#include	"post-processor.h"
+#include	"frame-processor.h"
 
 class	drmDecoder;
 class	packetAssembler;
 class	fecHandler;
 
-class	dataProcessor: public QObject {
+class	dataProcessor: public frameProcessor {
 Q_OBJECT
 public:
 		dataProcessor	(drmDecoder *,

@@ -27,7 +27,7 @@
 #include        "basics.h"
 #include        "prbs.h"
 
-#include	"post-processor.h"
+#include	"frame-processor.h"
 
 //
 //	Implements table 31 (page 111);
@@ -92,7 +92,7 @@ int16_t	getRYlcm_16	(int16_t protLevel) {
 }
 
 	qam16_handler::qam16_handler	(drmParameters *params,
-	                                 postProcessor *the_postProcessor,
+	                                 frameProcessor *the_postProcessor,
 	                                 int muxLength,
 	                                 int streamIndex):
 	                                     mscHandler (params,

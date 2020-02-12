@@ -59,10 +59,8 @@ private:
 	std::vector<uint8_t>
         		getAudioInformation (drmParameters *drm,
                                                         int streamId);
-//	deque<uint8_t>	payload;
-//	deque<uint32_t> starters;
+//	deque<uint8_t>	frameBuffer;
 //	vector<uint32_t> borders;
-//	vector<uint32_t> frameSize;
 	decoderBase	*my_aacDecoder;
 	rateConverter	*theConverter;
 	int		numFrames;

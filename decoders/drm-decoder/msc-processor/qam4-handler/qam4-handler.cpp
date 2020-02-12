@@ -25,10 +25,10 @@
 #include	"puncture-tables.h"
 #include	"viterbi-drm.h"
 #include	"prbs.h"
-#include	"post-processor.h"
+#include	"frame-processor.h"
 
 	qam4_handler::qam4_handler	(drmParameters *params,
-	                                 postProcessor	*the_postProcessor,
+	                                 frameProcessor	*the_postProcessor,
 	                                 int muxLength,
 	                                 int stream):
 	                                    mscHandler (params, muxLength,

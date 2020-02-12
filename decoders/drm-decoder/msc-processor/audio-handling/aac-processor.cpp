@@ -211,6 +211,7 @@ uint8_t	audioMode		= params -> theStreams [streamId].
 	                                                   audioMode;
 std::vector<uint8_t> audioDescriptor =
 		getAudioInformation (params, streamId);
+
 	my_aacDecoder -> reinit (audioDescriptor, streamId);
 	for (i = 0; i < numFrames; i ++) {
 	   int16_t	index = i;
