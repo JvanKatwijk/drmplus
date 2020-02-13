@@ -84,14 +84,14 @@ int16_t	i;
 	      y = -(Radius - 1);
 
 	   Points [i] = std::complex<float> (x, y);
-	   plotData [(x + Radius - 1) * 2 * Radius + y + Radius - 1] = 500;
+	   plotData [(x + Radius - 1) * 2 * Radius + y + Radius - 1] = 1000;
 	}
 
 	memcpy (plot2. data(), plotData. data(),
 	        2 * 2 * Radius * Radius * sizeof (double));
-	this		-> detach();
+	this		-> detach	();
 	this		-> setData	(IQData);
 	this		-> setDisplayMode (QwtPlotSpectrogram::ImageMode, true);
 	this		-> attach     (plotgrid);
-	plotgrid	-> replot();
+	plotgrid	-> replot	();
 }

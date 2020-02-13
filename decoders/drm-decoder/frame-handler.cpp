@@ -121,6 +121,7 @@ L1:
 	      myReader. shiftBuffer (Ts_t / 2);
 	      timeSynced = my_timeSyncer. dosync (params);
 	   }
+
 	   if (!running. load ())
 	      return;
 

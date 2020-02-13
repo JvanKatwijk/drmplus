@@ -66,9 +66,11 @@ void	programList::hide	(void) {
 
 void	programList::addRow (const QString &name, const QString &freq) {
 int16_t	row	= tableWidget -> rowCount ();
-
-	fprintf (stderr, "Name %s, freq %s\n",
-	           name. toLatin1 (). data (), freq. toLatin1 (). data ());
+#if 0
+	fprintf (stderr, "Name %s, freq %s rowNumber %d\n",
+	           name. toLatin1 (). data (),
+	           freq. toLatin1 (). data (), row);
+#endif
 	tableWidget	-> insertRow (row);
 
 	QTableWidgetItem *item0	= new QTableWidgetItem;

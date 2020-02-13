@@ -50,8 +50,8 @@ QString fileName;
 }
 
 #define	DEFAULT_INI	".drm-radio.ini"
-//#define	STATION_LIST	".drmradio-stations.bin"
-#define	STATION_LIST	 ".jsdr-fm-stations.bin"
+#define	STATION_LIST	".drmradio-stations.bin"
+//#define	STATION_LIST	 ".jsdr-fm-stations.bin"
 
 int	main (int argc, char **argv) {
 int32_t		opt;

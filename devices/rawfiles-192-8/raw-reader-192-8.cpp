@@ -162,9 +162,10 @@ void	rawReader_8::stopReader() {
 	}
 }
 
+//	samples - IQ - are 2 * 1 bytes long
 void rawReader_8::setFileat     (int32_t f) {
-int newPos	= f * samplesinFile / 100;
-	fseek (filePointer, newPos, SEEK_SET);
+int newPos	= (f * samplesinFile / 100) / 2;
+	fseek (filePointer, newPos * 2, SEEK_SET);
 }
 
 void    rawReader_8::reset (void) {

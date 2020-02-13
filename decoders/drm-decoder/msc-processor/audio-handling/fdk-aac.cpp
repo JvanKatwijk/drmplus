@@ -94,8 +94,10 @@ uint32_t	bytesValid	= 0;
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
 	errorStatus =
 	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, 0);
+#if 0
 	fprintf (stderr, "fdk-aac errorstatus %x\n",
 	                       errorStatus);
+#endif
 	if (errorStatus == AAC_DEC_NOT_ENOUGH_BITS) {
 	   *conversionOK	= false;
 	   *samples		= 0;
@@ -121,8 +123,10 @@ uint32_t	bytesValid	= 0;
 	      buffer [2 * i + 1] = localBuffer [2 * i + i];
 	   }
 	}
+#if 0
 	fprintf (stderr, "frameSize %d, samplerate %d\n",
 	               fdk_info -> frameSize, fdk_info -> sampleRate);
+#endif
 //	fprintf (stderr, "channel config %d (rate %d)\n",
 //	           fdk_info -> channelConfig, fdk_info -> sampleRate);
 	*samples	= fdk_info	-> frameSize;
