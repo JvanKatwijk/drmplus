@@ -38,6 +38,7 @@
 typedef void    *HINSTANCE;
 #endif
 
+#define	CURRENT_VERSION	"0.8"
 //
 //
 typedef	std::complex<float>	DSPCOMPLEX;

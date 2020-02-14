@@ -162,7 +162,10 @@ QString	FrequencytoString (int32_t freq) {
 	connect (deviceSelector, SIGNAL (activated (const QString &)),
                     this,  SLOT (doStart (const QString &)));
 	theDevice	= nullptr;
+	theDecoder	= nullptr;
 	dumpfilePointer	= nullptr;
+	myList		= nullptr;
+	copyrightLabel	-> setToolTip (footText ());
 }
 
 //      The end of all
@@ -171,7 +174,16 @@ QString	FrequencytoString (int32_t freq) {
         delete  mykeyPad;
         delete  myList;
 }
-//
+
+QString RadioInterface::footText () {
+        QString versionText = "drmPlus- version: " + QString(CURRENT_VERSION);
+        versionText += "Copyright J van Katwijk, J. vanKatwijk@gmail.com\n";
+        versionText += "Rights of Qt, fftw, portaudio, libsamplerate and libsndfile gratefully acknowledged";
+        versionText += "Rights of other contribuants gratefully acknowledged\n";
+        versionText += " Build on: " + QString(__TIMESTAMP__) + QString (" ") + QString (GITHASH);
+        return versionText;
+}
+
 //
 //	To keep things simple, we start after a device is selected
 //	then we run, no re-selection of device is possible.
@@ -216,7 +228,8 @@ theDevice	= setDevice (s, inputData);
 
 //	If the user quits before selecting a device ....
 void	RadioInterface::handle_quitButton	(void) {
-	delete theDecoder;
+	if (theDecoder != nullptr)
+	   delete theDecoder;
 	if (theDevice != NULL) {
 	   theDevice	-> stopReader ();
 	   disconnect (theDevice, SIGNAL (dataAvailable (int)),
@@ -224,8 +237,10 @@ void	RadioInterface::handle_quitButton	(void) {
 	   delete  theDevice;
 	}
 	sleep (1);
-	myList          -> saveTable ();
-	myList		-> hide ();
+	if (myList != nullptr) {
+	   myList	-> saveTable ();
+	   delete myList;
+	}
 }
 
 //

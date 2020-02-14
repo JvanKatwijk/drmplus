@@ -121,13 +121,13 @@ int     startPosB       = 0;
 //	if 0, we have a synchronous stream which we don't handle yet
 	         if (params -> theStreams [i]. packetModeInd == 1) {
 	            process_packets (dataVec, i,
-	                             0,	lengthA,
-	                             lengthA, lengthB);
+	                             0,	2 * lengthA,
+	                             2 * lengthA, 2 * lengthB);
 	         }
 	         else {	// synchronous stream
 	            process_syncStream (dataVec, i,
-	                                0,	lengthA,
-	                                lengthA, lengthB);
+	                                0,	2 * lengthA,
+	                                2 * lengthA,  2 * lengthB);
 	         }
 	      }
 	      startPosA	+= lengthA;

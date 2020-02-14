@@ -94,7 +94,8 @@ static	int offset	= 0;
 	   currPos		= sf_seek (filePointer, 0, SEEK_CUR);
 	   float totalTime	= (float)samplesinFile / sampleRate;
 	   float currTime	= (float)currPos / sampleRate;
-	   emit set_progressBar (currPos * 100 / samplesinFile, 
+	   float ccc		= (float)currPos / samplesinFile;
+	   emit set_progressBar ((int)(ccc * 100), 
 	                                       currTime, totalTime);
 	   cnt = 0;
 	}

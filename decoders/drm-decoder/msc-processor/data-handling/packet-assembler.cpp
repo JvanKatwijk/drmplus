@@ -50,7 +50,7 @@
 	      break;
 	   case 0x44a:
 //	      my_dataHandler	= new journalineHandler (drm);
-//	      break;
+	      break;
 	   case 59:
 //	      my_dataHandler	= new ip_dataHandler (mr);
 //	      break;
@@ -173,7 +173,6 @@ uint8_t	lengthInd;
 	   }
 	   next	+= lengthInd;
 	}
-
 
 	if (transportIdFlag) 
 	   my_dataHandler -> process_mscGroup (&data [next],

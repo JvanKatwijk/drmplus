@@ -60,8 +60,9 @@ private:
 	   int32_t	lowF;
 	   int32_t	highF;
 	   int32_t	currentOffset;
-	}theBand;
+	} theBand;
 
+	QString		footText	();
 	virtualDecoder	*theDecoder;
 	QSettings       *settings;
 	QString		stationList;
