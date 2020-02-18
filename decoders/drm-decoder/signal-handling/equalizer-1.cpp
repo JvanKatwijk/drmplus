@@ -347,6 +347,13 @@ int16_t	i;
 	return symbol_to_process == symbolsinFrame - 1;
 }
 //
+void	equalizer_1::init (std::complex<float> *testRow,
+	                   int16_t newSymbol) {
+	for (int carrier = K_min; carrier <= K_max; carrier ++) 
+	   testFrame [newSymbol][indexFor (carrier)] =
+	                         testRow [indexFor (carrier)];
+}
+
 bool	equalizer_1::equalize (std::complex<float> *testRow,
 	                       int16_t newSymbol,
 	                       theSignal **outFrame) {

@@ -27,8 +27,6 @@
 #include        "basics.h"
 #include        "prbs.h"
 
-#include	"frame-processor.h"
-
 //
 //	Implements table 31 (page 111);
 
@@ -92,11 +90,9 @@ int16_t	getRYlcm_16	(int16_t protLevel) {
 }
 
 	qam16_handler::qam16_handler	(drmParameters *params,
-	                                 frameProcessor *the_postProcessor,
-	                                 int muxLength,
-	                                 int streamIndex):
-	                                     mscHandler (params,
-	                                                 muxLength, streamIndex) {
+	                                 int	muxLength,
+	                                 int	lengthA,
+	                                 int	lengthB) {
 int16_t	RYlcm, i;
 float denom;
 //
@@ -105,21 +101,9 @@ float denom;
 //      in the lower protected part (the B part) follows
 
 	this    -> params		= params;
-	this	-> the_postProcessor	= the_postProcessor;
 	this	-> muxLength		= muxLength;
-	this	-> streamIndex		= streamIndex;
-	lengthA         = 0;
-	lengthB         = 0;
-
-	for (i = 0; i < 4; i ++) {
-	   if (params -> theStreams [i]. inUse) {
-	      lengthA += params  -> theStreams [i]. lengthHigh * 8;
-	      lengthB += params  -> theStreams [i]. lengthLow * 8;
-//	      fprintf (stderr, " i = %d: lengthA = %d, lengthB = %d\n", 
-//	                i, lengthA, lengthB);
-	   }
-	}
-	firstBuffer	= new uint8_t [lengthA + lengthB];
+	this	-> lengthA		= lengthA;
+	this	-> lengthB		= lengthB;
 
 	if (lengthA != 0) {     // two real levels
 //      apply formula from section 7.2.1. to compute the number
@@ -141,8 +125,8 @@ float denom;
 	else {
 	   N1			= 0;
 	   N2			= muxLength;
-	   Y13mapper_high       = NULL;
-	   Y21mapper_high       = NULL;
+	   Y13mapper_high	= nullptr;
+	   Y21mapper_high	= nullptr;
 	   Y13mapper_low        = new Mapper (2 * N2, 13);
 	   Y21mapper_low        = new Mapper (2 * N2, 21);
 	}
@@ -173,12 +157,11 @@ float denom;
 	delete  thePRBS;
 }
 
-void	qam16_handler::process		(theSignal *mux, bool toggler) {
+void	qam16_handler::process		(theSignal *mux, uint8_t *bitsOut) {
 int16_t highProtectedBits       = stream_0 -> highBits () +
 	                          stream_1 -> highBits ();
 int16_t lowProtectedBits        = stream_0 -> lowBits () +
 	                          stream_1 -> lowBits ();
-uint8_t bitsOut [highProtectedBits + lowProtectedBits];
 uint8_t bits_0 [stream_0 -> highBits () + stream_0 -> lowBits ()];
 uint8_t bits_1 [stream_1 -> highBits () + stream_1 -> lowBits ()];
 
@@ -195,6 +178,7 @@ uint8_t level_1 [muxLength];
 	                                      i > 0, level_0, level_1);
 	   stream_1        -> process      (Y1, bits_1, level_1);
 	}
+
 	memcpy (&bitsOut [0],
 	        &bits_0 [0],
 	        stream_0 -> highBits ());
@@ -212,9 +196,5 @@ uint8_t level_1 [muxLength];
 	        stream_1 -> lowBits ());
 //	apply PRBS
 	thePRBS -> doPRBS (bitsOut);
-	if (toggler)
-	   memcpy (firstBuffer, bitsOut, lengthA + lengthB);
-	else
-	   the_postProcessor -> process (firstBuffer, bitsOut, streamIndex);
 }
 

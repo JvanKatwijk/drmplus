@@ -28,7 +28,6 @@
 #include        <QObject>
 #include        <cstring>
 #include        "fir-filters.h"
-#include	"frame-processor.h"
 #include        "message-processor.h"
 #include	"decoder-base.h"
 
@@ -36,24 +35,28 @@ class	drmDecoder;
 class	aacProcessor;
 class	xheaacProcessor;
 
-class	audioFrameProcessor: public frameProcessor {
+class	audioFrameProcessor: public QObject{
 Q_OBJECT
 public:
 		audioFrameProcessor	(drmDecoder *,
-	                                 drmParameters *, int shortId);
+	                                 drmParameters *, int, int);
 		~audioFrameProcessor	();
-	void	process  (uint8_t *buf_1,
-                                 uint8_t *buf_2, int shortId);
+	void	process  (uint8_t *, bool);
 private:
 	drmDecoder	*parent;
 	drmParameters	*params;
+	int		shortId;
+	int		streamId;
+	uint8_t		*firstBuffer;
 	decoderBase	*my_aacDecoder;
 	aacProcessor	*my_aacProcessor;
 	xheaacProcessor	*my_xheaacProcessor;
 	void		processAudio (uint8_t *v, int16_t streamIndex,
 	                              int16_t startHigh, int16_t lengthHigh,
 	                              int16_t startLow,  int16_t lengthLow);
-//signals:
-//	void		show_audioMode (QString);
+	int		lengthA_total;
+	int		lengthB_total;
+signals:
+	void		show_audioMode (QString);
 };
 #endif

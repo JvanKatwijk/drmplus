@@ -43,17 +43,19 @@ float	sum = 0;
 
 void	timeCorrelator::getCorr (int symbol,
 	                         std::complex<float> *vec) {
-std::complex<float>	sum	= std::complex<float> (0, 0);
+float	sum	= 0;
+//std::complex<float>	sum	= std::complex<float> (0, 0);
 int i;
 	for (int carrier = K_min; carrier <= K_max; carrier ++) {
 	   if (isTimeCell (carrier)) {
 	      std::complex<float> temp =
 	            vec [carrier - K_min] *
 	                conj (getTimeRef (carrier));
-	      sum += temp;
+	      sum += real (temp * conj (temp));
 	   }
 	}
-	corrBank [symbol] = real (sum * conj (sum));
+	corrBank [symbol] = sum;
+//	corrBank [symbol] = real (sum * conj (sum));
 }
 
 int	timeCorrelator::get_bestIndex (float *v) {

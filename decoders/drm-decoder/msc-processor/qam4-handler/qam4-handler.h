@@ -26,25 +26,22 @@
 
 #include	<vector>
 #include	"basics.h"
-#include	"msc-handler.h"
 #include	"qam4-metrics.h"
 #include	"mapper.h"
 #include	"puncture-tables.h"
+#include	"deconvolver.h"
 
 class	viterbi_drm;
 class	prbs;
-class	frameProcessor;
 
-class qam4_handler: public mscHandler {
+class qam4_handler: public deconvolver {
 public:
-		qam4_handler	(drmParameters *,
-	                         frameProcessor *, int, int);
+		qam4_handler	(drmParameters *, int, int, int);
 		~qam4_handler	();
-	void	process		(theSignal *, bool);
+	void	process		(theSignal *, uint8_t *);
 private:
 	qam4_metrics	myDecoder;
 	punctureTables	myTables;
-	frameProcessor	*the_postProcessor;
 	drmParameters	*params;
 	int		muxLength;
 	int		muxCounter;

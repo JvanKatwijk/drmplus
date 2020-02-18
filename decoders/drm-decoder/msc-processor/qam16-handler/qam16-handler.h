@@ -24,25 +24,21 @@
 #define	__QAM16_HANDLER__
 
 #include	"basics.h"
-#include	"msc-handler.h"
 #include	"qam16-metrics.h"
+#include	"deconvolver.h"
 
-class	frameProcessor;
 class	Mapper;
 class	MSC_streamer;
-class	prbs;
 
-class qam16_handler: public mscHandler {
+class qam16_handler: public deconvolver {
 public:
-		qam16_handler	(drmParameters *, frameProcessor *, int, int);
+		qam16_handler	(drmParameters *, int, int, int);
 		~qam16_handler	();
-	void	process		(theSignal *, bool);
+	void	process		(theSignal *, uint8_t *);
 private:
 	drmParameters	*params;
-	frameProcessor	*the_postProcessor;
 	prbs		*thePRBS;
 	int		muxLength;
-	int		streamIndex;
 	qam16_metrics   myDecoder;
 	int16_t         lengthA;
 	int16_t         lengthB;

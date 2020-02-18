@@ -29,8 +29,9 @@ The current (0.8) version of drmplus is - in principle - able to decode
 xHE-AAC encoded audio frames. *However, the ONLY source I currently
 have is a recording of a fragment of a transmission from Petersburg,
 in which the binding between service and (audio)stream changes
-constantly*. I do not know how to interpret the changing (at least the rapid
-changing) of the binding of streams to services!!!
+constantly*.
+The selection of audio channels seems to work well, selection
+of data is being worked on
 
 Any suggestion is more than welcome
 

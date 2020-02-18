@@ -28,11 +28,13 @@
 #include	"ringbuffer.h"
 #include	"basics.h"
 #include	<mutex>
+#include	<atomic>
 #include	<deinterleaver.h>
-#include	"frame-processor.h"
 
 class	drmDecoder;
-class	mscHandler;
+class	audioFrameProcessor;
+class	dataFrameProcessor;
+class	deconvolver;
 
 	class	mscProcessor: public QObject {
 Q_OBJECT
@@ -50,16 +52,18 @@ private:
 	RingBuffer<std::complex<float>> *iqBuffer;
 	bool			show_Constellation;
 	deInterleaver_long	*my_deInterleaver;
-	frameProcessor		*the_postProcessor;
+	audioFrameProcessor	*my_audioFrameProcessor;
+	dataFrameProcessor	*my_dataFrameProcessor;
 	int			start_frame_2;
 	int			start_frame_3;
 	int			start_frame_4;
-
+	std::atomic<int>	serviceSelected;
+	std::vector<uint8_t>	muxBuffer;
 	int			muxLength;
 	int			muxCounter;
 	theSignal		*muxsampleBuf;
 	int			bufferP;
-	mscHandler		*my_mscHandler;
+	deconvolver		*my_deconvolver;
 	void			process_mux	(theSignal *, bool);
 	std::mutex		locker;
 signals:

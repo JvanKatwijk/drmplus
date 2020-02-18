@@ -27,7 +27,7 @@
 #include	"qam4-handler.h"
 #include	"qam16-handler.h"
 #include	"referenceframe.h"
-#include	"data-processor.h"
+#include	"dataframe-processor.h"
 #include	"audioframe-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
@@ -39,7 +39,11 @@
 	this	-> params	= params;
 	this	-> iqBuffer	= iqBuffer;
 	show_Constellation	= false;
-	this	-> the_postProcessor	= nullptr;
+	my_audioFrameProcessor	= nullptr;
+	my_dataFrameProcessor	= nullptr;
+	my_deconvolver		= nullptr;
+	serviceSelected. store (-1);
+
 	for (symbol = 0; symbol < symbolsperFrame; symbol ++) {
 	   for (carrier = K_min; carrier <= K_max; carrier ++) {
 	      if (isFACcell (symbol, carrier)) {
@@ -123,15 +127,12 @@
 	this	-> my_deInterleaver	=
 	                     new deInterleaver_long (muxLength, 6);
 	bufferP				= 0;
-	my_mscHandler			= nullptr;
 	connect (this, SIGNAL (show_const ()),
 	         theParent, SLOT (show_iq ()));
 }
 
 	mscProcessor::~mscProcessor	() {
 	delete muxsampleBuf;
-	if (my_mscHandler != nullptr)	
-	   delete my_mscHandler;
 	delete my_deInterleaver;
 }
 
@@ -197,29 +198,74 @@ static	bool toggler = false;
 }
 
 void	mscProcessor::selectService	(int shortId) {
-	locker. lock ();
-	if (my_mscHandler != nullptr)
-	   delete my_mscHandler;
+int	streamId	= -1;
+int	lengthA, lengthB;
 
-	if (the_postProcessor != nullptr)
-	   delete the_postProcessor;
-	if (params -> subChannels [shortId]. is_audioService)
-	   the_postProcessor	= new audioFrameProcessor (theParent,
-	                                             params,
-	                                             shortId);
+	serviceSelected. store (-1);
+	locker. lock ();
+	if (my_audioFrameProcessor != nullptr)
+	   delete my_audioFrameProcessor;
+	if (my_dataFrameProcessor != nullptr)
+	   delete my_dataFrameProcessor;
+	my_audioFrameProcessor	= nullptr;
+	my_dataFrameProcessor	= nullptr;
+	if (my_deconvolver != nullptr)
+	   delete my_deconvolver;
+
+	lengthA		= 0;
+	lengthB		= 0;
+	for (int i = 0; i < 4; i ++) {
+	   if (params -> theStreams [i]. inUse) {
+	      lengthA += params -> theStreams [i]. lengthHigh * 8;
+	      lengthB += params -> theStreams [i]. lengthLow  * 8;
+	   }
+	}
+
+	muxBuffer. resize (lengthA + 2 * lengthB);
+
+	if (params	-> theChannel. MSC_Mode == 0)	// QAM16
+	   my_deconvolver	= new qam16_handler (params, muxLength,
+	                                             lengthA, lengthB);
 	else
-	   the_postProcessor	= new dataProcessor (theParent,
-	                                             params,
-	                                             shortId);
-	if (params -> theChannel. MSC_Mode == 0)
-	   my_mscHandler	= new qam16_handler (params,
-	                                             the_postProcessor, 
-	                                             muxLength, shortId);
-	else
-	   my_mscHandler	= new qam4_handler (params,
-	                                            the_postProcessor,
-	                                            muxLength, shortId);
+	   my_deconvolver	= new qam4_handler (params, muxLength,
+	                                            lengthA, lengthB);
+//
+//	OK, for now we only deal with the - more or less - primary
+//	data for the different services. I.e. an audio service will
+//	only provide audio,
+	if (params -> subChannels [shortId]. is_audioService) {
+	   for (int i = 0; i < 4; i ++) {
+	      if (params -> theStreams [i]. inUse &&
+	          params -> theStreams [i]. audioStream &&
+	          (params -> theStreams [i]. shortId == shortId)) {
+	         streamId	= i;
+	         my_audioFrameProcessor	= new audioFrameProcessor (theParent,
+	                                                           params,
+	                                                           shortId,
+	                                                           i);
+	         break;
+	      }
+	   }
+	}
+	else {		// there is a data service
+	   for (int i = 0; i < 4; i ++) {
+	      if (params -> theStreams [i]. inUse &&
+	          !params -> theStreams [i]. audioStream &&
+	          (params -> theStreams [i]. shortId == shortId)) {
+	         streamId	= i;
+	         my_dataFrameProcessor	= new dataFrameProcessor (theParent,
+	                                                          params,
+	                                                          shortId,
+	                                                          i);
+	         break;
+	      }
+	   }
+	}
 	locker. unlock ();
+	if (streamId == -1)
+	   return;
+	else
+	   serviceSelected. store (shortId);
 }
 
 static int teller	= 0;
@@ -236,11 +282,21 @@ theSignal muxsampleBuf [muxLength];
 	   teller = 0;
 	}
 
-	if (my_mscHandler == nullptr)
+	if (serviceSelected. load () == -1)
 	   return;
-	my_deInterleaver -> deInterleave (mux, muxsampleBuf);
+//
+//	if selection (i.e. pair shortId, streamId) differs
+//	from previous selection ...
+//	
 	locker. lock ();
-	my_mscHandler -> process (muxsampleBuf, toggler);
+	my_deInterleaver -> deInterleave (mux, muxsampleBuf);
+	my_deconvolver	-> process (muxsampleBuf, muxBuffer. data ());
+	if (my_audioFrameProcessor != nullptr)
+	   my_audioFrameProcessor -> process (muxBuffer. data (), !toggler);
+	if (my_dataFrameProcessor != nullptr) {
+	   fprintf (stderr, "q");
+	   my_dataFrameProcessor -> process (muxBuffer. data (), !toggler);
+	}
 	locker. unlock ();
 }
 

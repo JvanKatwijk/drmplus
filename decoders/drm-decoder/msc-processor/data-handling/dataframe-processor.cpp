@@ -25,8 +25,7 @@
 #include	<float.h>
 #include	<math.h>
 #include	"basics.h"
-#include	"data-processor.h"
-#include	"frame-processor.h"
+#include	"dataframe-processor.h"
 #include	"drm-decoder.h"
 #include	"fec-handler.h"
 #include	"packet-assembler.h"
@@ -71,11 +70,23 @@ uint32_t y;
 	return (b & 0xFFFF);
 }
 
-	dataProcessor::dataProcessor	(drmDecoder *drm,
-	                                 drmParameters *params,
-	                                 int streamId) {
+	dataFrameProcessor::dataFrameProcessor	(drmDecoder *drm,
+	                                         drmParameters *params,
+	                                         int	shortId,
+	                                         int streamId) {
 	this	-> drmMaster	= drm;
 	this	-> params	= params;
+	this	-> shortId	= shortId;
+	this	-> streamId	= streamId;
+	lengthA_total   = 0;
+        lengthB_total   = 0;
+        for (int i = 0; i < 4; i ++) {
+           lengthA_total += params -> theStreams [i]. lengthHigh * 8;
+           lengthB_total += params -> theStreams [i]. lengthLow  * 8;
+        }
+
+        firstBuffer             = new uint8_t [lengthA_total + lengthB_total];
+
 	uint16_t applicationId	=
 	                  params -> theStreams [streamId].  applicationId;
 	my_packetAssembler	=
@@ -84,60 +95,52 @@ uint32_t y;
 	my_fecHandler		= new fecHandler (my_packetAssembler);
 }
 
-	dataProcessor::~dataProcessor	(void) {
+	dataFrameProcessor::~dataFrameProcessor	(void) {
 	delete my_fecHandler;
 	delete	my_packetAssembler;
 }
 
-void	dataProcessor::process         (uint8_t *buf_1, uint8_t *buf_2,
-                                                         int stream) {
-int     startPosA       = 0;
-int     startPosB       = 0;
+void	dataFrameProcessor::process	(uint8_t *buf_2, bool toggle) {
+int     startPosA       = params -> theStreams [streamId]. offsetHigh;
+int     startPosB       = params -> theStreams [streamId]. offsetLow;
+int     lengthA         = params -> theStreams [streamId]. lengthHigh;
+int     lengthB         = params -> theStreams [streamId]. lengthLow;
 
-//	we first compute the length of the HP part, which - obviously -
-//	is the start of the LP part
-        for (int i = 0; i < 4; i ++)
-           if (params -> theStreams [i]. inUse)
-              startPosB += params -> theStreams [i]. lengthHigh;
+        if (!toggle) {
+           memcpy (firstBuffer, buf_2, lengthA_total + lengthB_total);
+           return;
+        }
 
-//      Note that length and startPos are in bytes, input not yet packed though
-        for (int i = 0; i < 4; i ++) {
-           if (params -> theStreams [i]. inUse) {
-              int lengthA = params -> theStreams [i]. lengthHigh;
-              int lengthB = params -> theStreams [i]. lengthLow;
-              if (stream == i)  {       // build up the logical frame
-//	         fprintf (stderr, "stream %d %d %d\n", 
-//	                                i, startPosB, lengthB);
-                 uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
-                 memcpy (dataVec, &buf_1 [startPosA * 8], lengthA * 8);
-                 memcpy (&dataVec [lengthA * 8],
-                                  &buf_2 [startPosA * 8], lengthA * 8);
-                 memcpy (&dataVec [2 * lengthA * 8],
-                                  &buf_1 [startPosB * 8], lengthB * 8);
-                 memcpy (&dataVec [2 * lengthA * 8 + lengthB * 8],
-                                  &buf_2 [startPosB * 8], lengthB * 8);
-//	just a reminder:
+	fprintf (stderr, "a");
+	if (params -> theStreams [streamId]. shortId != shortId)
+	   return;
+
+	fprintf (stderr, "b");
+	uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
+        memcpy (dataVec, &firstBuffer [startPosA * 8], lengthA * 8);
+        memcpy (&dataVec [lengthA * 8],
+                           &buf_2 [startPosA * 8], lengthA * 8);
+        memcpy (&dataVec [2 * lengthA * 8],
+                           &firstBuffer [startPosB * 8], lengthB * 8);
+        memcpy (&dataVec [(2 * lengthA + lengthB) * 8],
+                           &buf_2 [startPosB * 8], lengthB * 8);
+
 //	if the packetmode indicator == 1 we have an asynchronous stream
 //	if 0, we have a synchronous stream which we don't handle yet
-	         if (params -> theStreams [i]. packetModeInd == 1) {
-	            process_packets (dataVec, i,
-	                             0,	2 * lengthA,
-	                             2 * lengthA, 2 * lengthB);
-	         }
-	         else {	// synchronous stream
-	            process_syncStream (dataVec, i,
-	                                0,	2 * lengthA,
-	                                2 * lengthA,  2 * lengthB);
-	         }
-	      }
-	      startPosA	+= lengthA;
-	      startPosB	+= lengthB;
-	   }
+	if (params -> theStreams [streamId]. packetModeInd == 1) {
+	   process_packets (dataVec, streamId,
+	                    0,	2 * lengthA,
+	                    2 * lengthA, 2 * lengthB);
+	}
+	else {	// synchronous stream
+	   process_syncStream (dataVec, streamId,
+	                       0,	2 * lengthA,
+	                       2 * lengthA,  2 * lengthB);
 	}
 }
 //
 
-void	dataProcessor::process_packets (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::process_packets (uint8_t *v, int16_t mscIndex,
 	                                int16_t startHigh, int16_t lengthHigh,
 	                                int16_t startLow,  int16_t lengthLow) {
 	if (lengthHigh != 0) 
@@ -147,7 +150,7 @@ void	dataProcessor::process_packets (uint8_t *v, int16_t mscIndex,
 	   handle_eep_packets (v, mscIndex, startLow, lengthLow);
 }
 
-void	dataProcessor::process_syncStream (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::process_syncStream (uint8_t *v, int16_t mscIndex,
 	                                   int16_t startHigh,
 	                                   int16_t lengthHigh,
 	                                   int16_t startLow,
@@ -159,7 +162,7 @@ void	dataProcessor::process_syncStream (uint8_t *v, int16_t mscIndex,
 	   handle_eep_syncStream (v, mscIndex, startLow, lengthLow);
 }
 
-void	dataProcessor::handle_uep_syncStream (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::handle_uep_syncStream (uint8_t *v, int16_t mscIndex,
 	                           int16_t startHigh, int16_t lengthHigh,
 	                           int16_t startLow, int16_t lengthLow) {
 int16_t	i;
@@ -173,7 +176,7 @@ uint8_t dataBuffer [lengthLow + lengthHigh];
 	handle_syncStream (dataBuffer, lengthLow + lengthHigh, mscIndex);
 }
 
-void	dataProcessor::handle_eep_syncStream (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::handle_eep_syncStream (uint8_t *v, int16_t mscIndex,
 	                           int16_t startLow, int16_t lengthLow) {
 uint8_t	dataBuffer [lengthLow];
 int16_t i;
@@ -184,7 +187,7 @@ int16_t i;
 }
 //
 
-void	dataProcessor::handle_syncStream (uint8_t *dataBuffer,
+void	dataFrameProcessor::handle_syncStream (uint8_t *dataBuffer,
 	                                  int16_t length,
 	                                  int16_t index) {
 //	for (int i = 0; i < 40; i ++)
@@ -193,7 +196,7 @@ void	dataProcessor::handle_syncStream (uint8_t *dataBuffer,
 }
 
 
-void	dataProcessor::handle_uep_packets (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::handle_uep_packets (uint8_t *v, int16_t mscIndex,
 	                           int16_t startHigh, int16_t lengthHigh,
 	                           int16_t startLow, int16_t lengthLow) {
 int16_t	i;
@@ -211,7 +214,7 @@ uint8_t dataBuffer [lengthLow + lengthHigh];
 	   handle_packets (dataBuffer, lengthLow + lengthHigh, mscIndex);
 }
 
-void	dataProcessor::handle_eep_packets (uint8_t *v, int16_t mscIndex,
+void	dataFrameProcessor::handle_eep_packets (uint8_t *v, int16_t mscIndex,
 	                                  int16_t startLow, int16_t lengthLow) {
 uint8_t	dataBuffer [lengthLow];
 int16_t i;
@@ -224,7 +227,7 @@ int16_t i;
 	   handle_packets (dataBuffer, lengthLow, mscIndex);
 }
 
-void	dataProcessor::handle_packets_with_FEC (uint8_t *v,
+void	dataFrameProcessor::handle_packets_with_FEC (uint8_t *v,
 	                                        int16_t length,
 	                                        uint8_t mscIndex) {
 uint8_t *packetBuffer;
@@ -269,7 +272,7 @@ static	int	cnt	= 0;
 	}
 }
 
-void	dataProcessor::handle_packets (uint8_t *v, int16_t length,
+void	dataFrameProcessor::handle_packets (uint8_t *v, int16_t length,
 	                               uint8_t mscIndex) {
 uint8_t *packetBuffer;
 int16_t	packetLength = params -> theStreams [mscIndex]. packetLength + 3;
@@ -278,7 +281,8 @@ int16_t	i;
 	for (i = 0; i < length / packetLength; i ++) {
 	   packetBuffer = &v [i * packetLength];
 //	Fetch relevant info from the stream
-//
+
+	fprintf (stderr, "a");
 //	first a crc check
 	   if (crc16_bytewise (packetBuffer, packetLength) != 0)
 	      continue;

@@ -32,10 +32,13 @@
 #endif
 
 	audioFrameProcessor::audioFrameProcessor (drmDecoder *drm,
-	                                 drmParameters *params,
-	                                 int shortId) {
+	                                          drmParameters *params,
+	                                          int	shortId,
+	                                          int streamId) {
 	this	-> parent	= drm;
 	this	-> params	= params;
+	this	-> shortId	= shortId;
+	this	-> streamId	= streamId;
 #ifdef  __WITH_FDK_AAC__
         my_aacDecoder           = new fdkAAC    (drm, params);
 #elif   __WITH_FAAD__
@@ -44,6 +47,14 @@
         my_aacDecoder           = new decoderBase ();
 #endif
 
+	lengthA_total	= 0;
+	lengthB_total	= 0;
+	for (int i = 0; i < 4; i ++) {
+	   lengthA_total += params -> theStreams [i]. lengthHigh * 8;
+	   lengthB_total += params -> theStreams [i]. lengthLow  * 8;
+	}
+
+	firstBuffer		= new uint8_t [lengthA_total + lengthB_total];
 	my_aacProcessor		= new aacProcessor	(drm, params,
 	                                                      my_aacDecoder);
 	my_xheaacProcessor	= new xheaacProcessor	(drm, params,
@@ -57,34 +68,39 @@
 	delete	my_aacDecoder;
 	delete	my_aacProcessor;
 	delete	my_xheaacProcessor;
+	delete[] firstBuffer;
 }
 
-void	audioFrameProcessor::process	(uint8_t *buf_1,
-	                                 uint8_t *buf_2, int shortId) {
-int	streamId	= params -> subChannels [shortId]. streamId;
+void	audioFrameProcessor::
+	               process	(uint8_t *buf_2, bool toggle) {
 int	startPosA	= params -> theStreams [streamId]. offsetHigh;
 int	startPosB	= params -> theStreams [streamId]. offsetLow;
 int	lengthA		= params -> theStreams [streamId]. lengthHigh;
 int	lengthB		= params -> theStreams [streamId]. lengthLow;
 
+	if (!toggle) {
+	   memcpy (firstBuffer, buf_2, lengthA_total + lengthB_total);
+	   return;
+	}
+
 	uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
-	memcpy (dataVec, &buf_1 [startPosA * 8], lengthA * 8);
+	memcpy (dataVec, &firstBuffer [startPosA * 8], lengthA * 8);
 	memcpy (&dataVec [lengthA * 8],
 	                   &buf_2 [startPosA * 8], lengthA * 8);
 	memcpy (&dataVec [2 * lengthA * 8],
-	                   &buf_1 [startPosB * 8], lengthB * 8);
+	                   &firstBuffer [startPosB * 8], lengthB * 8);
 	memcpy (&dataVec [(2 * lengthA + lengthB) * 8],
 	                   &buf_2 [startPosB * 8], lengthB * 8);
-//	if (params -> subChannels [shortId]. is_audioService) 
 	if (params -> theStreams [streamId]. audioStream)
 	   processAudio (dataVec, streamId,
 	                 0,           2 * lengthA,
 	                 2 * lengthA, 2 * lengthB);
 }
 
-void	audioFrameProcessor::processAudio (uint8_t *v, int16_t streamIndex,
-	                             int16_t startHigh, int16_t lengthHigh,
-	                             int16_t startLow,  int16_t lengthLow) {
+void	audioFrameProcessor::
+	           processAudio (uint8_t *v, int16_t streamIndex,
+	                         int16_t startHigh, int16_t lengthHigh,
+	                         int16_t startLow,  int16_t lengthLow) {
 uint8_t	audioCoding	= params -> theStreams [streamIndex]. audioCoding;
 
 	switch (audioCoding) {

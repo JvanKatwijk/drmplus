@@ -50,7 +50,6 @@ typedef struct {
 	bool		inUse;
 	uint8_t		shortId;
 	uint32_t	serviceId;
-	uint8_t		streamId;
 	QString		serviceName;
 	int		language;		// set by FAC
 	bool		is_audioService;
@@ -61,6 +60,7 @@ typedef struct {
 
 typedef struct {
 	bool		inUse;
+	uint8_t		shortId;
 	int16_t		lengthHigh;
 	int16_t		lengthLow;
 	int		offsetHigh;

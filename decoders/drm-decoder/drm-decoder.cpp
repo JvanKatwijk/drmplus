@@ -360,13 +360,19 @@ void	drmDecoder::update_GUI		() {
 
 void	drmDecoder::show_audioData (drmParameters *drm, int shortId) {
 streamParameters *theStream;
-int	streamId;
+int	streamId	= 0;
 	if (!drm -> subChannels [shortId]. is_audioService) {
 	   fprintf (stderr, "Sorry, not an audio channel\n");
 	   return;
 	}
 
-	streamId	= drm	-> subChannels [shortId]. streamId;
+	for (int i = 0; i < 4; i ++) 
+	   if (drm -> theStreams [i]. inUse &&
+	       drm -> theStreams [i]. audioStream &&
+	       (drm -> theStreams [i]. shortId == shortId)) {
+	      streamId = i;
+	      break;
+	}
 	theStream	= &(drm	-> theStreams [streamId]);
 	audioData. streamId	-> display (streamId);
 	audioData. serviceName	->

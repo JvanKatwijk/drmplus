@@ -171,8 +171,8 @@ QString	FrequencytoString (int32_t freq) {
 //      The end of all
         RadioInterface::~RadioInterface () {
 	secondsTimer. stop ();
-        delete  mykeyPad;
-        delete  myList;
+//	delete  mykeyPad;
+//	delete  myList;
 }
 
 QString RadioInterface::footText () {

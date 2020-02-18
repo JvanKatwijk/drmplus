@@ -21,28 +21,32 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DATA_PROCESSOR__
-#define	__DATA_PROCESSOR__
+#ifndef	__DATA_FRAME_PROCESSOR__
+#define	__DATA_FRAME_PROCESSOR__
 
 #include	<QObject>
 #include	<cstring>
 #include	"basics.h"
-#include	"frame-processor.h"
 
 class	drmDecoder;
 class	packetAssembler;
 class	fecHandler;
 
-class	dataProcessor: public frameProcessor {
+class	dataFrameProcessor: QObject {
 Q_OBJECT
 public:
-		dataProcessor	(drmDecoder *,
-	                         drmParameters *, int stream);
-		~dataProcessor	(void);
-	void	process		(uint8_t *, uint8_t *, int);
+		dataFrameProcessor	(drmDecoder *, drmParameters *,
+	                                              int, int);
+		~dataFrameProcessor	(void);
+	void	process		(uint8_t *, bool);
 private:
-	drmParameters	*params;
 	drmDecoder	*drmMaster;
+	drmParameters	*params;
+	int		shortId;
+	int		streamId;
+	int		lengthA_total;
+	int		lengthB_total;
+	uint8_t		*firstBuffer;
 	int16_t		numFrames;
 	fecHandler	*my_fecHandler;
 	packetAssembler	*my_packetAssembler;

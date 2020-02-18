@@ -107,6 +107,7 @@ L1:
 	   bool	frameReady	= false;
 	   if (!running. load ())
 	      return;
+//	   cleanup_db ();
 	   goodFrames	= 0;
 
 //	at first we need to find the first sample of a symbol
@@ -144,7 +145,6 @@ L1:
 //	.... and write that in Hz rather than bins
 	   params -> freqOffset_integer =
 	             params -> freqOffset_integer * 192000 / Tu_t;
-
 //
 //	We work with a "working buffer" of size FINE_TIME_BLOCKS + 1
 //	since we want to be able to handle negative time shifts
@@ -173,13 +173,12 @@ L1:
 	      my_wordCollector. getWord (params,
 	                                 fine_timeBlocks, inbank [lc]);
 	      my_timeCorrelator. getCorr (lc, inbank [lc]);
-//	      params -> timeOffset_fractional +=
-//	                           Ts_t * params -> sampleRate_offset;
 	      lc = (lc + 1) % symbolsperFrame;
 	      if (my_timeCorrelator. is_bestIndex (lc))  
                  break;
 	   }
 
+	   fprintf (stderr, "best index %d\n", lc);
 	   if (!running. load ())
 	      return;
 //
@@ -188,7 +187,7 @@ L1:
                    symbol_no < symbolsperFrame; symbol_no ++)
                  (void) my_equalizer.
                     equalize (inbank [(lc + symbol_no) % symbolsperFrame],
-                                                    symbol_no, outbank);
+	                                               symbol_no, outbank);
 
 	   symbol_no         = 0;
 	   frameReady        = false;

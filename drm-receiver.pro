@@ -220,13 +220,13 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.h \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.h \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.h \
-	   ./decoders/drm-decoder/msc-processor/frame-processor.h \
+	   ./decoders/drm-decoder/msc-processor/deconvolver.h \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.h\
+	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.h\
 	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.h\
@@ -277,13 +277,13 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/sdc-processor/sdc-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/msc-handler.cpp \
-	   ./decoders/drm-decoder/msc-processor/frame-processor.cpp \
+	   ./decoders/drm-decoder/msc-processor/deconvolver.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam4-handler/qam4-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-metrics.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/data-processor.cpp\
+	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.cpp\
 	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.cpp\

@@ -25,46 +25,41 @@
 #include	"puncture-tables.h"
 #include	"viterbi-drm.h"
 #include	"prbs.h"
-#include	"frame-processor.h"
 
 	qam4_handler::qam4_handler	(drmParameters *params,
-	                                 frameProcessor	*the_postProcessor,
-	                                 int muxLength,
-	                                 int stream):
-	                                    mscHandler (params, muxLength,
-	                                                stream),
+	                                 int	muxLength,
+	                                 int	lengthA,
+	                                 int	lengthB):
 	                                    myDecoder (),
 	                                    myTables () {
 	this	-> params	= params;
-	this	-> the_postProcessor = the_postProcessor;
 	this	-> muxLength	= muxLength;
-	this	-> stream	= stream;
-	this	-> lengthA	= 0;
-	this	-> lengthB	= 0;
+	this	-> lengthA	= lengthA;
+	this	-> lengthB	= lengthB;
 
-	for (int i = 0; i < 4; i ++) {
-	   if (params -> theStreams [i]. inUse) {
-	      lengthA	+= params -> theStreams [i]. lengthHigh * 8;
-	      lengthB	+= params -> theStreams [i]. lengthLow * 8;
-	   }
-	}
-	firstBuffer	= new uint8_t [lengthA + lengthB];
 //	for now
-	map_protLevel (params -> protLevelB, &Rx_high, &Ry_high);
+	map_protLevel (params -> protLevelA, &Rx_high, &Ry_high);
 	map_protLevel (params -> protLevelB, &Rx_low, &Ry_low);
-	double	Rp0 = (double)Rx_high / Ry_high;
-	double	Rp1 = (double)Rx_low / Ry_low;
+	double	Rp0	= (double)Rx_high / Ry_high;
+	double	Rp1	= (double)Rx_low / Ry_low;
 	float RYlcm	= getRYlcm_4 (params -> protLevelA);
 	float denom	= Rp0;
 	denom		*= 2 * RYlcm;
+
+#if 0
+	fprintf (stderr, "lengthA = %d, lengthB = %d, denom = %f, RYlcm = %f\n",
+	                     lengthA, lengthB, denom, RYlcm);
+#endif
 	N1		= int16_t (ceil (lengthA / denom)) * RYlcm;
 	N2		= muxLength - N1;
+#if 0
 	fprintf (stderr, "protLevels %d, %d\n",
 	                 params -> protLevelA, params -> protLevelB);
 	fprintf (stderr, "high protection %d %d, low %d %d\n",
 	                  Rx_high, Ry_high, Rx_low, Ry_low);
 	fprintf (stderr, "Cells A %d, cellsB %d\n",
 	                                N1, N2);
+#endif
 	puncture_high	= myTables. getPunctureTable (Rx_low,  Ry_low);
 	puncture_low	= myTables. getPunctureTable (Rx_low,  Ry_low);
 //
@@ -86,10 +81,9 @@
 	delete thePRBS;
 }
 //
-void	qam4_handler::process		(theSignal *mux, bool toggleFlag) {
+void	qam4_handler::process		(theSignal *mux, uint8_t *out) {
 int deconvolveLength	= 6 * (lengthA + lengthB + 6);
 metrics	deconvolveBuffer [deconvolveLength];
-uint8_t mscDecoded	[lengthA + lengthB];
 metrics	softBits	[2 * muxLength];
 metrics	hulpVec		[2 * muxLength];
 int	Teller	= 0;
@@ -133,14 +127,8 @@ int	Teller	= 0;
 	}
 
 	deconvolver	-> deconvolve (deconvolveBuffer,
-	                              lengthA + lengthB, mscDecoded);
-	thePRBS		-> doPRBS (mscDecoded);
-	
-	if (toggleFlag)
-	   memcpy (firstBuffer, mscDecoded, lengthA + lengthB);
-	else
-	   the_postProcessor -> process (firstBuffer,
-	                                 mscDecoded, stream);
+	                              lengthA + lengthB, out);
+	thePRBS		-> doPRBS (out);
 }
 
 void	qam4_handler::map_protLevel (int protLevel, int* Rx, int* Ry) {
