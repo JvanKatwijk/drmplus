@@ -184,10 +184,9 @@ void	drmDecoder::selectChannel_2	(void) {
 }
 
 void	drmDecoder::selectChannel_3	(void) {
-	stationLabel	-> setText (params. subChannels [1]. serviceName);
+	stationLabel	-> setText (params. subChannels [3]. serviceName);
 	show_audioData (&params, 3);
 	my_frameHandler	-> selectService (3);
-
 }
 
 static	int	faadCounter	= 0;
@@ -361,6 +360,7 @@ void	drmDecoder::update_GUI		() {
 void	drmDecoder::show_audioData (drmParameters *drm, int shortId) {
 streamParameters *theStream;
 int	streamId	= 0;
+
 	if (!drm -> subChannels [shortId]. is_audioService) {
 	   fprintf (stderr, "Sorry, not an audio channel\n");
 	   return;

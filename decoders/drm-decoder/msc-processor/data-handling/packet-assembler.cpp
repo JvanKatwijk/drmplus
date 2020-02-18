@@ -25,6 +25,7 @@
 #include	<stdio.h>
 #include	"basics.h"
 #include	"mot-data.h"
+#include	"journaline-datahandler.h"
 //
 //	The function of the packetAssembler is - as the name suggests -
 //	assembling the packets for the various application handlers.
@@ -49,17 +50,16 @@
 	      my_dataHandler	= new motHandler (drm);
 	      break;
 	   case 0x44a:
-//	      my_dataHandler	= new journalineHandler (drm);
+	      my_dataHandler	= new journaline_dataHandler ();
 	      break;
 	   case 59:
-//	      my_dataHandler	= new ip_dataHandler (mr);
-//	      break;
 	   default:
 	       my_dataHandler	= new virtual_dataHandler ();
 	}
 }
 
 	packetAssembler::~packetAssembler	(void) {
+	
 	delete my_dataHandler;
 }
 //

@@ -200,7 +200,13 @@ static	bool toggler = false;
 void	mscProcessor::selectService	(int shortId) {
 int	streamId	= -1;
 int	lengthA, lengthB;
-
+#if 0
+	for (int i = 0; i < 4; i ++) 
+	   fprintf (stderr, "stream %d -> shortId %d (inUse %d)\n",
+	                      i, 
+	                      params -> theStreams [i]. shortId,	
+	                      params -> theStreams [i]. inUse);
+#endif
 	serviceSelected. store (-1);
 	locker. lock ();
 	if (my_audioFrameProcessor != nullptr)
@@ -211,6 +217,7 @@ int	lengthA, lengthB;
 	my_dataFrameProcessor	= nullptr;
 	if (my_deconvolver != nullptr)
 	   delete my_deconvolver;
+	my_deconvolver		= nullptr;
 
 	lengthA		= 0;
 	lengthB		= 0;
@@ -229,10 +236,11 @@ int	lengthA, lengthB;
 	else
 	   my_deconvolver	= new qam4_handler (params, muxLength,
 	                                            lengthA, lengthB);
-//
+
 //	OK, for now we only deal with the - more or less - primary
 //	data for the different services. I.e. an audio service will
 //	only provide audio,
+
 	if (params -> subChannels [shortId]. is_audioService) {
 	   for (int i = 0; i < 4; i ++) {
 	      if (params -> theStreams [i]. inUse &&
@@ -257,6 +265,8 @@ int	lengthA, lengthB;
 	                                                          params,
 	                                                          shortId,
 	                                                          i);
+	         fprintf (stderr, "shortId %d carrier data on stream %d\n",
+	                              shortId, i);
 	         break;
 	      }
 	   }
@@ -285,18 +295,15 @@ theSignal muxsampleBuf [muxLength];
 	if (serviceSelected. load () == -1)
 	   return;
 //
-//	if selection (i.e. pair shortId, streamId) differs
-//	from previous selection ...
-//	
 	locker. lock ();
 	my_deInterleaver -> deInterleave (mux, muxsampleBuf);
 	my_deconvolver	-> process (muxsampleBuf, muxBuffer. data ());
+
 	if (my_audioFrameProcessor != nullptr)
 	   my_audioFrameProcessor -> process (muxBuffer. data (), !toggler);
-	if (my_dataFrameProcessor != nullptr) {
-	   fprintf (stderr, "q");
+	if (my_dataFrameProcessor != nullptr) 
 	   my_dataFrameProcessor -> process (muxBuffer. data (), !toggler);
-	}
+
 	locker. unlock ();
 }
 

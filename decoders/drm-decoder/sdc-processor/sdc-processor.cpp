@@ -178,7 +178,7 @@ int	temp1		= 0, temp2	= 0;
 	                    get_SDCBits (data, index, 12),
 	                    get_SDCBits (data, index + 12, 12));
 #endif
-	         params -> theStreams [i]. inUse = true;
+//	         params -> theStreams [i]. inUse = true;
 	      }
 	      temp1	= 0; temp2	= lengthHigh;
 	      for (int i = 0; i < bodySize / 3; i ++) {
@@ -192,8 +192,8 @@ int	temp1		= 0, temp2	= 0;
 	   case 5:
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);
-
-	      return index + 16 + 8 * bodySize;
+	      params	-> theStreams [streamId]. inUse	= true;
+	      params	-> theStreams [streamId]. shortId = shortId;
 	      params 	-> theStreams [streamId]. audioStream = false;
 	      params	-> theStreams [streamId]. packetModeInd =
 	                                get_SDCBits (data, base + 4, 1);
@@ -298,6 +298,9 @@ int	temp1		= 0, temp2	= 0;
 	   case 9:	// audio information
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);
+	      if (!params -> subChannels [shortId]. is_audioService)
+	         return index + 16 + 8 * bodySize;
+	      params	-> theStreams [streamId]. inUse	= true;
 	      params	-> theStreams [streamId]. shortId = shortId;
 	      params	-> theStreams [streamId]. audioStream = true;
 	      params	-> theStreams [streamId]. audioCoding =

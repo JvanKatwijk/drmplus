@@ -111,11 +111,9 @@ int     lengthB         = params -> theStreams [streamId]. lengthLow;
            return;
         }
 
-	fprintf (stderr, "a");
 	if (params -> theStreams [streamId]. shortId != shortId)
 	   return;
 
-	fprintf (stderr, "b");
 	uint8_t dataVec [2 * 8 * (lengthA + lengthB)];
         memcpy (dataVec, &firstBuffer [startPosA * 8], lengthA * 8);
         memcpy (&dataVec [lengthA * 8],
@@ -282,10 +280,10 @@ int16_t	i;
 	   packetBuffer = &v [i * packetLength];
 //	Fetch relevant info from the stream
 
-	fprintf (stderr, "a");
 //	first a crc check
 	   if (crc16_bytewise (packetBuffer, packetLength) != 0)
 	      continue;
+
 	   my_packetAssembler -> assemble (packetBuffer,
 	                                   packetLength, mscIndex);
 	}

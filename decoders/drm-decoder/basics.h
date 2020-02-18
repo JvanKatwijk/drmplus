@@ -59,8 +59,8 @@ typedef struct {
 } subChannelParameters;
 
 typedef struct {
-	bool		inUse;
 	uint8_t		shortId;
+	bool		inUse;
 	int16_t		lengthHigh;
 	int16_t		lengthLow;
 	int		offsetHigh;
