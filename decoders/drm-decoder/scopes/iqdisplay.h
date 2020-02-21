@@ -25,42 +25,27 @@
 
 #include	"radio-constants.h"
 #include	<vector>
-#include	<qwt.h>
-#include	<qwt_slider.h>
-#include	<qwt_plot.h>
-#include	<qwt_plot_curve.h>
-#include	<qwt_plot_marker.h>
-#include	<qwt_plot_grid.h>
-#include	<qwt_dial.h>
-#include	<qwt_dial_needle.h>
-#include	<qwt_plot_spectrogram.h>
-#include	<qwt_color_map.h>
-#include	<qwt_plot_spectrogram.h>
-#include	<qwt_scale_widget.h>
-#include	<qwt_scale_draw.h>
-#include	<qwt_plot_zoomer.h>
-#include	<qwt_plot_panner.h>
-#include	<qwt_plot_layout.h>
-/*
- *	for the waterfall display
- */
+#include	<QFrame>
+#include	<QtCharts/QChartView>
+#include        <QtCharts/QScatterSeries>
+#include        <QtCharts/QLegendMarker>
+#include        <QtCharts/QValueAxis>
+#include	"ui_iq_display.h"
+QT_CHARTS_USE_NAMESPACE
 
-class IQDisplay: public QObject, public QwtPlotSpectrogram {
+class IQDisplay: public QChartView {
 Q_OBJECT
 public:
-	IQDisplay		(QwtPlot *, int16_t);
+	IQDisplay		(QFrame *parent = nullptr);
 	~IQDisplay		();
 void	DisplayIQ		(std::complex<float> *, float);
+void	show			();
+void	hide			();
 private:
-	int32_t			x_amount;
-	std::vector<double>	plotData;
-	std::vector<double>	plot2;
-	std::vector<complex<float> > Points;
-	QwtPlot			*plotgrid;
-	int			_OutputRate;
-	int			Radius;
-	int			CycleCount;
-private slots:
+	QScatterSeries		*series0;
+	QFrame			*parent;
+public slots:
+
 };
 #endif
 

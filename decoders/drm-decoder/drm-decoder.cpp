@@ -27,55 +27,58 @@
 #include	"eqdisplay.h"
 #include	"iqdisplay.h"
 
-        drmDecoder::drmDecoder	(RadioInterface * parent,
+	drmDecoder::drmDecoder	(RadioInterface * parent,
 	                         RingBuffer<std::complex<float>> *input,
 	                         RingBuffer<std::complex<float>> *audioBuffer) {
 	this	-> audioBuffer	= audioBuffer;
 	myFrame			= new QFrame (nullptr);
-        setupUi (myFrame);
-	techFrame		= new QFrame (nullptr);
+	setupUi (myFrame);
+//	techFrame		= new QFrame (nullptr);
 	audioFrame		= new QFrame (nullptr);
-	techData. setupUi (techFrame);
+//	techData. setupUi (techFrame);
 	audioData. setupUi (audioFrame);
 
-        my_eqDisplay		= new EQDisplay (techData.
-	                                              equalizerDisplay);
-        my_iqDisplay		= new IQDisplay (techData.
-	                                              iq_sampleDisplay, 128);
-        myFrame                 -> show ();
+//	my_eqDisplay		= new EQDisplay (techData.
+//	                                              equalizerDisplay);
+//	my_iqDisplay		= new IQDisplay (techData.
+//	                                              iq_sampleDisplay);
+	my_eqDisplay		= new EQDisplay ();
+	my_iqDisplay		= new IQDisplay ();
+	myFrame                 -> show ();
 
 	timeSyncLabel   -> setStyleSheet ("QLabel {background-color:red}");
-        facSyncLabel    -> setStyleSheet ("QLabel {background-color:red}");
-        sdcSyncLabel    -> setStyleSheet ("QLabel {background-color:red}");
-        faadSyncLabel   -> setStyleSheet ("QLabel {background-color:red}");
+	facSyncLabel    -> setStyleSheet ("QLabel {background-color:red}");
+	sdcSyncLabel    -> setStyleSheet ("QLabel {background-color:red}");
+	faadSyncLabel   -> setStyleSheet ("QLabel {background-color:red}");
 
-        this    -> eqBuffer     = new RingBuffer<std::complex<float>> (32768);
-        this    -> iqBuffer     = new RingBuffer<std::complex<float>> (1024);
+	this    -> eqBuffer     = new RingBuffer<std::complex<float>> (32768);
+	this    -> iqBuffer     = new RingBuffer<std::complex<float>> (1024);
 
 	my_frameHandler 	= new frameHandler (this,
 	                                            input,
 	                                            &params,
 	                                            eqBuffer, iqBuffer);
 	phaseOffset		= 0;
-	connect (techData_button, SIGNAL (clicked ()),
-	         this, SLOT (handle_techData ()));
+	connect (equalizerButton, SIGNAL (clicked ()),
+	         this, SLOT (handle_equalizerButton ()));
 	connect (streamData_button, SIGNAL (clicked ()),
 	         this, SLOT (handle_streamData ()));
 	connect (this, SIGNAL (audioAvailable (int, int)),
 	         parent, SLOT (processAudio (int, int)));
-	connect (techData. constellationSelector,
+	connect (constellationSelector,
 	                          SIGNAL (activated (const QString &)),	
-	         this, SLOT (handle_constellation (const QString &)));
+	         this, SLOT (handle_constellationSelector (const QString &)));
 }
 
 	drmDecoder::~drmDecoder () {
-        delete	my_frameHandler;
+	delete	my_frameHandler;
 	delete	myFrame;
-	delete	techFrame;
+//	delete	techFrame;
 	delete	audioFrame;
 	my_iqDisplay	-> hide ();
+	my_eqDisplay	-> hide ();
 //	delete	my_iqDisplay;
-	delete	my_eqDisplay;
+//	delete	my_eqDisplay;
 }
 
 void	drmDecoder::show_coarseOffset	(float offset) {
@@ -149,13 +152,13 @@ static std::complex<float> lbuf [4800];
 static int fillP        = 0;
 void    drmDecoder::sampleOut           (float re, float im) {
 std::complex<float> z   = std::complex<float> (re, im);
-        lbuf [fillP] = z;
-        fillP ++;
-        if (fillP >= 4800) {
-           audioBuffer     -> putDataIntoBuffer (lbuf, 4800);
-           audioAvailable (audioBuffer -> GetRingBufferReadAvailable (), 48000);
-           fillP = 0;
-        }
+	lbuf [fillP] = z;
+	fillP ++;
+	if (fillP >= 4800) {
+	   audioBuffer     -> putDataIntoBuffer (lbuf, 4800);
+	   audioAvailable (audioBuffer -> GetRingBufferReadAvailable (), 48000);
+	   fillP = 0;
+	}
 }
 
 void	drmDecoder::showSNR		(float snr) {
@@ -226,7 +229,7 @@ void	drmDecoder::showMOT		(QByteArray data, int subtype) {
 }
 
 void    drmDecoder::set_phaseOffset (int f) {
-        phaseOffset += f;
+	phaseOffset += f;
 //	phaseOffsetDisplay	-> display (phaseOffset);
 }
 
@@ -248,35 +251,24 @@ std::complex<float> line [xx];
 }
 
 void	drmDecoder::show_iq		() {
-std::complex<float> Values [128];
-std::complex<float> pixels [5 * 128];
+std::complex<float> Values [96];
+std::complex<float> pixels [5 * 96];
 int16_t i;
 int16_t t;
 double  avg     = 0;
-int     scopeWidth      = techData. scopeSlider -> value();
-float	pixS	= 1.0 / 128;
-	while (iqBuffer -> GetRingBufferReadAvailable () >= 128) {
-           t = iqBuffer -> getDataFromBuffer (Values, 128);
-           for (i = 0; i < t; i ++) {
-              float x = abs (Values [i]);
-              if (!std::isnan (x) && !std::isinf (x))
-              avg += abs (Values [i]);
-           }
+	while (iqBuffer -> GetRingBufferReadAvailable () >= 100) {
+	   t = iqBuffer -> getDataFromBuffer (Values, 100);
+	   for (i = 0; i < t; i ++) {
+	      float x = abs (Values [i]);
+	      if (!std::isnan (x) && !std::isinf (x))
+	         avg += abs (Values [i]);
+	   }
 
 	   for (i = 0; i < t; i ++) {
-	      pixels [5 * i] = std::complex<float> (real (Values [i]) - pixS,
-	                                            imag (Values [i]));
-	      pixels [5 * i + 1] = std::complex<float> (real (Values [i]) - pixS,
-	                                                imag (Values [i]) - pixS);
-	      pixels [5 * i + 2] = std::complex<float> (real (Values [i]),
-	                                                imag (Values [i]));
-	      pixels [5 * i + 3] = std::complex<float> (real (Values [i]) + pixS,
-	                                                imag (Values [i]));
-	      pixels [5 * i + 4] = std::complex<float> (real (Values [i]) + pixS,
-	                                                imag (Values [i]) + pixS);
+	      pixels [i] = cdiv (Values [i], avg / t);
 	   }
-           avg     /= t;
-           my_iqDisplay -> DisplayIQ (pixels, scopeWidth / avg);
+	   avg     /= t;
+	   my_iqDisplay -> DisplayIQ (pixels, avg);
 	}
 }
 
@@ -290,16 +282,16 @@ void	drmDecoder::cleanup_db		() {
 	}
 	
 	disconnect (channel_0, SIGNAL (clicked (void)),
-                    this, SLOT (selectChannel_0 (void)));
+	            this, SLOT (selectChannel_0 (void)));
 	channel_0	-> setText ("not available");
-        disconnect (channel_1, SIGNAL (clicked (void)),
-                    this, SLOT (selectChannel_1 (void)));
+	disconnect (channel_1, SIGNAL (clicked (void)),
+	            this, SLOT (selectChannel_1 (void)));
 	channel_1	-> setText ("not available");
-        disconnect (channel_2, SIGNAL (clicked (void)),
-                    this, SLOT (selectChannel_2 (void)));
+	disconnect (channel_2, SIGNAL (clicked (void)),
+	            this, SLOT (selectChannel_2 (void)));
 	channel_2	-> setText ("not available");
-        disconnect (channel_3, SIGNAL (clicked (void)),
-                    this, SLOT (selectChannel_3 (void)));
+	disconnect (channel_3, SIGNAL (clicked (void)),
+	            this, SLOT (selectChannel_3 (void)));
 	channel_3	-> setText ("not available");
 }
 
@@ -405,11 +397,20 @@ int	streamId	= 0;
 	              theStream -> textFlag ? "a " : "no ");
 }
 
-void	drmDecoder::handle_techData	() {
-	if (techFrame -> isHidden ())
-	   techFrame -> show ();
+void	drmDecoder::handle_constellationSelector (const QString &s) {
+	if (s == "no tech") {
+	   my_iqDisplay	-> hide ();
+	   return;
+	}
+	my_iqDisplay	-> show ();
+	my_frameHandler	-> set_constellationView (s);
+}
+
+void	drmDecoder::handle_equalizerButton () {
+	if (my_eqDisplay -> isHidden ())
+	   my_eqDisplay -> show ();
 	else
-	   techFrame -> hide ();
+	   my_eqDisplay -> hide ();
 }
 
 void	drmDecoder::handle_streamData		() {
@@ -419,9 +420,6 @@ void	drmDecoder::handle_streamData		() {
 	   audioFrame -> hide ();
 }
 
-void	drmDecoder::handle_constellation	(const QString &s) {
-	my_frameHandler	-> set_constellationView (s);
-}
 
 QString	drmDecoder::getProgramType	(int programType) {
 	switch (programType) {

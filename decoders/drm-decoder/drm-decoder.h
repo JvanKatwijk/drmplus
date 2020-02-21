@@ -38,7 +38,7 @@ class           RadioInterface;
 class		EQDisplay;
 class		IQDisplay;
 
-#include	"ui_technical-data.h"
+//#include	"ui_technical-data.h"
 #include	"ui_audiodata.h"
 
 class   drmDecoder: public virtualDecoder, private Ui_drmdecoder {
@@ -54,9 +54,9 @@ private:
 	RingBuffer<std::complex<float>>	*audioBuffer;
 	std::atomic<bool>       running;
 	QFrame		*myFrame;
-	QFrame		*techFrame;
+//	QFrame		*techFrame;
 	QFrame		*audioFrame;
-	Ui_technicaldata techData;
+//	Ui_technicaldata techData;
 	Ui_audiodata	audioData;
 	EQDisplay	*my_eqDisplay;
 	IQDisplay	*my_iqDisplay;
@@ -89,7 +89,6 @@ public slots:
 	void		setFACSync		(bool);
 	void		update_GUI		();
 	void		cleanup_db		();
-	void		handle_constellation	(const QString &);
 	
 private slots:
 	void		executeSDCSync		(bool);
@@ -102,7 +101,8 @@ private slots:
 	void		selectChannel_3		(void);
 
 	void		set_phaseOffset		(int);
-	void		handle_techData		();
+	void		handle_constellationSelector	(const QString &);
+	void		handle_equalizerButton	();
 	void		handle_streamData	();
 //signals:
 //	void		audioAvailable		(int, int);

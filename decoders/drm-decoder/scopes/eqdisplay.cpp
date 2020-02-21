@@ -22,65 +22,75 @@
  */
 
 #include	"eqdisplay.h"
+#include        <QtCharts/QScatterSeries>
+#include        <QtCharts/QLegendMarker>
+#include        <QtCharts/QValueAxis>
+#include        <QtGui/QImage>
+#include        <QtGui/QPainter>
+#include        <QtCore/QtMath>
 
 
-	EQDisplay::EQDisplay	(QwtPlot *plotgrid) {
-	this	-> plotgrid	= plotgrid;
-	plotgrid		-> setCanvasBackground (QColor ("white"));
-	grid                    = new QwtPlotGrid;
-#if defined QWT_VERSION && ((QWT_VERSION >> 8) < 0x0601)
-        grid    -> setMajPen (QPen(QColor ("black"), 0, Qt::DotLine));
-#else
-        grid    -> setMajorPen (QPen(QColor ("black"), 0, Qt::DotLine));
-#endif
-        grid    -> enableXMin (true);
-        grid    -> enableYMin (true);
-#if defined QWT_VERSION && ((QWT_VERSION >> 8) < 0x0601)
-        grid    -> setMinPen (QPen(QColor ("black"), 0, Qt::DotLine));
-#else
-        grid    -> setMinorPen (QPen(QColor ("black"), 0, Qt::DotLine));
-#endif
-        grid    -> attach (plotgrid);
+	EQDisplay::EQDisplay	(QFrame *parent):
+	                               QChartView (new QChart (), parent) {
 
-	spectrumCurve   = new QwtPlotCurve ("");
-        spectrumCurve   -> setPen (QPen(Qt::red));
-        spectrumCurve   -> setOrientation (Qt::Horizontal);
-        spectrumCurve   -> setBaseline  (0);
-        spectrumCurve   -> attach (plotgrid);
-	phaseCurve	= new QwtPlotCurve ("");
-        phaseCurve	-> setPen (QPen(Qt::blue));
-        phaseCurve	-> setOrientation (Qt::Horizontal);
-        phaseCurve	-> setBaseline  (0);
-        phaseCurve	-> attach (plotgrid);
+        this    -> parent       = parent;
+
+	amplitudes	= new QLineSeries ();
+	phases		= new QLineSeries ();
+	for (int i = 0; i < 206; i ++) {
+	   amplitudes -> append (i, 0.05 * i);
+	   phases     -> append (i, i % 10);
+	}
+	setRenderHint (QPainter::Antialiasing);
+        chart ()        -> setTitle ("equalizer ");
+	axisXlog	= new QValueAxis;
+        axisXlog        -> setTitleText ("amplitude and phase");
+	chart ()	-> setToolTip ("Green line is phase, other the amplitude");
+        axisXlog        -> setTitleBrush (QBrush("#AADDDD"));
+        axisXlog        -> setLabelsColor ("#C4C4C4");
+        axisYlog	= new QValueAxis;
+        axisYlog        -> setTitleBrush (QBrush ("#AADDDD"));
+        axisYlog        -> setLabelsColor("#C4C4C4");
+        chart ()        -> addAxis (axisXlog, Qt::AlignBottom);
+        chart ()        -> addAxis (axisYlog, Qt::AlignLeft);
+
+	chart ()	-> addSeries	(amplitudes);
+	chart ()	-> addSeries	(phases);
 }
 
 	EQDisplay::~EQDisplay	() {}
 
+void	EQDisplay::show		() {
+	QChartView::show ();
+}
+
+void	EQDisplay::hide		() {
+	QChartView::hide ();
+}
+
+bool	EQDisplay::isHidden	() {
+	return QChartView::isHidden ();
+}
+
+static int xxx = 0;
 void	EQDisplay::show		(std::complex<float> *v, int amount) {
-double	max	= 0;
-int	i;
-double X_axis	[amount];
-double plotData [amount];
-double phaseData [amount];
+float	max	= 0;
+	for (int i = 0; i < amount; i ++)
+	   if (abs (v [i]) > max)
+	      max = abs (v [i]);
 
-	for (i = 0; i < amount; i ++) {
-	   X_axis	[i] = i - amount / 2;
-	   plotData	[i] = abs (v [i]);
-	   if (plotData [i] > max)
-	      max = plotData [i];
+	if (++xxx <= 3)
+	   return;
+	xxx = 0;
+	max	= 2 * max;
+	amplitudes	-> clear	();
+	phases		-> clear	();
+	for (int i = 0; i < amount; i ++) {
+	   amplitudes -> append (i, abs (v [i]));
+	   phases     -> append (i, arg (v [i]) + M_PI);
 	}
-	for (i = 0; i < amount; i ++)
-	   plotData [i] = plotData [i] / max * 10;
-	for (i = 0; i < amount; i ++) 
-	   phaseData [i] = arg (v [i]) + 5;
 
-	plotgrid	-> setAxisScale (QwtPlot::xBottom,
-	                                 (double)X_axis [0],
-	                                 (double)X_axis [amount - 1]);
-	plotgrid	-> enableAxis   (QwtPlot::xBottom);
-	plotgrid	-> setAxisScale (QwtPlot::yLeft, 0, 10);
-	spectrumCurve	-> setSamples (X_axis, plotData, amount);
-	phaseCurve	-> setSamples (X_axis, phaseData, amount);
-	plotgrid	-> replot ();
+        axisXlog        -> setRange (0, amount);
+        axisYlog        -> setRange (0, max);
 }
 

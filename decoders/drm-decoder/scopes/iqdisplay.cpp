@@ -21,77 +21,74 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"iqdisplay.h"
-#include	"spectrogramdata.h"
-/*
- *	iq circle plotter
- */
-SpectrogramData	*IQData	= nullptr;
+#include	<QtCharts/QScatterSeries>
+#include	<QtCharts/QLegendMarker>
+#include        <QtCharts/QValueAxis>
+#include	<QtGui/QImage>
+#include	<QtGui/QPainter>
+#include	<QtCore/QtMath>
 
-	IQDisplay::IQDisplay (QwtPlot *plot, int16_t x):
-	                                QwtPlotSpectrogram() {
-QwtLinearColorMap *colorMap  = new QwtLinearColorMap (Qt::black, Qt::white);
+	IQDisplay::IQDisplay (QFrame *parent):
+	                          QChartView (new QChart (), parent) {
 
-	setRenderThreadCount	(1);
-	plotgrid	= plot;
-	x_amount	= x;
-	Radius		= x_amount;
-	CycleCount	= 0;
-	Points. resize (x_amount);
-	memset (Points. data(), 0, x_amount * sizeof (std::complex<float>));
-	this		-> setColorMap (colorMap);
-	plotData. resize (2 * Radius * 2 * Radius);
-	plot2.	  resize (2 * Radius * 2 * Radius);
-	memset (plotData. data(), 0,
-	                  2 * 2 * Radius * Radius * sizeof (double));
-	IQData		= new SpectrogramData (plot2. data(),
-	                                       0,
-	                                       2 * Radius,
-	                                       2 * Radius,
-	                                       2 * Radius,
-	                                       50.0);
-	this		-> setData (IQData);
-	plot		-> enableAxis (QwtPlot::xBottom, false);
-	plot		-> enableAxis (QwtPlot::yLeft, false);
-	this		-> setDisplayMode (QwtPlotSpectrogram::ImageMode, true);
-	plotgrid	-> replot();
+	this	-> parent	= parent;
+	series0	= new QScatterSeries ();
+	series0 -> setName ("IQ");
+	series0 -> setMarkerShape (QScatterSeries::MarkerShapeCircle);
+	series0 -> setMarkerSize (8.0);
+
+	for (int i = 0; i < 100; i ++)
+           series0 -> append (-2 + 0.02 * i, fmod (-2 + 0.1 * i, 2));
+
+	this	-> setSizePolicy (QSizePolicy::Ignored,
+	                                  QSizePolicy::Ignored);
+	setRenderHint (QPainter::Antialiasing);
+	chart ()	-> setTitle ("constellation diagram");
+
+	chart ()	-> resize (250, 250);
+	QValueAxis * axisXlog = new QValueAxis;
+//	axisXlog	-> setMinorTickCount (0.2);
+        axisXlog	-> setRange (-1.5, 1.5);
+//	axisXlog	-> setMinorGridLineColor("#3F4F4F");
+//	axisXlog	-> setGridLineColor("#4F5F5F");
+        axisXlog	-> setTitleText ("I");
+        axisXlog	-> setTitleBrush (QBrush("#AADDDD"));
+	axisXlog	-> setLabelsColor ("#C4C4C4");
+
+	QValueAxis * axisYlog = new QValueAxis;
+//	axisYlog	-> setMinorTickCount (0.2);
+        axisYlog	-> setRange (-1.5, 1.5);
+//	axisXlog	-> setMinorGridLineColor ("#3F4F4F");
+//	axisYlog	-> setGridLineColor("#4F5F5F");
+        axisYlog	-> setTitleText ("Q");
+        axisYlog	-> setTitleBrush (QBrush ("#AADDDD"));
+        axisYlog	-> setLabelsColor("#C4C4C4");
+
+        chart () 	-> addAxis (axisXlog, Qt::AlignBottom);
+        chart () 	-> addAxis (axisYlog, Qt::AlignLeft);
+	chart ()	-> createDefaultAxes();
+
+	chart () 	-> setDropShadowEnabled (false);
+	chart ()	-> addSeries (series0);
 }
 
 	IQDisplay::~IQDisplay() {
-	this		-> detach();
-//	delete		IQData;
+}
+
+void	IQDisplay::show		() {
+	QChartView::show ();
+}
+
+void	IQDisplay::hide		() {
+	QChartView::hide ();
 }
 
 void	IQDisplay::DisplayIQ (std::complex<float> *z, float scale) {
-int16_t	i;
-
-	for (i = 0; i < x_amount; i ++) {
-	   int a	= real (Points [i]);
-	   int b	= imag (Points [i]);
-	   plotData [(a + Radius - 1) * 2 * Radius + b + Radius - 1] = 0;
+QVector<QPointF> data;
+	for (int i = 0; i < 100; i ++) {
+	   data. append (QPointF (real (z [i]) - 1,
+	                          imag (z [i])));
 	}
-	for (i = 0; i < x_amount; i ++) {
-           int x = (int)(scale * real (z [i]));
-           int y = (int)(scale * imag (z [i]));
-
-	   if (x >= Radius)
-	      x = Radius - 1;
-	   if (y >= Radius)
-	      y = Radius - 1;
-
-	   if (x <= - Radius)
-	      x = -(Radius - 1);
-	   if (y <= - Radius)
-	      y = -(Radius - 1);
-
-	   Points [i] = std::complex<float> (x, y);
-	   plotData [(x + Radius - 1) * 2 * Radius + y + Radius - 1] = 1000;
-	}
-
-	memcpy (plot2. data(), plotData. data(),
-	        2 * 2 * Radius * Radius * sizeof (double));
-	this		-> detach	();
-	this		-> setData	(IQData);
-	this		-> setDisplayMode (QwtPlotSpectrogram::ImageMode, true);
-	this		-> attach     (plotgrid);
-	plotgrid	-> replot	();
+	series0 -> replace (data);
 }
+

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>191</height>
+    <width>583</width>
+    <height>197</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -328,9 +328,33 @@ in the last 10 frames (10 frames = 10 * 40 * 480 samples)</string>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="techData_button">
+        <widget class="QComboBox" name="constellationSelector">
+         <item>
+          <property name="text">
+           <string>no tech</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>FAC</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>SDC</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>MSC</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="equalizerButton">
          <property name="text">
-          <string>show tech</string>
+          <string>equalizer</string>
          </property>
         </widget>
        </item>

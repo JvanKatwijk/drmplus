@@ -294,12 +294,17 @@ int	temp1		= 0, temp2	= 0;
 	         params -> minutes	= minutes;
 	      }
 	      return index + 16 + 8 * bodySize;
-
+//
+//	for now: 
+//	if the service is defined as data we do not know
+//	we do not knpw how to handle audio in the associated stream
 	   case 9:	// audio information
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);
-	      if (!params -> subChannels [shortId]. is_audioService)
+	      if (!params -> subChannels [shortId]. is_audioService) {
+	         params -> theStreams [streamId]. inUse = false;
 	         return index + 16 + 8 * bodySize;
+	      }
 	      params	-> theStreams [streamId]. inUse	= true;
 	      params	-> theStreams [streamId]. shortId = shortId;
 	      params	-> theStreams [streamId]. audioStream = true;
