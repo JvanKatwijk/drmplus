@@ -126,7 +126,7 @@ as 4QAM , the audio and data content is encoded in 16 QAM.
 In 16QAM - as said - both phase and amplitude are important to
 extract the bits, each dot position will be mapped upon 3 bits.
 
-![drm-plus](/16QAM-signal.png?raw=true)
+![drm-plus](/16QAM_signal.png?raw=true)
 
 The equalizer output shows that both phase and amplitude need some
 correction.
