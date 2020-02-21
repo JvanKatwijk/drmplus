@@ -96,6 +96,41 @@ Since the DRM+ signals are in the FM Band, the DRM+ decoder is also
 equipped with an FM decoder: the main widget shows a button with which
 one selects the deceder.
 
+-----------------------------------------------------------------------
+DRM+ signals
+-----------------------------------------------------------------------
+
+DRM+ encodes its content in 4QAM and 16QAM. The decoding of these signals
+requires correction of the phase and - especially in case of QAM16 (and higher)
+correction of the amplitude.
+
+The samples stream in the input is - using am FFT approach - mapped onto
+samples in the frequency domain, in this domain the real correction
+action takes place by an "equalizer".
+
+The picture below shows an almost ideal 4QAM signal - derived from a recording
+from a synthetic signal. The constellation picture - taken from app a
+100 samples - shows the 4 dots clearly. Each of the dots shows
+a position in an XY plane of samples where two bits can be extracted
+from a samples.
+
+The equalizer output - i.e. the values computed to correct phase
+and amplitude of the incoming signal shows that almost straight lines.
+
+![drm-plus](/4QAM_signal.png?raw=true)
+
+The second picture shows the constellation and equalizer output for
+a recorded signal from St Peterburg. While some parts are encoded
+as 4QAM , the audio and data content is encoded in 16 QAM.
+
+In 16QAM - as said - both phase and amplitude are important to
+extract the bits, each dot position will be mapped upon 3 bits.
+
+![drm-plus](/16QAM-signal.png?raw=true)
+
+The equalizer output shows that both phase and amplitude need some
+correction.
+
 ------------------------------------------------------------------------
 Work to be done / being done
 ------------------------------------------------------------------------
@@ -121,9 +156,6 @@ in the range of this carrier distance.
 Drift in the frequency may lead to the "fine" error to grow such a way
 that it has effect on the coarse error.
 
-While in 0.6 an attempt is made to handle these error, error recovery
-is far from complete as yet.
-
 ------------------------------------------------------------------------
 Operation of the decoder
 --------------------------------------------------------------------------
@@ -148,15 +180,10 @@ offsets in the mux where to find the data.
 Furthermore, this widget will tell whether the signal was encoded as
 a 4QAM or a 16QAM signal (both supported).
 
-The (really) technical widget will show two "scopes". The scope on the
-left will show the equalization signal (note that DRM decoding requires
-that the incoming signal is to be restored, note that this makes
-DRM(+) decoding much more interesting than e.g. DAB decoding),
-used to restore the signal. The scope on the right shows the constellation
-of the received signal, one may choose here to see the FAC signals,
-the SDC signal or the MSC signal.
-
-The picture shows a 16QAM signal, i.e. one sees the 16 dots on the screen.
+With a combobox on the bottom of the decoder widget one may
+choose to see the constellation of the FAC signals, the SDC signals
+or the MSC signals. With the next button one may choose to see
+the equalizer output.
 
 -----------------------------------------------------------------------
 Input devices

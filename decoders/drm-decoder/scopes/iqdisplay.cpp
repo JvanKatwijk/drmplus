@@ -48,7 +48,7 @@
 	chart ()	-> resize (250, 250);
 	QValueAxis * axisXlog = new QValueAxis;
 //	axisXlog	-> setMinorTickCount (0.2);
-        axisXlog	-> setRange (-1.5, 1.5);
+        axisXlog	-> setRange (-2, 2);
 //	axisXlog	-> setMinorGridLineColor("#3F4F4F");
 //	axisXlog	-> setGridLineColor("#4F5F5F");
         axisXlog	-> setTitleText ("I");
@@ -57,7 +57,7 @@
 
 	QValueAxis * axisYlog = new QValueAxis;
 //	axisYlog	-> setMinorTickCount (0.2);
-        axisYlog	-> setRange (-1.5, 1.5);
+        axisYlog	-> setRange (-2, 2);
 //	axisXlog	-> setMinorGridLineColor ("#3F4F4F");
 //	axisYlog	-> setGridLineColor("#4F5F5F");
         axisYlog	-> setTitleText ("Q");

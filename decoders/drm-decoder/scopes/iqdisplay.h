@@ -30,7 +30,6 @@
 #include        <QtCharts/QScatterSeries>
 #include        <QtCharts/QLegendMarker>
 #include        <QtCharts/QValueAxis>
-#include	"ui_iq_display.h"
 QT_CHARTS_USE_NAMESPACE
 
 class IQDisplay: public QChartView {

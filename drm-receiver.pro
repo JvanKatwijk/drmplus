@@ -178,9 +178,7 @@ LIBS    += -lwinmm
 
 drm	{
 FORMS += ./decoders/drm-decoder/drm-decoder.ui \
-	 ./decoders/drm-decoder/technical-data.ui \
-	 ./decoders/drm-decoder/audiodata.ui \
-	 ./decoders/drm-decoder/scopes/iq_display.ui
+	 ./decoders/drm-decoder/audiodata.ui 
 
 DEPENDPATH += decoders/drm-decoder \
 	      decoders/drm-decoder/input \
