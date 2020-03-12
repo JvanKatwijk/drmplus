@@ -22,6 +22,8 @@
  */
 
 //	design of the central framehandler for DAB+ decoder
+//	This class basically controls the processing of the
+//	DRM+ datastream
 
 #include	"frame-handler.h"
 #include	"radio.h"

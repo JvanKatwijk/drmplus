@@ -297,7 +297,7 @@ int	temp1		= 0, temp2	= 0;
 //
 //	for now: 
 //	if the service is defined as data we do not know
-//	we do not knpw how to handle audio in the associated stream
+//	how to handle audio in the associated stream
 	   case 9:	// audio information
 	      shortId	= get_SDCBits (data, base, 2);
 	      streamId	= get_SDCBits (data, base + 2, 2);

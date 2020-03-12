@@ -34,11 +34,12 @@
 	audioFrameProcessor::audioFrameProcessor (drmDecoder *drm,
 	                                          drmParameters *params,
 	                                          int	shortId,
-	                                          int streamId) {
+	                                          int	streamId) {
 	this	-> parent	= drm;
 	this	-> params	= params;
 	this	-> shortId	= shortId;
 	this	-> streamId	= streamId;
+
 #ifdef  __WITH_FDK_AAC__
         my_aacDecoder           = new fdkAAC    (drm, params);
 #elif   __WITH_FAAD__

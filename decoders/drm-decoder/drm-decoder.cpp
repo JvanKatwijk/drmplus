@@ -35,13 +35,8 @@
 	setupUi (myFrame);
 //	techFrame		= new QFrame (nullptr);
 	audioFrame		= new QFrame (nullptr);
-//	techData. setupUi (techFrame);
 	audioData. setupUi (audioFrame);
 
-//	my_eqDisplay		= new EQDisplay (techData.
-//	                                              equalizerDisplay);
-//	my_iqDisplay		= new IQDisplay (techData.
-//	                                              iq_sampleDisplay);
 	my_eqDisplay		= new EQDisplay ();
 	my_iqDisplay		= new IQDisplay ();
 	myFrame                 -> show ();
@@ -73,7 +68,6 @@
 	drmDecoder::~drmDecoder () {
 	delete	my_frameHandler;
 	delete	myFrame;
-//	delete	techFrame;
 	delete	audioFrame;
 	my_iqDisplay	-> hide ();
 	my_eqDisplay	-> hide ();
@@ -165,7 +159,6 @@ void	drmDecoder::showSNR		(float snr) {
 	snrDisplay	-> display (snr);
 }
 
-
 void	drmDecoder::selectChannel_0	(void) {
 int hp_sum	= 0;
 	stationLabel	-> setText (params. subChannels [0]. serviceName);
@@ -233,7 +226,6 @@ void    drmDecoder::set_phaseOffset (int f) {
 //	phaseOffsetDisplay	-> display (phaseOffset);
 }
 
-
 void	drmDecoder::show_country (QString s) {
 	countryLabel	-> setText (s);
 }
@@ -251,7 +243,7 @@ std::complex<float> line [xx];
 }
 
 void	drmDecoder::show_iq		() {
-std::complex<float> Values [96];
+std::complex<float> Values [100];
 std::complex<float> pixels [5 * 96];
 int16_t i;
 int16_t t;

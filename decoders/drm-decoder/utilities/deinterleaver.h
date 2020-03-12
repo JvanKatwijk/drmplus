@@ -5,6 +5,7 @@
  *    Lazy Chair Computing
  *
  *    This file is part of the DRM+ decoder
+ *
  *    DRM+ decoder is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -28,7 +29,7 @@
 #include	"mapper.h"
 //
 //	Since we have a "short" and a "long"
-//	interleaver, we create an "mother" class
+//	interleaver, we create a "mother" class
 //	from which the two are derived
 //
 class deInterleaver {

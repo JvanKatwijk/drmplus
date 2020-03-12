@@ -43,7 +43,6 @@ int16_t	i, j;
 
 	this	-> blockLength	= blockLength;
 
-
 	history = new int32_t *[blockLength + N_POLYS + 1];
 	Costs	= new float   *[blockLength + N_POLYS + 1];
 

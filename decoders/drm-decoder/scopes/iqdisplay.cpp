@@ -44,7 +44,8 @@
 	                                  QSizePolicy::Ignored);
 	setRenderHint (QPainter::Antialiasing);
 	chart ()	-> setTitle ("constellation diagram");
-
+	chart ()	-> legend()->setAlignment(Qt::AlignBottom);
+	chart ()	-> setTheme(QChart::ChartThemeBlueCerulean);
 	chart ()	-> resize (250, 250);
 	QValueAxis * axisXlog = new QValueAxis;
 //	axisXlog	-> setMinorTickCount (0.2);
