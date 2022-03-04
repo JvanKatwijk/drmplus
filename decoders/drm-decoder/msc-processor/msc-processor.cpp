@@ -27,7 +27,8 @@
 #include	"qam4-handler.h"
 #include	"qam16-handler.h"
 #include	"referenceframe.h"
-#include	"dataframe-processor.h"
+//#include	"dataframe-processor.h"
+
 #include	"audioframe-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
@@ -40,7 +41,7 @@
 	this	-> iqBuffer	= iqBuffer;
 	show_Constellation	= false;
 	my_audioFrameProcessor	= nullptr;
-	my_dataFrameProcessor	= nullptr;
+//	my_dataFrameProcessor	= nullptr;
 	my_deconvolver		= nullptr;
 	serviceSelected. store (-1);
 
@@ -218,10 +219,10 @@ int	lengthA, lengthB;
 	locker. lock ();
 	if (my_audioFrameProcessor != nullptr)
 	   delete my_audioFrameProcessor;
-	if (my_dataFrameProcessor != nullptr)
-	   delete my_dataFrameProcessor;
+//	if (my_dataFrameProcessor != nullptr)
+//	   delete my_dataFrameProcessor;
 	my_audioFrameProcessor	= nullptr;
-	my_dataFrameProcessor	= nullptr;
+//	my_dataFrameProcessor	= nullptr;
 	if (my_deconvolver != nullptr)
 	   delete my_deconvolver;
 	my_deconvolver		= nullptr;

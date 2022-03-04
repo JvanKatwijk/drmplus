@@ -228,7 +228,7 @@ int	elementsUsed		= 0;
 	frameBuffer. resize (0);
 // at the end, save for the next afs
 	for (int i = borders [frameBorderCount - 1];
-	                        i < directoryOffset - 2; i ++)
+	                        i < directoryOffset; i ++)
 	   frameBuffer. push_back (get_MSCBits (v, 16 + i * 8, 8));
 }
 //

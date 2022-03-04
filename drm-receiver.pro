@@ -148,7 +148,17 @@ HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.h
 }
 
 win32 {
-DESTDIR		= .
+exists ("./.git") {
+   GITHASHSTRING = $$system(git rev-parse --short HEAD)
+   !isEmpty(GITHASHSTRING) {
+       message("Current git hash = $$GITHASHSTRING")
+       DEFINES += GITHASH=\\\"$$GITHASHSTRING\\\"
+   }
+}
+isEmpty(GITHASHSTRING) {
+    DEFINES += GITHASH=\\\"------\\\"
+}
+DESTDIR		= /usr/shared/w32-programs/windows-drmplus
 CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
@@ -185,7 +195,7 @@ DEPENDPATH += decoders/drm-decoder \
 	      decoders/drm-decoder/sdc-processor \
 	      decoders/drm-decoder/msc-processor \
 	      decoders/drm-decoder/msc-processor/data-handling \
-	      decoders/drm-decoder/msc-processor/data-handling/journaline \
+#	      decoders/drm-decoder/msc-processor/data-handling/journaline \
 	      decoders/drm-decoder/msc-processor/audio-handling \
 	      decoders/drm-decoder/msc-processor/qam4-handler \
 	      decoders/drm-decoder/msc-processor/qam16-handler \
@@ -200,7 +210,7 @@ INCLUDEPATH += decoders/drm-decoder \
 	      decoders/drm-decoder/sdc-processor \
 	      decoders/drm-decoder/msc-processor \
 	      decoders/drm-decoder/msc-processor/data-handling \
-	      decoders/drm-decoder/msc-processor/data-handling/journaline \
+#	      decoders/drm-decoder/msc-processor/data-handling/journaline \
 	      decoders/drm-decoder/msc-processor/audio-handling \
 	      decoders/drm-decoder/msc-processor/qam4-handler \
 	      decoders/drm-decoder/msc-processor/qam16-handler \
@@ -225,22 +235,22 @@ HEADERS += ./decoders/drm-decoder/drm-decoder.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.h \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-handler.h \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.h \
-	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/journaline-datahandler.h\
-	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdatagroupdecoder.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/crc_8_16.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/log.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/newssvcdec_impl.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/Splitter.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdgdec_impl.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/newsobject.h \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/NML.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/galois.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline-datahandler.h\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdatagroupdecoder.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/crc_8_16.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/log.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/newssvcdec_impl.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/Splitter.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdgdec_impl.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/newsobject.h \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/NML.h \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/audioframe-processor.h\
 	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.h \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.h \
@@ -282,21 +292,21 @@ SOURCES *= ./decoders/drm-decoder/drm-decoder.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/msc-streamer.cpp \
 	   ./decoders/drm-decoder/msc-processor/qam16-handler/qam16-metrics.cpp \
 	   ./decoders/drm-decoder/msc-processor/data-handling/message-processor.cpp \
-	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
-	   ./decoders/drm-decoder/msc-processor/data-handling/journaline-datahandler.cpp \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/crc_8_16.c \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/log.c \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/newssvcdec_impl.cpp \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/Splitter.cpp \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdgdec_impl.c \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/newsobject.cpp \
-           ./decoders/drm-decoder/msc-processor/data-handling/journaline/NML.cpp \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/dataframe-processor.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/virtual-datahandler.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/reed-solomon.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/packet-assembler.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/mot-data.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/galois.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/fec-handler.cpp\
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline-datahandler.cpp \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/crc_8_16.c \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/log.c \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/newssvcdec_impl.cpp \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/Splitter.cpp \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/dabdgdec_impl.c \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/newsobject.cpp \
+#	   ./decoders/drm-decoder/msc-processor/data-handling/journaline/NML.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/audioframe-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/aac-processor.cpp \
 	   ./decoders/drm-decoder/msc-processor/audio-handling/xheaac-processor.cpp \

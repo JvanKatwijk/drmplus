@@ -33,7 +33,7 @@
 
 class	drmDecoder;
 class	audioFrameProcessor;
-class	dataFrameProcessor;
+//class	dataFrameProcessor;
 class	deconvolver;
 
 	class	mscProcessor: public QObject {
@@ -53,7 +53,7 @@ private:
 	bool			show_Constellation;
 	deInterleaver_long	*my_deInterleaver;
 	audioFrameProcessor	*my_audioFrameProcessor;
-	dataFrameProcessor	*my_dataFrameProcessor;
+//	dataFrameProcessor	*my_dataFrameProcessor;
 	int			start_frame_2;
 	int			start_frame_3;
 	int			start_frame_4;
