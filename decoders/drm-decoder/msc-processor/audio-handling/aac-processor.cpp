@@ -64,9 +64,9 @@ void	aacProcessor::process_aac (uint8_t *v, int16_t streamId,
            handle_uep_audio (v, streamId, startHigh, lengthHigh,
                                                 startLow, lengthLow - 4);
         else
-           handle_eep_audio (v, streamId,  startLow, lengthLow - 4);
-	my_messageProcessor.
-                 processMessage (v, 8 * (2 * (lengthHigh + lengthLow) - 4));
+           handle_eep_audio (v, streamId,  startLow, lengthLow);
+//	my_messageProcessor.
+//	   processMessage (v, 8 * (2 * (lengthHigh + lengthLow) - 4));
 }
 
 static
@@ -193,7 +193,7 @@ int16_t		payLoad_length = 0;
 
 	for (i = 0; i < numFrames; i ++) {
 	   for (j = 0; j < f [i]. length; j ++) {
-	      int16_t in2 = (payLoad_start + f [i]. startPos + j);
+	      int16_t in2 = payLoad_start + f [i]. startPos + j;
 	      f [i]. audio [j] = get_MSCBits (v, in2 * 8, 8);
 	   }
 	}
@@ -202,18 +202,17 @@ int16_t		payLoad_length = 0;
 //
 
 void	aacProcessor::playOut (int16_t	streamId) {
-int16_t	i;
-uint8_t	audioSamplingRate	= params -> theStreams [streamId].
-	                                                   audioSamplingRate;
-uint8_t	SBR_flag		= params -> theStreams [streamId].
-	                                                   sbrFlag;
-uint8_t	audioMode		= params -> theStreams [streamId].
-	                                                   audioMode;
+//uint8_t	audioSamplingRate	= params -> theStreams [streamId].
+//	                                                   audioSamplingRate;
+//uint8_t	SBR_flag		= params -> theStreams [streamId].
+//	                                                   sbrFlag;
+//uint8_t	audioMode		= params -> theStreams [streamId].
+//	                                                   audioMode;
 std::vector<uint8_t> audioDescriptor =
 		getAudioInformation (params, streamId);
 
 	my_aacDecoder -> reinit (audioDescriptor, streamId);
-	for (i = 0; i < numFrames; i ++) {
+	for (int i = 0; i < numFrames; i ++) {
 	   int16_t	index = i;
 	   bool		convOK;
 	   int16_t	cnt;
@@ -221,8 +220,9 @@ std::vector<uint8_t> audioDescriptor =
 	   if (f [index]. length < 0)
 	      continue;
 #if 0
-	   fprintf (stderr, "Frame %d (numFrames %d) length %d\n",
-	                          index, numFrames, f [index]. length + 1);
+	   fprintf (stderr, "Frame %d (numFrames %d) length %d %d\n",
+	                          index, numFrames, f [index]. length + 1,
+	                                            f [index]. startPos);
 #endif
 	   my_aacDecoder ->  decodeFrame ((uint8_t *)(&f [index]. aac_crc),
 	                                 f [index]. length + 1,
@@ -231,10 +231,10 @@ std::vector<uint8_t> audioDescriptor =
 	                                 &cnt, &rate);
 	   if (convOK) {
 	      faadSuccess (true);
-	      if (cnt > 0)
-	         writeOut (outBuffer, cnt, rate);
+	      writeOut (outBuffer, cnt, rate);
 	   }
 	   else {
+	      fprintf (stderr, "error frame %d (%d)\n", i, numFrames);
 	      faadSuccess (false);
 	   }
 	}
@@ -298,8 +298,8 @@ uint8_t	xxx	= 0;
 	xxx	|= (sp -> enhancementFlag << 6);
 	xxx	|= (sp -> coderField) << 1;
 	temp. push_back (xxx);
-	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
-	   temp. push_back (sp -> xHE_AAC. at (i));
+//	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
+//	   temp. push_back (sp -> xHE_AAC. at (i));
 	return temp;
 }
 

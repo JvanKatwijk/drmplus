@@ -1,12 +1,12 @@
 
 ------------------------------------------------------------------
-DRMPLUS-0.9
+DRMPLUS-0.95
 ------------------------------------------------------------------
 
-DRMPLUS-0.9 is experimental software for the decoding of
+DRMPLUS-0.95 is experimental software for the decoding of
 DRM+ signals. The software is "still in development" and certainly not
 error free.
-In the 0.9 version the technical data is redesigned and QtCharts
+In the 0.95 version the technical data is redesigned and QtCharts
 are used to display the equalizer results and the symbol constellations.
 
 ![drm-plus](/drmplus-drm.png?raw=true)
@@ -27,7 +27,7 @@ suggestions are welcome.
 xHE-AAC decoding, services and streams
 ----------------------------------------------------------------------------
 
-The current (0.9) version of drmplus is - in principle - able to decode 
+The current (0.95) version of drmplus is - in principle - able to decode 
 xHE-AAC encoded audio frames. *However, the ONLY source I currently
 have is a recording of a fragment of a transmission from Petersburg,
 in which the mapping of streams to services is not completely understood
@@ -42,7 +42,7 @@ Any suggestion is more than welcome
 CONFIGURING
 -----------------------------------------------------------------------
 
-In version 0.8 one may configure the "faad" library for decoding AAC encoded
+In version 0.95 one may configure the "faad" library for decoding AAC encoded
 fragments, or "fdk-aac" for decoding AAC or xHE-AAC encoded fragments.
 
 The ".pro" file provides an option to configure the software to use

@@ -173,7 +173,7 @@ int	temp1		= 0, temp2	= 0;
 	         lengthHigh	+= get_SDCBits (data, index, 12);
 	         lengthLow	+= get_SDCBits (data, index + 12, 12);
 #if 0
-	         fprintf (stderr, "stream %d (%d %d) lengths %d %d\n",
+	         fprintf (stderr, "stream %d prots (%d %d) lengthHigh %d  Low %d\n",
 	                    i, params -> protLevelA, params -> protLevelB,
 	                    get_SDCBits (data, index, 12),
 	                    get_SDCBits (data, index + 12, 12));

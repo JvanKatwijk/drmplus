@@ -40,7 +40,7 @@ class	equalizer_1: public equalizer_base {
 public:
 			equalizer_1 	(drmDecoder	*parent,
 	                                 RingBuffer<std::complex<float>> *);
-			~equalizer_1 	(void);
+			~equalizer_1	();
 	bool		equalize	(std::complex<float> *,
 	                                 int16_t,
 	                                 theSignal **,
@@ -50,7 +50,7 @@ public:
 	bool		equalize	(std::complex<float> *,
 	                                 int16_t,
 	                                 theSignal **);
-	void		init		(std::complex<float> *, int16_t);
+//	void		init		(std::complex<float> *, int16_t);
 private:
 	drmDecoder	*parent;
 	RingBuffer<std::complex<float>>	*eqBuffer;

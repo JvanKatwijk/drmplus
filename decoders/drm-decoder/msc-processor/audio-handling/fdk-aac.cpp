@@ -84,6 +84,7 @@ void	fdkAAC::decodeFrame (uint8_t    *audioFrame,
 	                     int32_t    *pcmRate) {
 int	errorStatus;
 uint32_t	bytesValid	= 0;
+int	flags		= 0;
 
 	UCHAR *bb	= (UCHAR *)audioFrame;
 	bytesValid	= frameSize;
@@ -92,8 +93,10 @@ uint32_t	bytesValid	= 0;
 
 	if (bytesValid != 0)
 	   fprintf (stderr, "bytesValid after fill %d\n", bytesValid);
+	if (!*conversionOK)
+	   flags = AACDEC_INTR;
 	errorStatus =
-	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, 0);
+	     aacDecoder_DecodeFrame (handle, localBuffer, 16 * 980, flags);
 #if 0
 	fprintf (stderr, "fdk-aac errorstatus %x\n",
 	                       errorStatus);
@@ -103,7 +106,9 @@ uint32_t	bytesValid	= 0;
 	   *samples		= 0;
 	   return;
 	}
+
 	if (errorStatus != AAC_DEC_OK) {
+//	if ((errorStatus != AAC_DEC_OK) && (errorStatus & 0x4000 == 0)) {
 	   *conversionOK	= false;
 	   *samples		= 0;
 	   return;

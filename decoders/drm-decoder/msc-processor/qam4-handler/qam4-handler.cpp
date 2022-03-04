@@ -46,13 +46,13 @@
 	float denom	= Rp0;
 	denom		*= 2 * RYlcm;
 
-#if 0
+#if 1
 	fprintf (stderr, "lengthA = %d, lengthB = %d, denom = %f, RYlcm = %f\n",
 	                     lengthA, lengthB, denom, RYlcm);
 #endif
 	N1		= int16_t (ceil (lengthA / denom)) * RYlcm;
 	N2		= muxLength - N1;
-#if 0
+#if 1
 	fprintf (stderr, "protLevels %d, %d\n",
 	                 params -> protLevelA, params -> protLevelB);
 	fprintf (stderr, "high protection %d %d, low %d %d\n",
@@ -67,7 +67,9 @@
         residuTable	= myTables. getResiduTable   (Rx_low, Ry_low, N2);
 	nrBits_high	= Rx_high * (2 * N1) / Ry_high;
 	nrBits_low	= Rx_low  * (2 * N2 - 12) / Ry_low;
-	
+
+	fprintf (stderr, "nrBits_high %d, low %d\n",
+	                         nrBits_high, nrBits_low);
 	Y21Mapper_high		= new Mapper (2 * N1, 21);
 	Y21Mapper_low		= new Mapper (2 * N2, 21);
 	deconvolver		= new  viterbi_drm (lengthA + lengthB);

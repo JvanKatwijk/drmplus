@@ -6,8 +6,6 @@ QT	+= core  gui widgets charts
 CONFIG	-= console
 TARGET	= drm-plus-0.9
 QMAKE_CFLAGS	+= -ffast-math -flto
-QMAKE_CXXFLAGS	+= -ffast-math -flto
-#QMAKE_LFLAGS	+= -g
 #QMAKE_CXXFLAGS	+= -g 
 RC_ICONS        =  drmplus.ico
 RESOURCES       += resources.qrc
@@ -159,6 +157,8 @@ CONFIG		+= rtlsdr
 #CONFIG		+= cardreader
 CONFIG          += drm
 CONFIG          += fm
+#CONFIG		+= faad
+CONFIG		+= fdk-aac
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
@@ -172,7 +172,6 @@ LIBS    += -lusb-1.0
 LIBS    += -lsndfile
 LIBS    += -lsamplerate
 LIBS    += -lole32
-LIBS	+= -lfaad_drm
 LIBS    += -lwinmm
 }
 

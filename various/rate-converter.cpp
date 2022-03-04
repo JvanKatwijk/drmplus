@@ -74,7 +74,8 @@ int	res;
 	inp		= 0;
 	framesOut	= src_data -> output_frames_gen;
 	for (i = 0; i < framesOut; i ++)
-	   out [i] = std::complex<float> (outBuffer [2 * i], outBuffer [2 * i + 1]);
+	   out [i] = std::complex<float> (outBuffer [2 * i],
+	                                  outBuffer [2 * i + 1]);
 	*amount		= framesOut;
 	return true;
 }

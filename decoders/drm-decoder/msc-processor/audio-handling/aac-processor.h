@@ -35,7 +35,7 @@
 typedef struct frame {
 	int16_t length, startPos;
 	uint8_t aac_crc;
-	uint8_t audio [512];
+	uint8_t audio [256];
 } audioFrame;
 
 class	drmDecoder;

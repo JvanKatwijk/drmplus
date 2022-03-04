@@ -91,7 +91,6 @@ int16_t	i, j;
 	   predecessor_for_0 [i] = ((i << 1) + 00) & (NumofStates - 1);
 	   predecessor_for_1 [i] = ((i << 1) + 01) & (NumofStates - 1);
 	}
-
 }
 
 	viterbi_drm::~viterbi_drm (void) {

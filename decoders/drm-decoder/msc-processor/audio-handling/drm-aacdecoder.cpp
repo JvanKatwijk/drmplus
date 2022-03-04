@@ -123,7 +123,7 @@ void	DRM_aacDecoder::decodeFrame (uint8_t	*AudioFrame,
 	                             int32_t	*pcmRate) {
 int16_t* outBuf = NULL;
 NeAACDecFrameInfo hInfo;
-uint16_t	i;
+
 	hInfo.channels	= 1;
 	hInfo.error	= 1;
 //	ensure we have a decoder:
@@ -150,13 +150,13 @@ uint16_t	i;
 	}
 
 	if (hInfo. channels == 2) {
-	   for (i = 0; i < hInfo. samples; i ++)
+	   for (int i = 0; i < hInfo. samples; i ++)
 	      buffer [i] = outBuf [i];
 	   *samples = hInfo. samples / 2;
 	}
 	else
 	if (hInfo. channels == 1) {
-	   for (i = 0; i < hInfo. samples; i ++) {
+	   for (int i = 0; i < hInfo. samples; i ++) {
 	      buffer [2 * i]	= ((int16_t *)outBuf) [i];
 	      buffer [2 * i + 1] = buffer [2 * i];
 	   *samples = hInfo. samples;

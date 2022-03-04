@@ -96,12 +96,12 @@ int64_t	period	= (BUFFERSIZE * 1000000) / 192000;  // full IQś read
               }
 
 	      if (++teller >= 20) {
-	         int xx = ftell (filePointer);
-	         float progress		= (float)xx / 8  / samplesinFile;
-	         float currentTime	= (float)xx / (8 * 192000);
-	         float totalTime	= (float)samplesinFile / (8 * 192000);
-	         set_progressBar ((int)(progress * 100),
-	                                     currentTime, totalTime);
+//	         int xx = ftell (filePointer);
+//	         float progress		= (float)xx / 8  / samplesinFile;
+//	         float currentTime	= (float)xx / (8 * 192000);
+//	         float totalTime	= (float)samplesinFile / (8 * 192000);
+//	         set_progressBar ((int)(progress * 100),
+//	                                     currentTime, totalTime);
                  teller = 0;
 	      }
 

@@ -96,9 +96,9 @@ std::complex<float> gamma	= std::complex<float> (0, 0);
 	}
 //
 //	slow down a little on too fast a movement
-	if (bestIndex - actualBase > 6)
+	if (bestIndex - actualBase > 1)
 	   actualBase ++;
-	if (actualBase - bestIndex > 6)
+	if (actualBase - bestIndex > 1)
 	   actualBase --;
 	return actualBase;
 }
@@ -118,12 +118,12 @@ float	timeOffsetFractional;
 	if (timeDelay < -0.5) {
 	   timeDelay ++;
 	   d	= -1;
-	   timeOffsetFractional = timeDelay;
 	}
-	else {
-	   d	= floor (timeDelay + 0.5);
-	   timeOffsetFractional	= timeDelay - d;
-	}
+	timeOffsetFractional = timeDelay;
+//	else {
+//	   d	= floor (timeDelay + 0.5);
+//	   timeOffsetFractional	= timeDelay - d;
+//	}
 
 //	correction of the time offset by interpolation
         for (i = 0; i < Ts_t; i ++) {
@@ -180,6 +180,7 @@ float	timeOffsetFractional;
 	memmove (buffer, &buffer [shiftBase],
 	                 amount * sizeof (std::complex<float>));
 	myReader -> waitfor (toRead);
+	p -> freqOffset_integer = 0;
 	myReader -> read (&buffer [amount], toRead, p -> freqOffset_integer);
 	totalOffset	+= actualBase;
 	if (nrSymbols > 10 * symbolsperFrame) {

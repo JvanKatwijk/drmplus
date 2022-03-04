@@ -64,8 +64,9 @@ private:
 	theSignal		*muxsampleBuf;
 	int			bufferP;
 	deconvolver		*my_deconvolver;
-	void			process_mux	(theSignal *, bool);
+	void			process_mux	(theSignal *, int);
 	std::mutex		locker;
+	int			toggleFlag;
 signals:
 	void			show_const	();
 };

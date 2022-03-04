@@ -41,8 +41,10 @@ public:
 		audioFrameProcessor	(drmDecoder *,
 	                                 drmParameters *, int, int);
 		~audioFrameProcessor	();
-	void	process  (uint8_t *, bool);
+	void	process  (uint8_t *, int);
+//	void	process  (uint8_t *, bool);
 private:
+	messageProcessor	my_messageProcessor;
 	drmDecoder	*parent;
 	drmParameters	*params;
 	int		shortId;
