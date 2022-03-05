@@ -208,7 +208,7 @@ int symbol, carrier;
 void	mscProcessor::selectService	(int shortId) {
 int	streamId	= -1;
 int	lengthA, lengthB;
-#if 1
+#if 0
 	for (int i = 0; i < 4; i ++) 
 	   fprintf (stderr, "stream %d -> shortId %d (inUse %d)\n",
 	                      i, 

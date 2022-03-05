@@ -121,7 +121,7 @@ int	elementsUsed		= 0;
 	if (!theCRC. doCRC (v, 16)) {
 	   fprintf (stderr, "oei\n");
 	}
-//
+
 	uint32_t bitResLevel	= (bitReservoirLevel + 1) * 384 *
 	                                               numChannels;
 //
@@ -235,7 +235,9 @@ int	elementsUsed		= 0;
 void	xheaacProcessor::resetBuffers	() {
 	frameBuffer. resize (0);
 }
-
+//
+static int good	= 0;
+static int fout	= 0;
 static
 int16_t outBuffer [16 * 960];
 void	xheaacProcessor::
@@ -251,14 +253,18 @@ int32_t	rate;
 	                               &cnt, &rate);
 	if (convOK) {
 	   faadSuccess (true);
-	   if (cnt > 0) {
-	      writeOut (outBuffer, cnt, rate);
-//	      fprintf (stderr, "%d (%d) success (rate %d)\n", index, size, rate);
-	   }
+	   writeOut (outBuffer, cnt, rate);
+	   good ++;
 	}
 	else {
-	   fprintf (stderr, "%d (%d) failed\n", index, size);
+	   fout ++;
 	   faadSuccess (false);
+	}
+
+	if (good + fout >= 10) {
+//	   fprintf (stderr, "%d goed out of %d\n", good, good + fout);
+	   good = 0;
+	   fout = 0;
 	}
 }
 //
@@ -273,8 +279,6 @@ int16_t i;
 
 void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                           int32_t pcmRate) {
-int16_t	i;
-
 	if (theConverter == nullptr) {
 	   theConverter = new rateConverter (pcmRate, 48000, pcmRate / 10);
 	   fprintf (stderr, "converter set to %d\n", pcmRate);

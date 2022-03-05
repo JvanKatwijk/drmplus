@@ -6,6 +6,11 @@ DRMPLUS-0.95
 DRMPLUS-0.95 is experimental software for the decoding of
 DRM+ signals. The software is "still in development" and certainly not
 error free.
+
+Since there are here no drm+ transmission I am depending on a few
+recordings. Right now, both the AAC and xHE-AAC audio can be
+decoded.
+
 In the 0.95 version the technical data is redesigned and QtCharts
 are used to display the equalizer results and the symbol constellations.
 

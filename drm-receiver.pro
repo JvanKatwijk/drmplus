@@ -3,8 +3,9 @@
 ######################################################################
 TEMPLATE = app
 QT	+= core  gui widgets charts
-CONFIG	-= console
-TARGET	= drm-plus-0.9
+CONFIG	+= console
+#CONFIG	-= console
+TARGET	= drm-plus-0.95
 QMAKE_CFLAGS	+= -ffast-math -flto
 #QMAKE_CXXFLAGS	+= -g 
 RC_ICONS        =  drmplus.ico
@@ -131,21 +132,6 @@ INCLUDEPATH	+= /usr/include/qt5/qwt
 LIBS		+= -lqwt-qt5 -lrt -lsndfile -lsamplerate -lportaudio -lusb-1.0 -lfftw3f -ldl -lz
 }
 
-fdk-aac {
-DEFINES		+= __WITH_FDK_AAC__
-INCLUDEPATH     += /usr/local/include/fdk-aac
-LIBS		+= -lfdk-aac
-SOURCES		+=./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.cpp 
-HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.h
-}
-
-faad	{
-DEFINES		+= __WITH_FAAD__
-LIBS		+= -lfaad_drm
-
-SOURCES		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.cpp 
-HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.h
-}
 
 win32 {
 exists ("./.git") {
@@ -167,8 +153,9 @@ CONFIG		+= rtlsdr
 #CONFIG		+= cardreader
 CONFIG          += drm
 CONFIG          += fm
-#CONFIG		+= faad
-CONFIG		+= fdk-aac
+#CONFIG         += faad
+CONFIG          += fdk-aac
+
 # includes in mingw differ from the includes in fedora linux
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include
 INCLUDEPATH += /usr/i686-w64-mingw32/sys-root/mingw/include/qt5/qwt
@@ -183,6 +170,28 @@ LIBS    += -lsndfile
 LIBS    += -lsamplerate
 LIBS    += -lole32
 LIBS    += -lwinmm
+}
+
+fdk-aac {
+DEFINES		+= __WITH_FDK_AAC__
+INCLUDEPATH     += /usr/local/include/fdk-aac
+unix {
+LIBS           += -lfdk-aac
+}
+win32 {
+LIBS           += -lfdk-aac-2
+}
+
+SOURCES		+=./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.cpp 
+HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/fdk-aac.h
+}
+
+faad	{
+DEFINES		+= __WITH_FAAD__
+LIBS		+= -lfaad_drm
+
+SOURCES		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.cpp 
+HEADERS		+= ./decoders/drm-decoder/msc-processor/audio-handling/drm-aacdecoder.h
 }
 
 drm	{
