@@ -20,16 +20,16 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-
 #include	<aacdecoder_lib.h>
 #include	<stdio.h>
-#include	"drm-decoder.h"
 #include	"fdk-aac.h"
 #include	<vector>
+#include	"drm-decoder.h"
 
 	fdkAAC::fdkAAC	(drmDecoder *p,
-	                 drmParameters *drm) {
-std::vector<uint8_t> codecInfo;
+	                 drmParameters *drm):
+	                      decoderBase (p) {
+//std::vector<uint8_t> codecInfo;
 	handle = aacDecoder_Open (TT_DRM, 3);
 	if (handle == nullptr) {
 	   throw (44);
@@ -75,6 +75,8 @@ void	fdkAAC::init	() {
 
 static
 int16_t	localBuffer [8 * 32768];
+
+static	int rate	= 0;
 
 void	fdkAAC::decodeFrame (uint8_t    *audioFrame,
 	                     uint32_t    frameSize,
@@ -134,6 +136,13 @@ int	flags		= 0;
 #endif
 //	fprintf (stderr, "channel config %d (rate %d)\n",
 //	           fdk_info -> channelConfig, fdk_info -> sampleRate);
+
+	if (rate != fdk_info -> sampleRate) {
+	   QString text	= QString::number (fdk_info -> sampleRate);
+	   text += fdk_info -> numChannels == 1 ? " mono" : " stereo";
+	   aacData (text);
+	   rate = fdk_info -> sampleRate;
+	}
 	*samples	= fdk_info	-> frameSize;
 	*pcmRate	= fdk_info	-> sampleRate;
 	*conversionOK	= true;

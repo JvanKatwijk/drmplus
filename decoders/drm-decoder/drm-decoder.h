@@ -79,7 +79,8 @@ public slots:
 	void		show_timeOffset		(float);
 	void		show_clockOffset	(float);
 	void		show_angle		(float);
-	void		sampleOut		(float, float);
+//	void		sampleOut		(float, float);
+	void		samplesAvailable	();
 	void		faadSuccess		(bool);
 	void		showMOT			(QByteArray, int);
 	void		aacData			(QString);

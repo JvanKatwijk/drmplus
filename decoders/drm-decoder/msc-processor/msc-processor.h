@@ -40,6 +40,7 @@ class	deconvolver;
 Q_OBJECT
 public:
 			mscProcessor	(drmDecoder *,
+	                                 RingBuffer<std::complex<float>> *,
 	                                 drmParameters *,
 	                                 RingBuffer<std::complex<float>> *);
 			~mscProcessor	();
@@ -48,6 +49,7 @@ public:
 	void		selectService	(int stream);
 private:
 	drmDecoder		*theParent;
+	RingBuffer<std::complex<float>> *audioBuffer;
 	drmParameters		*params;
 	RingBuffer<std::complex<float>> *iqBuffer;
 	bool			show_Constellation;

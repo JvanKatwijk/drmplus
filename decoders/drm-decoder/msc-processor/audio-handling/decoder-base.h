@@ -28,13 +28,16 @@
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<vector>
+#include	<QString>
+class	drmDecoder;
 
-class	decoderBase : public QObject {
+class decoderBase: public QObject {
+Q_OBJECT
 public:
-	decoderBase	();
-virtual	~decoderBase	();
+		decoderBase	(drmDecoder *);
+virtual		~decoderBase	();
 virtual
-void	reinit		(std::vector<uint8_t>, int);
+	void	reinit		(std::vector<uint8_t>, int);
 virtual
 void	decodeFrame (uint8_t    *audioFrame,
 	             uint32_t	frameSize,
@@ -42,6 +45,9 @@ void	decodeFrame (uint8_t    *audioFrame,
 	             int16_t	*buffer,
 	             int16_t    *samples,
 	             int32_t    *pcmRate);
+	drmDecoder	*drm;
+signals:
+	void	aacData		(QString);
 };
 
 #endif

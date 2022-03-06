@@ -25,12 +25,8 @@
 #include	"basics.h"
 #include	"drm-decoder.h"
 #include	"rate-converter.h"
-#include	<deque>
 #include	<vector>
 #include	<complex>
-
-vector<uint8_t>  frameBuffer;
-vector<uint32_t> borders;
 
 static
 const uint16_t crcPolynome [] = {
@@ -41,18 +37,6 @@ static
 const uint16_t polynome_16 [] = {
   0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 // MSB .. LSB x16 + x12 + x5 + 1
 };
-
-//
-static  inline
-uint16_t        get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
-int16_t         i;
-uint16_t        res     = 0;
-
-        for (i = 0; i < nr; i ++)
-           res = (res << 1) | (v [offset + i] & 01);
-
-        return res;
-}
 
 //	the 16 bit CRC - computed over bytes - has 
 //	as polynome x^16 + x^12 + x^5 + 1
@@ -81,18 +65,32 @@ uint16_t	genpoly		= 0x1021;
 //	           (msg [len] << 8) | msg [len + 1],  ~accumulator & 0xFFFF);
 	return (crc ^ accumulator) == 0;
 }
+//
+static  inline
+uint16_t        get_MSCBits (uint8_t *v, int16_t offset, int16_t nr) {
+int16_t         i;
+uint16_t        res     = 0;
+
+        for (i = 0; i < nr; i ++)
+           res = (res << 1) | (v [offset + i] & 01);
+
+        return res;
+}
+
 
 	xheaacProcessor::xheaacProcessor (drmDecoder *drm,
+	                                  RingBuffer<std::complex<float>> *audioBuffer,
 	                                  drmParameters *params,
 	                                  decoderBase *my_aacDecoder):
 	                                    theCRC (8, crcPolynome),
 	                                    CRC_16 (16, polynome_16) { 
 	this	-> parent	= drm;
+	this	-> audioBuffer	= audioBuffer;
 	this	-> params	= params;
-	connect (this, SIGNAL (putSample (float, float)),
-	         parent, SLOT (sampleOut (float, float)));
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (faadSuccess (bool)));
+	connect (this, SIGNAL (samplesAvailable ()),
+	         parent, SLOT (samplesAvailable ()));
 	this	-> my_aacDecoder	= my_aacDecoder;
 	this	-> theConverter		= nullptr;
 	currentRate			= 0;
@@ -110,9 +108,11 @@ uint16_t	genpoly		= 0x1021;
 void	xheaacProcessor::process_usac	(uint8_t *v, int16_t streamId,
                                          int16_t startHigh, int16_t lengthHigh,
                                          int16_t startLow, int16_t lengthLow) {
+
+	(void)startHigh; (void)lengthHigh; (void)startLow;
 int	frameBorderCount	= get_MSCBits (v, 0, 4);
-int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
-int	crc			= get_MSCBits (v, 8, 8);
+//int	bitReservoirLevel	= get_MSCBits (v, 4, 4);
+//int	crc			= get_MSCBits (v, 8, 8);
 int	length			= lengthHigh + lengthLow;
 int	numChannels		=
 	         params -> theStreams [streamId]. audioMode == 0 ? 1 : 2;
@@ -122,8 +122,8 @@ int	elementsUsed		= 0;
 	   fprintf (stderr, "oei\n");
 	}
 
-	uint32_t bitResLevel	= (bitReservoirLevel + 1) * 384 *
-	                                               numChannels;
+//	uint32_t bitResLevel	= (bitReservoirLevel + 1) * 384 *
+//	                                               numChannels;
 //
 //	we do not look at the USAC crc at the end of the USAC frame
 	uint32_t directoryOffset = length - 2 * frameBorderCount - 2;
@@ -137,9 +137,9 @@ int	elementsUsed		= 0;
 	my_aacDecoder -> reinit (audioDescriptor, streamId);
 
 	for (int i = 0; i < frameBorderCount; i++) {
-	   uint32_t frameBorderIndex =
+	   int frameBorderIndex =
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i, 12);
-	   uint32_t frameBorderCountRepeat = 
+	   int frameBorderCountRepeat = 
 	                    get_MSCBits (v, 8 * length - 16 - 16 * i + 12, 4);
 #if 0
 	   fprintf (stderr, "frameBorderIndex %d, check %d\n",
@@ -153,6 +153,7 @@ int	elementsUsed		= 0;
 	   borders [i] = frameBorderIndex;
 	}
 	elementsUsed = 0;
+//	fprintf (stderr, "frameborderCount %d\n", frameBorderCount);
 //
 //	The first frameBorderIndex might point to the last one or
 //	two bytes of the previous afs.
@@ -228,7 +229,7 @@ int	elementsUsed		= 0;
 	frameBuffer. resize (0);
 // at the end, save for the next afs
 	for (int i = borders [frameBorderCount - 1];
-	                        i < directoryOffset; i ++)
+	                        i < (uint32_t) directoryOffset; i ++)
 	   frameBuffer. push_back (get_MSCBits (v, 16 + i * 8, 8));
 }
 //
@@ -244,7 +245,9 @@ void	xheaacProcessor::
 	          playOut (std::vector<uint8_t> &f, int size, int index) {
 static bool	convOK = false;
 int16_t	cnt;
-int32_t	rate;
+int32_t	rate; 
+
+	(void)size;
 	my_aacDecoder ->  decodeFrame (f. data (),
 	                               f. size (),
 //	                               f. size () - 2,
@@ -253,11 +256,13 @@ int32_t	rate;
 	                               &cnt, &rate);
 	if (convOK) {
 	   faadSuccess (true);
+//	   fprintf (stderr, "frame %d goed\n", index);
 	   writeOut (outBuffer, cnt, rate);
 	   good ++;
 	}
 	else {
 	   fout ++;
+	   fprintf (stderr, "frame %d fout\n", index);
 	   faadSuccess (false);
 	}
 
@@ -268,20 +273,15 @@ int32_t	rate;
 	}
 }
 //
-void	xheaacProcessor::toOutput (std::complex<float> *b, int16_t cnt) {
-int16_t i;
-        if (cnt == 0)
-           return;
-
-        for (i = 0; i < cnt; i ++)
-           putSample (real (b [i]), imag (b [i]));
-}
+//      valid samplerates for xHE-AAC are
+//      9.6, 12, 16, 19,2 24, 32, 38,4 and 48 KHz
+//      translation factors are
+//      5, 4, 3, 5 / 2, 2, 3 / 2, 5/4
 
 void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                           int32_t pcmRate) {
 	if (theConverter == nullptr) {
 	   theConverter = new rateConverter (pcmRate, 48000, pcmRate / 10);
-	   fprintf (stderr, "converter set to %d\n", pcmRate);
 	   currentRate	= pcmRate;
 	}
 
@@ -289,7 +289,6 @@ void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	   delete theConverter;
 	   theConverter = new rateConverter (pcmRate, 48000, pcmRate / 10);
 	   currentRate = pcmRate;
-	   fprintf (stderr, "converter set to %d\n", pcmRate);
 	}
 #if 0
 	fprintf (stderr, "processing %d samples (rate %d)\n",
@@ -300,13 +299,12 @@ void	xheaacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	   std::complex<float> tmp = 
 	                    std::complex<float> (buffer [2 * i] / 8192.0,
 	                                         buffer [2 * i + 1] / 8192.0);
-	   if (pcmRate == 48000)
-	      toOutput (&tmp, 1);
-	   else {
-	      int amount;
-	      bool b = theConverter -> convert (tmp, local, &amount);
-	      if (b)
-	         toOutput (local, amount);
+	   int amount;
+	   bool b = theConverter -> convert (tmp, local, &amount);
+	   if (b) {
+	      audioBuffer -> putDataIntoBuffer (local, amount);
+	      if (audioBuffer -> GetRingBufferReadAvailable () > 4800)
+	         samplesAvailable ();
 	   }
 	}
 }
@@ -328,7 +326,7 @@ uint8_t	xxx	= 0;
 	xxx	|= (sp -> enhancementFlag << 6);
 	xxx	|= (sp -> coderField) << 1;
 	temp. push_back (xxx);
-	for (int i = 0; i < sp -> xHE_AAC. size (); i ++)
+	for (size_t i = 0; i < sp -> xHE_AAC. size (); i ++)
 	   temp. push_back (sp -> xHE_AAC. at (i));
 	return temp;
 }

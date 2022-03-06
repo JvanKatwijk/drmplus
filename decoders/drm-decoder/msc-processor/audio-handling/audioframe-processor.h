@@ -27,7 +27,8 @@
 #include        "basics.h"
 #include        <QObject>
 #include        <cstring>
-#include        "fir-filters.h"
+//#include        "fir-filters.h"
+#include	"ringbuffer.h"
 #include        "message-processor.h"
 #include	"decoder-base.h"
 
@@ -39,6 +40,7 @@ class	audioFrameProcessor: public QObject{
 Q_OBJECT
 public:
 		audioFrameProcessor	(drmDecoder *,
+	                                 RingBuffer<std::complex<float>> *,
 	                                 drmParameters *, int, int);
 		~audioFrameProcessor	();
 	void	process  (uint8_t *, int);
@@ -46,6 +48,7 @@ public:
 private:
 	messageProcessor	my_messageProcessor;
 	drmDecoder	*parent;
+	RingBuffer<std::complex<float>> *audioBuffer;
 	drmParameters	*params;
 	int		shortId;
 	int		streamId;

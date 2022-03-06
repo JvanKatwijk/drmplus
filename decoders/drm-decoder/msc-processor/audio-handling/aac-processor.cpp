@@ -37,14 +37,15 @@ uint16_t        res     = 0;
 }
 
 	aacProcessor::aacProcessor	(drmDecoder *drm,
+	                                 RingBuffer<std::complex<float>> *audioBuffer,
 	                                 drmParameters *params,
 	                                 decoderBase	*my_aacDecoder):
-	                                    my_messageProcessor (drm),
 	                                    upFilter_24000 (5, 12000, 48000) {
 	this	-> parent	= drm;
+	this	-> audioBuffer	= audioBuffer;
 	this	-> params	= params;
-	connect (this, SIGNAL (putSample (float, float)),
-	         parent, SLOT (sampleOut (float, float)));
+	connect (this, SIGNAL (samplesAvailable ()),
+	         parent, SLOT (samplesAvailable ()));
 	connect (this, SIGNAL (faadSuccess (bool)),
 	         parent, SLOT (faadSuccess (bool)));
 	this	-> my_aacDecoder = my_aacDecoder;
@@ -65,8 +66,6 @@ void	aacProcessor::process_aac (uint8_t *v, int16_t streamId,
                                                 startLow, lengthLow - 4);
         else
            handle_eep_audio (v, streamId,  startLow, lengthLow);
-//	my_messageProcessor.
-//	   processMessage (v, 8 * (2 * (lengthHigh + lengthLow) - 4));
 }
 
 static
@@ -202,12 +201,6 @@ int16_t		payLoad_length = 0;
 //
 
 void	aacProcessor::playOut (int16_t	streamId) {
-//uint8_t	audioSamplingRate	= params -> theStreams [streamId].
-//	                                                   audioSamplingRate;
-//uint8_t	SBR_flag		= params -> theStreams [streamId].
-//	                                                   sbrFlag;
-//uint8_t	audioMode		= params -> theStreams [streamId].
-//	                                                   audioMode;
 std::vector<uint8_t> audioDescriptor =
 		getAudioInformation (params, streamId);
 
@@ -241,43 +234,37 @@ std::vector<uint8_t> audioDescriptor =
 }
 //
 
-void	aacProcessor::toOutput (float *b, int16_t cnt) {
-int16_t	i;
-	if (cnt == 0)
-	   return;
-	for (i = 0; i < cnt / 2; i ++)
-	   putSample (b [2 * i], b [2 * i + 1]);
-}
-
 void	aacProcessor::writeOut (int16_t *buffer, int16_t cnt,
 	                          int32_t pcmRate) {
 int16_t	i;
 
 	if (pcmRate == 48000) {
-	   float lbuffer [2 * cnt];
+	   std::complex<float> lbuffer [cnt];
 	   for (i = 0; i < cnt; i ++) {
-	      lbuffer [2 * i]     = float (buffer [2 * i] / 32767.0);
-	      lbuffer [2 * i + 1] = float (buffer [2 * i + 1] / 32767.0);
+	      lbuffer [i]     = 
+	                std::complex<float> (buffer [2 * i] / 8192.0,
+	                                     buffer [2 * i + 1] / 8192.0);
 	   }
-	   toOutput (lbuffer, 2 * cnt);
+	   audioBuffer	-> putDataIntoBuffer (lbuffer, cnt);
+	   if (audioBuffer -> GetRingBufferReadAvailable () > 4800)
+	      samplesAvailable ();
 	   return;
 	}
 
-
 	if (pcmRate == 24000) {
-	   float lbuffer [4 * cnt];
+	   std::complex<float> lbuffer [2 * cnt];
 	   for (i = 0; i < cnt; i ++) {
 	      std::complex<float> help =
 	           upFilter_24000.
 	                Pass (std::complex<float> (buffer [2 * i] / 32767.0,
 	                                           buffer [2 * i + 1] / 32767.0));
-	      lbuffer [4 * i + 0] = real (help);
-	      lbuffer [4 * i + 1] = imag (help);
-	      help = upFilter_24000. Pass (std::complex<float> (0, 0));
-	      lbuffer [4 * i + 2] = real (help);
-	      lbuffer [4 * i + 3] = imag (help);
+	      lbuffer [2 * i] = help;
+	      lbuffer [2 * i + 1] =
+	                upFilter_24000. Pass (std::complex<float> (0, 0));
 	   }
-	   toOutput (lbuffer, 4 * cnt);
+	   audioBuffer	-> putDataIntoBuffer (lbuffer, 2 * cnt);
+	   if (audioBuffer -> GetRingBufferReadAvailable () > 4800)
+	      samplesAvailable ();
 	   return;
 	}
 }

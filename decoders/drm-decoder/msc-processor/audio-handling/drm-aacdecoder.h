@@ -61,8 +61,8 @@ private:
 	bool		SBR_flag;
 	uint8_t		audioMode;
 	int16_t		audioRate;
-signals:
-	void		aacData	(QString);
+//signals:
+//	void		aacData	(QString);
 };
 
 #endif // __DRM_AACDECODER

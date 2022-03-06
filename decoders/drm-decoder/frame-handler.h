@@ -47,6 +47,7 @@ Q_OBJECT
 public:
 		frameHandler	(drmDecoder *,
 	                 	 RingBuffer<std::complex<float>> *,
+	                 	 RingBuffer<std::complex<float>> *,
 	                         drmParameters	*,
 	                         RingBuffer<std::complex<float>> *,
 	                         RingBuffer<std::complex<float>> *);
@@ -55,6 +56,7 @@ public:
 	void	set_constellationView	(const QString &);
 private:
 	drmDecoder	*theRadio;
+	RingBuffer<std::complex<float>> *audioBuffer;
 	drmParameters	*params;
 	RingBuffer<std::complex<float>> *eqBuffer;
 	RingBuffer<std::complex<float>> *iqBuffer;

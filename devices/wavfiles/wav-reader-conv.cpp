@@ -46,6 +46,7 @@ SF_INFO *sf_info;
 	filePointer		= fp;
 	_I_Buffer		= b;
 
+	running. store (false);
 	samplesinFile		= sf_info	-> frames;
 	sampleRate		= sf_info	-> samplerate;
 	numofChannels		= sf_info	-> channels;

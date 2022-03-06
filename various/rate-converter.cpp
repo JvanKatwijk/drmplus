@@ -28,13 +28,16 @@
 int	err;
 	this	-> inRate	= inRate;
 	this	-> outRate	= outRate;
+
 	inputLimit		= inSize;
 	ratio			= double(outRate) / inRate;
+	if (inRate == 0)
+	   inRate = 48000;
 	fprintf (stderr, "ratio = %f\n", ratio);
 	outputLimit		= inSize * ratio;
 //	converter		= src_new (SRC_SINC_BEST_QUALITY, 2, &err);
-//	converter		= src_new (SRC_LINEAR, 2, &err);
-	converter		= src_new (SRC_SINC_MEDIUM_QUALITY, 2, &err);
+	converter		= src_new (SRC_LINEAR, 2, &err);
+//	converter		= src_new (SRC_SINC_MEDIUM_QUALITY, 2, &err);
 	src_data		= new SRC_DATA;
 	inBuffer		= new float [2 * inputLimit + 20];
 	outBuffer		= new float [2 * outputLimit + 20];
@@ -71,6 +74,7 @@ int	res;
 	   fprintf (stderr, "error %s\n", src_strerror (res));
 	   return false;
 	}
+
 	inp		= 0;
 	framesOut	= src_data -> output_frames_gen;
 	for (i = 0; i < framesOut; i ++)

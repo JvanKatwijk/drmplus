@@ -29,11 +29,11 @@
 #include	<stdint.h>
 #include        <cstring>
 #include	<vector>
-#include	<deque>
 #include	<complex>
+#include	"ringbuffer.h"
 #include	"checkcrc.h"
 #include	"decoder-base.h"
-#include	"message-processor.h"
+//#include	"message-processor.h"
 
 class	drmDecoder;
 class	rateConverter;
@@ -42,6 +42,7 @@ class	xheaacProcessor: public QObject {
 Q_OBJECT
 public:
 			xheaacProcessor	(drmDecoder *,
+	                                 RingBuffer<std::complex<float>> *,
 	                                 drmParameters *,
 	                                 decoderBase *);
 			~xheaacProcessor	();
@@ -51,6 +52,7 @@ public:
 private:
 	void		resetBuffers	();
 	drmDecoder	*parent;
+	RingBuffer<std::complex<float>> *audioBuffer;
 	drmParameters	*params;
 	checkCRC	theCRC;
 	checkCRC	CRC_16;
@@ -58,17 +60,16 @@ private:
 	std::vector<uint8_t>
         		getAudioInformation (drmParameters *drm,
                                                         int streamId);
-//	deque<uint8_t>	frameBuffer;
-//	vector<uint32_t> borders;
 	decoderBase	*my_aacDecoder;
 	rateConverter	*theConverter;
 	int		numFrames;
 	void		writeOut	(int16_t *, int16_t, int32_t);
-	void		toOutput	(std::complex<float> *, int16_t);
 	void		playOut		(std::vector<uint8_t> &, int, int);
+	std::vector<uint8_t>  frameBuffer;
+	std::vector<uint32_t> borders;
 signals:
-	void            putSample       (float, float);
 	void            faadSuccess     (bool);
+	void		samplesAvailable	();
 };
 
 #endif

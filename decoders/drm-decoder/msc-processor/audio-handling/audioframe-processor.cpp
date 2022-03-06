@@ -32,11 +32,13 @@
 #endif
 
 	audioFrameProcessor::audioFrameProcessor (drmDecoder *drm,
+	                                          RingBuffer<std::complex<float>> *audioBuffer,
 	                                          drmParameters *params,
 	                                          int	shortId,
 	                                          int	streamId):
 	                                            my_messageProcessor (drm){
 	this	-> parent	= drm;
+	this	-> audioBuffer	= audioBuffer;
 	this	-> params	= params;
 	this	-> shortId	= shortId;
 	this	-> streamId	= streamId;
@@ -59,10 +61,14 @@
 //	fprintf (stderr, "lengthA_total %d, lengthB_total %d\n",
 //	                           lengthA_total, lengthB_total);
 	firstBuffer		= new uint8_t [lengthA_total + lengthB_total];
-	my_aacProcessor		= new aacProcessor	(drm, params,
-	                                                      my_aacDecoder);
-	my_xheaacProcessor	= new xheaacProcessor	(drm, params,
-	                                                      my_aacDecoder);
+	my_aacProcessor		= new aacProcessor	(drm,
+	                                                 audioBuffer,
+	                                                 params,
+	                                                 my_aacDecoder);
+	my_xheaacProcessor	= new xheaacProcessor	(drm,
+	                                                 audioBuffer,
+	                                                 params,
+	                                                 my_aacDecoder);
 	connect (this, SIGNAL (show_audioMode (QString)),
                  parent, SLOT (show_audioMode (QString)));
 

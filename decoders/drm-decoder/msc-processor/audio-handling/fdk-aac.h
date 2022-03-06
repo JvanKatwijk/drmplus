@@ -53,7 +53,6 @@ private:
 	std::vector<uint8_t>	currentConfig;
 	std::vector<uint8_t>
 			getAudioInformation (drmParameters *drm, int streamId);
-
 };
 
 #endif

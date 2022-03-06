@@ -64,6 +64,7 @@ SF_INFO	*sf_info;
 	   throw (22);
 	}
 
+	fprintf (stderr, "samplerate %d\n", sf_info -> samplerate);
 	if (theRate == sf_info -> samplerate)
 	   myReader	= new wavReader_nconv (sf_info,
 	                                       filePointer, b);

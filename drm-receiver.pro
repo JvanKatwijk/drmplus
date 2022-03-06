@@ -8,6 +8,11 @@ CONFIG	+= console
 TARGET	= drm-plus-0.95
 QMAKE_CFLAGS	+= -ffast-math -flto
 #QMAKE_CXXFLAGS	+= -g 
+#QMAKE_CFLAGS   +=  -g -fsanitize=address
+#QMAKE_CXXFLAGS +=  -g -fsanitize=address
+#QMAKE_LFLAGS   +=  -g -fsanitize=address
+QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
+
 RC_ICONS        =  drmplus.ico
 RESOURCES       += resources.qrc
 

@@ -27,12 +27,11 @@
 #include	"drm-decoder.h"
 
 	DRM_aacDecoder::DRM_aacDecoder (drmDecoder *drm, 
-	                                drmParameters *params) {
+	                                drmParameters *params):
+	                                    decoderBase (drm) {
 	the_drmDecoder		= drm;
 	this	-> params	= params;
 	the_aacDecoder		= nullptr;
-	connect (this, SIGNAL (aacData (QString)),
-	         drm,  SLOT (aacData (QString)));
 }
 
 	DRM_aacDecoder::~DRM_aacDecoder (void) {

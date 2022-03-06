@@ -162,17 +162,22 @@ int16_t highProtectedBits       = stream_0 -> highBits () +
 	                          stream_1 -> highBits ();
 int16_t lowProtectedBits        = stream_0 -> lowBits () +
 	                          stream_1 -> lowBits ();
-uint8_t bits_0 [stream_0 -> highBits () + stream_0 -> lowBits ()];
-uint8_t bits_1 [stream_1 -> highBits () + stream_1 -> lowBits ()];
+uint8_t *bits_0  = new uint8_t [stream_0 -> highBits () + stream_0 -> lowBits () + 10];
+uint8_t *bits_1  = new uint8_t [stream_1 -> highBits () + stream_1 -> lowBits () + 10];
 
-metrics Y0      [2 * muxLength];
-metrics Y1      [2 * muxLength];
-uint8_t level_0 [muxLength];
-uint8_t level_1 [muxLength];
+metrics *Y0	= new metrics [2 * muxLength];
+metrics *Y1	= new metrics [2 * muxLength];
+uint8_t *level_0  = new uint8_t [2 * muxLength + 10];
+uint8_t *level_1  = new uint8_t [2 * muxLength + 10];
 
+//	fprintf (stderr, "muxLength = %d\n", muxLength);
 	for (int i = 0; i < 4; i ++) {
 	   myDecoder. computemetrics (mux, muxLength, 0, Y0,
 	                                      i > 0, level_0, level_1);
+//	   fprintf (stderr, "Y0 = %d, bits_0 = %d, level_0 = %d\n",
+//	                        2 * muxLength, stream_0 -> highBits () +
+//	                                       stream_0 -> lowBits (),
+//	                                        muxLength);
 	   stream_0        -> process      (Y0, bits_0, level_0);
 	   myDecoder. computemetrics (mux, muxLength, 1, Y1,
 	                                      i > 0, level_0, level_1);
@@ -196,5 +201,9 @@ uint8_t level_1 [muxLength];
 	        stream_1 -> lowBits ());
 //	apply PRBS
 	thePRBS -> doPRBS (bitsOut);
+	delete[] Y0;
+	delete[] Y1;
+	delete[] level_0;
+	delete[] level_1;
 }
 

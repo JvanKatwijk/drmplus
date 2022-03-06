@@ -51,6 +51,7 @@
 
 	my_frameHandler 	= new frameHandler (this,
 	                                            input,
+	                                            audioBuffer,
 	                                            &params,
 	                                            eqBuffer, iqBuffer);
 	phaseOffset		= 0;
@@ -142,17 +143,21 @@ void	drmDecoder::show_mer		(float mer) {
 	mer_display	-> display (mer);
 }
 
-static std::complex<float> lbuf [4800];
-static int fillP        = 0;
-void    drmDecoder::sampleOut           (float re, float im) {
-std::complex<float> z   = std::complex<float> (re, im);
-	lbuf [fillP] = z;
-	fillP ++;
-	if (fillP >= 4800) {
-	   audioBuffer     -> putDataIntoBuffer (lbuf, 4800);
-	   audioAvailable (audioBuffer -> GetRingBufferReadAvailable (), 48000);
-	   fillP = 0;
-	}
+//static std::complex<float> lbuf [4800];
+//static int fillP        = 0;
+//void    drmDecoder::sampleOut           (float re, float im) {
+//std::complex<float> z   = std::complex<float> (re, im);
+//	lbuf [fillP] = z;
+//	fillP ++;
+//	if (fillP >= 4800) {
+//	   audioBuffer     -> putDataIntoBuffer (lbuf, 4800);
+//	   audioAvailable (audioBuffer -> GetRingBufferReadAvailable (), 48000);
+//	   fillP = 0;
+//	}
+//}
+
+void	drmDecoder::samplesAvailable	() {
+	audioAvailable (audioBuffer -> GetRingBufferReadAvailable (), 48000);
 }
 
 void	drmDecoder::showSNR		(float snr) {

@@ -34,6 +34,7 @@ static	int goodFrames	= 0;
 
 	frameHandler::frameHandler (drmDecoder 		*theRadio,
 	                            RingBuffer<std::complex<float>> *b,
+	                            RingBuffer<std::complex<float>> *audioBuffer,
 	                            drmParameters	*params,
 	                            RingBuffer<std::complex<float>> *eqBuffer,
 	                            RingBuffer<std::complex<float>> *iqBuffer):
@@ -50,11 +51,13 @@ static	int goodFrames	= 0;
 	                               my_sdcProcessor	(theRadio,
 	                                                 params, iqBuffer) {
 	this	-> theRadio	= theRadio;
+	this	-> audioBuffer	= audioBuffer;
 	this	-> params	= params;
 	this	-> eqBuffer	= eqBuffer;
 	this	-> iqBuffer	= iqBuffer;
 
-	my_mscProcessor	= new mscProcessor (theRadio, params, iqBuffer);
+	my_mscProcessor	= new mscProcessor (theRadio, audioBuffer,
+	                                     params, iqBuffer);
 	connect (this, SIGNAL (setTimeSync (bool)),
 	          theRadio, SLOT (setTimeSync (bool)));
         connect (this, SIGNAL (setFACSync (bool)),

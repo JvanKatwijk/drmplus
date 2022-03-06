@@ -24,8 +24,13 @@
 #include	<stdio.h>
 #include	<vector>
 #include	"decoder-base.h"
+#include	"drm-decoder.h"
 
-	decoderBase::decoderBase	() {}
+	decoderBase::decoderBase	(drmDecoder *drm) {
+	this	-> drm = drm;
+	connect (this, SIGNAL (aacData (QString)),
+	         drm, SLOT (aacData (QString)));
+}
 	decoderBase::~decoderBase	() {}
 
 void	decoderBase::reinit		(std::vector<uint8_t> v, int sI) {

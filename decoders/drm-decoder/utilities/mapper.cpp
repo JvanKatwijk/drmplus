@@ -41,7 +41,7 @@ int	i;
 int s, q;
 	if (size < 0)
 	   fprintf (stderr, "wat maak je me nou met %d\n", size);
-	mapperTable	= new int [size];
+	mapperTable	= new int [size + 10];
 	if (t0 == 0) {
 	   for (i = 0; i < size; i ++)
 	      mapperTable [i] = i;

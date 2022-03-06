@@ -3,13 +3,16 @@
 DRMPLUS-0.95
 ------------------------------------------------------------------
 
-DRMPLUS-0.95 is experimental software for the decoding of
+DRMPLUS-0.95 is EXPERIMENTAL software for the decoding of
 DRM+ signals. The software is "still in development" and certainly not
 error free.
 
 Since there are here no drm+ transmission I am depending on a few
 recordings. Right now, both the AAC and xHE-AAC audio can be
 decoded.
+
+Anyway, the address sanitizer does not seem to give errors anymore,
+so it seems most errors are gone by now.
 
 In the 0.95 version the technical data is redesigned and QtCharts
 are used to display the equalizer results and the symbol constellations.
@@ -35,13 +38,10 @@ xHE-AAC decoding, services and streams
 The current (0.95) version of drmplus is - in principle - able to decode 
 xHE-AAC encoded audio frames. *However, the ONLY source I currently
 have is a recording of a fragment of a transmission from Petersburg,
-in which the mapping of streams to services is not completely understood
-since the mapping of one stream is constantly changing, and it seems
-that from tiem to time two services use the same stream.
 The selection of audio channels seems to work well, selection
 of data is being worked on
 
-Any suggestion is more than welcome
+Any suggestion - or better: a recording - is more than welcome
 
 -----------------------------------------------------------------------
 CONFIGURING

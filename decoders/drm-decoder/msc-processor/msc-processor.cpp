@@ -32,11 +32,13 @@
 #include	"audioframe-processor.h"
 
 	mscProcessor::mscProcessor (drmDecoder		*parent,
+	                            RingBuffer<std::complex<float>> *audioBuffer,
 	                            drmParameters	*params,
 	                            RingBuffer<std::complex<float>> *iqBuffer) {
 	int nrCells	= 0;
 	int symbol, carrier;
 	this	-> theParent	= parent;
+	this	-> audioBuffer	= audioBuffer;
 	this	-> params	= params;
 	this	-> iqBuffer	= iqBuffer;
 	show_Constellation	= false;
@@ -256,6 +258,7 @@ int	lengthA, lengthB;
 	          (params -> theStreams [i]. shortId == shortId)) {
 	         streamId	= i;
 	         my_audioFrameProcessor	= new audioFrameProcessor (theParent,
+	                                                           audioBuffer,
 	                                                           params,
 	                                                           shortId,
 	                                                           i);

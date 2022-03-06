@@ -29,13 +29,14 @@
 #include        <cstring>
 #include	<vector>
 #include	"fir-filters.h"
+#include	"ringbuffer.h"
 #include	"decoder-base.h"
-#include	"message-processor.h"
+//#include	"message-processor.h"
 
 typedef struct frame {
 	int16_t length, startPos;
 	uint8_t aac_crc;
-	uint8_t audio [256];
+	uint8_t audio [512];
 } audioFrame;
 
 class	drmDecoder;
@@ -44,6 +45,7 @@ class	aacProcessor: public QObject {
 Q_OBJECT
 public:
 			aacProcessor	(drmDecoder *,
+	                                 RingBuffer<std::complex<float>> *,
 	                                 drmParameters *,
 	                                 decoderBase *);
 			~aacProcessor	();
@@ -54,8 +56,8 @@ private:
         		getAudioInformation (drmParameters *drm, int streamId);
 
 	drmDecoder	*parent;
+	RingBuffer<std::complex<float>> *audioBuffer;
 	drmParameters	*params;
-	messageProcessor my_messageProcessor;
 	decoderBase	*my_aacDecoder;
 	LowPassFIR      upFilter_24000;
 	int		numFrames;
@@ -64,11 +66,10 @@ private:
 	void		handle_eep_audio (uint8_t *, int16_t,
 	                                          int16_t, int16_t);
 	void		writeOut	(int16_t *, int16_t, int32_t);
-	void		toOutput	(float *, int16_t);
 	void		playOut		(int16_t);
 signals:
-	void            putSample       (float, float);
 	void            faadSuccess     (bool);
+	void		samplesAvailable	();
 };
 
 #endif

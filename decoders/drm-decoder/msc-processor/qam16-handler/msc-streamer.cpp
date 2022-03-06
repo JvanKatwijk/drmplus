@@ -274,6 +274,7 @@ int16_t	i;
 	   memcpy (better, xxTemp, 2 * N1 * sizeof (uint8_t));
 
 //	Next the LP bits
+//	fprintf (stderr, "There are %d bits mapped (N1 = %d)\n", 2 * N2, N1);
 	if (lpMapper != NULL)	// stream > 0 for SM 64
 	   for (i = 0; i < 2 * N2; i ++) 
 	      better [2 * N1 + i] = xxTemp [2 * N1 + lpMapper -> mapIn (i)];
