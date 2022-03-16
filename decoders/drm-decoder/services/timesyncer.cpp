@@ -105,6 +105,7 @@ int32_t i, j;
 //	OK, the terms are computed, now find the minimum
 	int16_t index	= Tg_t + averageOffset + Ts_t / 2;
 
+	fprintf (stderr, "index %d\n", index);
 	for (j = 0; j < nSymbols - 2; j++) {
 	   float minValue	= 1000000.0;
 	   for (i = 0; i < Ts_t; i++) {

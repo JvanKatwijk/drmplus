@@ -123,7 +123,7 @@ isEmpty(GITHASHSTRING) {
 
 DESTDIR		= ./linux-bin
 CONFIG		+= qwt
-CONFIG		+= sdrplay
+#CONFIG		+= sdrplay
 CONFIG		+= rtlsdr
 CONFIG		+= hackrf
 CONFIG		+= lime
@@ -150,7 +150,7 @@ isEmpty(GITHASHSTRING) {
     DEFINES += GITHASH=\\\"------\\\"
 }
 DESTDIR		= /usr/shared/w32-programs/windows-drmplus
-CONFIG		+= sdrplay
+#CONFIG		+= sdrplay
 CONFIG		+= hackrf
 CONFIG		+= rtlsdr
 #CONFIG		+= pmsdr
